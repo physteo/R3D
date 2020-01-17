@@ -4,7 +4,7 @@
 class Sandbox : public r3d::Application
 {
 public:
-	Sandbox() {}
+	Sandbox() : Application{} {}
 	~Sandbox() {}
 };
 

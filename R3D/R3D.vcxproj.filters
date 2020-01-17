@@ -1,36 +1,31 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="r3d">
+      <UniqueIdentifier>{CE9E880B-3AA8-887C-C323-9F7C2F2C947C}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\r3d\Core.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClInclude Include="src\r3d.h" />
     <ClInclude Include="src\r3d\Application.h">
-      <Filter>Header Files</Filter>
+      <Filter>r3d</Filter>
     </ClInclude>
-    <ClInclude Include="src\r3d.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\r3d\Core.h">
+      <Filter>r3d</Filter>
     </ClInclude>
     <ClInclude Include="src\r3d\EntryPoint.h">
-      <Filter>Header Files</Filter>
+      <Filter>r3d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\r3d\Log.h">
+      <Filter>r3d</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\r3d\Application.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>r3d</Filter>
+    </ClCompile>
+    <ClCompile Include="src\r3d\Log.cpp">
+      <Filter>r3d</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

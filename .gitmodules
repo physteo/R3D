@@ -1,0 +1,3 @@
+[submodule "R3D/vendor/spdlog"]
+	path = R3D/vendor/spdlog
+	url = https://github.com/gabime/spdlog
