@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core.h"
+#include <R3D/Core.h>
 
 namespace r3d
 {

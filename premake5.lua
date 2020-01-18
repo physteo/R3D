@@ -19,6 +19,9 @@ project "R3D"
    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
+   pchheader "R3Dpch.h"
+   pchsource "R3D/src/R3Dpch.cpp"
+
    files 
    {
    	   "%{prj.name}/src/**.h",
@@ -27,7 +30,8 @@ project "R3D"
 
    includedirs
    {
-   	   "%{prj.name}/vendor/spdlog/include"
+   	   "%{prj.name}/vendor/spdlog/include",
+   	   "%{prj.name}/src"
    }
 
    filter "system:windows"

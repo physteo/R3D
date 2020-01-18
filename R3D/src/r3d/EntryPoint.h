@@ -1,20 +1,20 @@
 #pragma once
 
+#include <R3D/Core.h>
+#include <R3D/Log/Log.h>
+
 #ifdef R3D_PLATFORM_WIN
 	
 extern r3d::Application* r3d::createApplication();
 
-	int main(int argc, char** argv)
-	{
-		r3d::Log::init();
-		R3D_CORE_INFO("Log initialized.");
-		double a = 2.000001;
-		R3D_CRITICAL("Rendara3D Engine Var = {0}.", a);
-		
+int main(int argc, char** argv)
+{
+	R3D_CORE_INFO("Rendara3D Engine.");
+	r3d::Log::init();
 
-		auto app = r3d::createApplication();
-		app->run();
-		delete app;
-	}
+	auto app = r3d::createApplication();
+	app->run();
+	delete app;
+}
 
 #endif

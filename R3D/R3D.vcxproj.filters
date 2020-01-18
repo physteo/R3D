@@ -1,31 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="r3d">
-      <UniqueIdentifier>{CE9E880B-3AA8-887C-C323-9F7C2F2C947C}</UniqueIdentifier>
+    <Filter Include="R3D">
+      <UniqueIdentifier>{8E16880B-FA1F-887C-839B-9E7CEFA3937C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="R3D\Events">
+      <UniqueIdentifier>{B216CD42-9ECE-0E90-07D6-E7EBF3ACA980}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\r3d.h" />
-    <ClInclude Include="src\r3d\Application.h">
-      <Filter>r3d</Filter>
+    <ClInclude Include="src\R3D.h" />
+    <ClInclude Include="src\R3D\Core.h">
+      <Filter>R3D</Filter>
     </ClInclude>
-    <ClInclude Include="src\r3d\Core.h">
-      <Filter>r3d</Filter>
+    <ClInclude Include="src\R3D\EntryPoint.h">
+      <Filter>R3D</Filter>
     </ClInclude>
-    <ClInclude Include="src\r3d\EntryPoint.h">
-      <Filter>r3d</Filter>
+    <ClInclude Include="src\R3D\Events\Event.h">
+      <Filter>R3D\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\r3d\Log.h">
-      <Filter>r3d</Filter>
+    <ClInclude Include="src\R3D\Events\EventManager.h">
+      <Filter>R3D\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Events\EventTypesAndCategories.h">
+      <Filter>R3D\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Events\EventsListener.h">
+      <Filter>R3D\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3Dpch.h" />
+    <ClInclude Include="src\R3D\Events\KeyEvent.h" />
+    <ClInclude Include="src\R3D\Entities\Entity.h" />
+    <ClInclude Include="src\R3D\Entities\EntityEvents.h" />
+    <ClInclude Include="src\R3D\Entities\EntityManager.h" />
+    <ClInclude Include="src\R3D\Archetypes\Archetype.h" />
+    <ClInclude Include="src\R3D\Archetypes\ArchetypeManager.h" />
+    <ClInclude Include="src\R3D\Utils\StringHash.h" />
+    <ClInclude Include="src\R3D\Archetypes\Metatype.h" />
+    <ClInclude Include="src\R3D\Archetypes\RawPackedArray.h" />
+    <ClInclude Include="src\R3D\Archetypes\ArchetypeManagerRingBuffer.h" />
+    <ClInclude Include="src\R3D\Utils\RingBuffer.h" />
+    <ClInclude Include="src\R3D\Log\Log.h">
+      <Filter>R3D</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Application\Application.h">
+      <Filter>R3D</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\r3d\Application.cpp">
-      <Filter>r3d</Filter>
+    <ClCompile Include="src\R3D\Events\EventManager.cpp">
+      <Filter>R3D\Events</Filter>
     </ClCompile>
-    <ClCompile Include="src\r3d\Log.cpp">
-      <Filter>r3d</Filter>
+    <ClCompile Include="src\R3Dpch.cpp" />
+    <ClCompile Include="src\R3D\Entities\EntityManager.cpp" />
+    <ClCompile Include="src\R3D\Archetypes\ArchetypeManager.cpp" />
+    <ClCompile Include="src\R3D\Utils\StringHash.cpp" />
+    <ClCompile Include="src\R3D\Archetypes\RawPackedArray.cpp" />
+    <ClCompile Include="src\R3D\Utils\RingBuffer.cpp" />
+    <ClCompile Include="src\R3D\Log\Log.cpp">
+      <Filter>R3D</Filter>
+    </ClCompile>
+    <ClCompile Include="src\R3D\Application\Application.cpp">
+      <Filter>R3D</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
