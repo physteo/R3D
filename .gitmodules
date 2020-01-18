@@ -1,3 +1,6 @@
 [submodule "R3D/vendor/spdlog"]
 	path = R3D/vendor/spdlog
 	url = https://github.com/gabime/spdlog
+[submodule "R3D/vendor/GLFW"]
+	path = R3D/vendor/GLFW
+	url = git@github.com:physteo/glfw.git
