@@ -1,9 +1,4 @@
 #include <R3D.h>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <imgui.h>
-#include <examples/imgui_impl_glfw.h>
-#include <examples/imgui_impl_opengl3.h>
 
 struct Position
 {
@@ -105,8 +100,9 @@ class Sandbox : public r3d::Application
 public:
 	Sandbox() : Application{ "Sandbox app.", 800, 600 }
 	{
+#ifdef R3D_DEBUG_APP
 		setDebugMode(false);
-
+#endif
 		pushBackLayer(new WorldLayer());
 	}
 	~Sandbox() {}

@@ -8,7 +8,7 @@ namespace r3d
 	Application* Application::s_instance = nullptr;
 
 	Application::Application(std::string applicationName, double windowWidth, double windowHeight, int maxFramerate, bool saveFrames)
-		: m_window{ applicationName, windowWidth, windowHeight },	m_running(true), m_paused(false), m_debugMode(true)//, m_dataRingBuffer(60)
+		: m_window{ applicationName, windowWidth, windowHeight },	m_running(true), m_paused(false)//m_dataRingBuffer(60)
 	{
 		s_instance = this;
 		m_saveFrames = saveFrames;
@@ -21,6 +21,9 @@ namespace r3d
 		m_basicListeners[KeyPressedEvent::getStaticType()].push_back(this);
 
 		m_applicationInputLayer = nullptr;
+#ifdef R3D_DEBUG_APP
+		m_debugMode = true;
+#endif
 	}
 
 	Application::~Application()
@@ -142,12 +145,13 @@ namespace r3d
 				stepForwardLayers();
 			}
 		}
+#ifdef R3D_DEBUG_APP
 		if (e.getKeyCode() == GLFW_KEY_DELETE && e.getRepeatCount() == 0)
 		{
 			m_debugMode = !m_debugMode;
 			std::cout << "Debug mode: " << m_debugMode << std::endl;
 		}
-
+#endif
 		return false;
 	}
 

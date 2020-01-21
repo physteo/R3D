@@ -1,27 +1,31 @@
 project "glad"
-	kind "StaticLib"
-	language "C"
+   kind "StaticLib"
+   language "C"
 
-	includedirs {"include"}
+   includedirs {"include"}
 
-	files
-	{
-		"src/glad.c"
-	}
+   files
+   {
+      "src/glad.c"
+   }
 
-	filter "system:windows"
-		systemversion "latest"
-		staticruntime "On"
+   filter "system:windows"
+      systemversion "latest"
+      staticruntime "On"
 
-		defines 
-		{ 
-			"_CRT_SECURE_NO_WARNINGS"
-		}
+      defines 
+      { 
+         "_CRT_SECURE_NO_WARNINGS"
+      }
 
-	filter "configurations:Debug"
-		runtime "Debug"
-		symbols "on"
+   filter "configurations:Debug"
+      runtime "Debug"
+      symbols "on"
 
-	filter "configurations:Release"
-		runtime "Release"
-		optimize "on"
+   filter "configurations:Release"
+      runtime "Release"
+      optimize "on"
+
+   filter "configurations:Dist"
+      runtime "Release"
+      optimize "on"

@@ -11,12 +11,6 @@
 
 #include <R3D/Events/KeyEvent.h>
 
-#ifdef  R3D_DEBUG
-#define R3D_DEBUG_MSG(str) do { if(Application::isInDebugMode()) {R3D_CORE_TRACE("{0}", str);} } while( false )
-#else
-#define R3D_DEBUG_MSG(str) do { } while ( false )
-#endif
-
 namespace r3d
 {
 
@@ -31,11 +25,12 @@ namespace r3d
 		//	return &(s_instance->m_commonEntities);
 		//}
 
+#ifdef R3D_DEBUG_APP
 		static bool isInDebugMode()
 		{
 			return s_instance->m_debugMode;
 		}
-
+#endif
 		static EntityManager* getEntityManager()
 		{
 			return &(s_instance->m_entityManager);
@@ -110,9 +105,10 @@ namespace r3d
 
 		virtual bool onEvent(Event& e) override;
 
+#ifdef R3D_DEBUG_APP
 		//!< Set debug mode. If set to true, debug prints will be called, if DEBUG_APP is also defined.
 		void setDebugMode(bool debug) { m_debugMode = debug; }
-
+#endif
 	private:
 		bool onKeyPressedEvent(KeyPressedEvent e);
 
@@ -134,9 +130,10 @@ namespace r3d
 		bool m_running;
 		bool m_paused;
 		bool m_stepping;
-		bool m_debugMode;
 		bool m_saveFrames;
-
+#ifdef R3D_DEBUG_APP
+		bool m_debugMode;
+#endif
 		static Application* s_instance;
 
 		//std::unordered_map<std::string, Entity>  m_commonEntities;

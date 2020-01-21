@@ -73,17 +73,17 @@ project "R3D"
        "GLFW_INCLUDE_NONE"
      }
 
-   filter "configurations:Dist"
-      defines "R3D_DIST"
-     optimize "on"
-
-   filter "configurations:Release"
-      defines "R3D_RELEASE"
-     optimize "on"
-
    filter "configurations:Debug"
       defines "R3D_DEBUG"
-     symbols "on"
+      symbols "on"
+           
+   filter "configurations:Release"
+      defines "R3D_RELEASE"
+      optimize "on"
+           
+   filter "configurations:Dist"
+      defines "R3D_DIST"
+      optimize "on"
 
    filter {"system:windows", "configurations:Release"}
       buildoptions "/MT"
@@ -102,7 +102,7 @@ project "Sandbox"
 
    files 
    {
-         "%{prj.name}/src/**.h",
+      "%{prj.name}/src/**.h",
       "%{prj.name}/src/**.cpp"
    }
 
@@ -121,22 +121,21 @@ project "Sandbox"
    }
 
    filter "system:windows"
-     systemversion "latest"
+      systemversion "latest"
 
-     defines
-     {
+      defines
+      {
         "R3D_PLATFORM_WIN"
-     }
-
-   filter "configurations:Dist"
-      defines "R3D_DIST"
-     optimize "on"
-
-   filter "configurations:Release"
-      defines "R3D_RELEASE"
-     optimize "on"
+      }
 
    filter "configurations:Debug"
       defines "R3D_DEBUG"
-     symbols "on"
-
+      symbols "on"
+           
+   filter "configurations:Release"
+      defines "R3D_RELEASE"
+      optimize "on"
+           
+   filter "configurations:Dist"
+      defines "R3D_DIST"
+      optimize "on"

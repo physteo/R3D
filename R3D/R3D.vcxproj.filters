@@ -13,6 +13,9 @@
     <Filter Include="R3D\Events">
       <UniqueIdentifier>{B216CD42-9ECE-0E90-07D6-E7EBF3ACA980}</UniqueIdentifier>
     </Filter>
+    <Filter Include="R3D\ImGui">
+      <UniqueIdentifier>{38BE9638-A428-4BAF-ED66-FC5459102904}</UniqueIdentifier>
+    </Filter>
     <Filter Include="R3D\Utils">
       <UniqueIdentifier>{6E4A7439-DAB4-28B0-23F3-D9558F9C0605}</UniqueIdentifier>
     </Filter>
@@ -26,6 +29,9 @@
       <Filter>R3D\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\R3D\Core\EntryPoint.h">
+      <Filter>R3D\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Core\Layer.h">
       <Filter>R3D\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\R3D\Core\Log.h">
@@ -58,6 +64,9 @@
     <ClInclude Include="src\R3D\Ecs\RawPackedArray.h">
       <Filter>R3D\Ecs</Filter>
     </ClInclude>
+    <ClInclude Include="src\R3D\Ecs\System.h">
+      <Filter>R3D\Ecs</Filter>
+    </ClInclude>
     <ClInclude Include="src\R3D\Events\Event.h">
       <Filter>R3D\Events</Filter>
     </ClInclude>
@@ -79,6 +88,9 @@
     <ClInclude Include="src\R3D\Events\PhysicsEvents.h">
       <Filter>R3D\Events</Filter>
     </ClInclude>
+    <ClInclude Include="src\R3D\ImGui\ImGuiLayer.h">
+      <Filter>R3D\ImGui</Filter>
+    </ClInclude>
     <ClInclude Include="src\R3D\Utils\RingBuffer.h">
       <Filter>R3D\Utils</Filter>
     </ClInclude>
@@ -86,12 +98,12 @@
       <Filter>R3D\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\R3Dpch.h" />
-    <ClInclude Include="src\R3D\Ecs\System.h" />
-    <ClInclude Include="src\R3D\Core\Layer.h" />
-    <ClInclude Include="src\R3D\ImGui\ImGuiLayer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\R3D\Core\Application.cpp">
+      <Filter>R3D\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\R3D\Core\Layer.cpp">
       <Filter>R3D\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\R3D\Core\Log.cpp">
@@ -112,6 +124,9 @@
     <ClCompile Include="src\R3D\Events\EventManager.cpp">
       <Filter>R3D\Events</Filter>
     </ClCompile>
+    <ClCompile Include="src\R3D\ImGui\ImGuiLayer.cpp">
+      <Filter>R3D\ImGui</Filter>
+    </ClCompile>
     <ClCompile Include="src\R3D\Utils\RingBuffer.cpp">
       <Filter>R3D\Utils</Filter>
     </ClCompile>
@@ -119,7 +134,5 @@
       <Filter>R3D\Utils</Filter>
     </ClCompile>
     <ClCompile Include="src\R3Dpch.cpp" />
-    <ClCompile Include="src\R3D\Core\Layer.cpp" />
-    <ClCompile Include="src\R3D\ImGui\ImGuiLayer.cpp" />
   </ItemGroup>
 </Project>
