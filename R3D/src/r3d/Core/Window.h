@@ -25,11 +25,13 @@ namespace r3d {
 		GLFWmonitor* m_monitor;
 		bool		 m_fullscreen;
 
+		float colorR, colorG, colorB;
 		float m_lastTime;
 		float m_lastFrameTime;
 		int   m_maxFramerate;
 
 	public:
+		Window() {}
 		/*!
 		Width and Height must be specified in pixels.
 		*/
@@ -45,14 +47,19 @@ namespace r3d {
 		void setViewPort(float width, float height) const;
 		//!< Set the "background color" of the currently binded buffer. Use numbers between 0 and 1 (not 0-255!).
 		void clearColorBufferBit(float red, float blue, float green, float alpha) const;
+		void clearColorBufferBit() const;
 		void swapBuffers() const;
 		void pollEvents() const;
 		void terminate() const;
 
 		void setWidth(double width) { m_width = width; }
 		void setHeight(double height) { m_height = height; }
+		void setColor(float r, float g, float b) { colorR = r; colorG = g; colorB = b; }
 		double getWidth() const { return m_width; }
 		double getHeight() const { return m_height; }
+		float getColorR() { return colorR; }
+		float getColorG() { return colorG; }
+		float getColorB() { return colorB; }
 
 		//!< Updates the stored time (in seconds) with the real time.
 		void  updateTime();

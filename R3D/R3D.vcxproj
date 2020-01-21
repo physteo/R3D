@@ -145,6 +145,7 @@
     <ClInclude Include="src\R3D\Core\Application.h" />
     <ClInclude Include="src\R3D\Core\Core.h" />
     <ClInclude Include="src\R3D\Core\EntryPoint.h" />
+    <ClInclude Include="src\R3D\Core\Layer.h" />
     <ClInclude Include="src\R3D\Core\Log.h" />
     <ClInclude Include="src\R3D\Core\Window.h" />
     <ClInclude Include="src\R3D\Ecs\Archetype.h" />
@@ -155,6 +156,7 @@
     <ClInclude Include="src\R3D\Ecs\EntityManager.h" />
     <ClInclude Include="src\R3D\Ecs\Metatype.h" />
     <ClInclude Include="src\R3D\Ecs\RawPackedArray.h" />
+    <ClInclude Include="src\R3D\Ecs\System.h" />
     <ClInclude Include="src\R3D\Events\Event.h" />
     <ClInclude Include="src\R3D\Events\EventManager.h" />
     <ClInclude Include="src\R3D\Events\EventTypesAndCategories.h" />
@@ -162,18 +164,21 @@
     <ClInclude Include="src\R3D\Events\KeyEvent.h" />
     <ClInclude Include="src\R3D\Events\LogicEvents.h" />
     <ClInclude Include="src\R3D\Events\PhysicsEvents.h" />
+    <ClInclude Include="src\R3D\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\R3D\Utils\RingBuffer.h" />
     <ClInclude Include="src\R3D\Utils\StringHash.h" />
     <ClInclude Include="src\R3Dpch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\R3D\Core\Application.cpp" />
+    <ClCompile Include="src\R3D\Core\Layer.cpp" />
     <ClCompile Include="src\R3D\Core\Log.cpp" />
     <ClCompile Include="src\R3D\Core\Window.cpp" />
     <ClCompile Include="src\R3D\Ecs\ArchetypeManager.cpp" />
     <ClCompile Include="src\R3D\Ecs\EntityManager.cpp" />
     <ClCompile Include="src\R3D\Ecs\RawPackedArray.cpp" />
     <ClCompile Include="src\R3D\Events\EventManager.cpp" />
+    <ClCompile Include="src\R3D\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\R3D\Utils\RingBuffer.cpp" />
     <ClCompile Include="src\R3D\Utils\StringHash.cpp" />
     <ClCompile Include="src\R3Dpch.cpp">

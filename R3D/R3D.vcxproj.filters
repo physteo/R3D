@@ -86,6 +86,9 @@
       <Filter>R3D\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\R3Dpch.h" />
+    <ClInclude Include="src\R3D\Ecs\System.h" />
+    <ClInclude Include="src\R3D\Core\Layer.h" />
+    <ClInclude Include="src\R3D\ImGui\ImGuiLayer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\R3D\Core\Application.cpp">
@@ -116,5 +119,7 @@
       <Filter>R3D\Utils</Filter>
     </ClCompile>
     <ClCompile Include="src\R3Dpch.cpp" />
+    <ClCompile Include="src\R3D\Core\Layer.cpp" />
+    <ClCompile Include="src\R3D\ImGui\ImGuiLayer.cpp" />
   </ItemGroup>
 </Project>

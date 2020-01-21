@@ -30,10 +30,15 @@ namespace r3d
 
 #endif
 
-	Window::Window(std::string title, double width, double height, int maxFramerate) : Window{ title, width, height, Monitor::G_NOTSPECIFIED, maxFramerate } {}
+	Window::Window(std::string title, double width, double height, int maxFramerate) : Window{ title, width, height, Monitor::G_NOTSPECIFIED, maxFramerate }
+	{
+		colorR = 1.0; colorG = 0.0; colorB = 0.0;
+	}
 
 	Window::Window(std::string title, double width, double height, Monitor monitor, int maxFramerate)
 	{
+		colorR = 1.0; colorG = 0.0; colorB = 0.0;
+
 		m_lastTime = getCurrentTime();
 		R3D_ASSERT(maxFramerate > 0, "MaxFramerate must be positive.");
 		m_maxFramerate = maxFramerate;
@@ -56,14 +61,12 @@ namespace r3d
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);// GLFW_OPENGL_CORE_PROFILE); 
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-
-		// keep the size fixed 
 		glfwWindowHint(GLFW_RESIZABLE, GL_FALSE); // TODO: make windows resizable
 
 		// Create a windowed mode window and its OpenGL context 
 		if (monitor == Monitor::G_NOTSPECIFIED)
 		{
-			m_window = glfwCreateWindow((int) width, (int) height, title.c_str(), nullptr, nullptr);
+			m_window = glfwCreateWindow((int) width, (int) height, title.c_str(), NULL, NULL);
 		}
 		else
 		{
@@ -101,7 +104,7 @@ namespace r3d
 		//glEnable(GL_FRAMEBUFFER_SRGB);
 
 		// set input mode for mouse
-		glfwSetInputMode(m_window, GLFW_STICKY_MOUSE_BUTTONS, 1);
+		//glfwSetInputMode(m_window, GLFW_STICKY_MOUSE_BUTTONS, 1);
 
 #if defined(R3D_DEBUG) || defined(R3D_RELEASE)
 		glEnable(GL_DEBUG_OUTPUT);
@@ -119,11 +122,16 @@ namespace r3d
 		R3D_CORE_INFO("GLFW:   version {0}", glfwGetVersionString());
 		
 		R3D_CORE_ASSERT(versionMajor > 4 || (versionMajor == 4 && versionMinor >= 5), "R3D requires at least OpenGL version 4.5!");
+		
+		// Event callbacks
+
+
+
 	}
 
 	void Window::setViewPort(float width, float height) const
 	{
-		glViewport(0, 0, width, height);
+		glViewport(0, 0, (GLsizei) width, (GLsizei) height);
 	}
 
 	bool Window::isClosed() const
@@ -136,6 +144,11 @@ namespace r3d
 		glClearColor(red, green, blue, alpha);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//stencil//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+	}
+
+	void Window::clearColorBufferBit() const
+	{
+		clearColorBufferBit(colorR, colorG, colorB, 1.0f);
 	}
 
 	void Window::swapBuffers() const
