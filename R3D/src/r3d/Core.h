@@ -6,7 +6,7 @@
 	#ifdef R3D_BUILD_DLL
 		#define R3D_API __declspec(dllexport)
 	#else
-		#define R3D_API __declspec(dllimport)
+		#define R3D_API 
 	#endif
 #else
 	#error R3D supports only Windows.

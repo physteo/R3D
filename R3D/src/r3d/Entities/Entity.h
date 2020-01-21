@@ -13,7 +13,7 @@ namespace r3d
 		const unsigned ENTITY_GENERATION_MASK = ((1 << ENTITY_GENERATION_BITS) - 1);
 	}
 
-	struct R3D_API Entity
+	struct Entity
 	{
 		Entity() : id(29790) {}
 

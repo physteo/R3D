@@ -11,7 +11,7 @@ namespace r3d
 		Application();
 		virtual ~Application();
 
-		void run();
+		virtual void run();
 	};
 
 	Application* createApplication();

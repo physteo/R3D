@@ -4,17 +4,35 @@ workspace "R3D"
 
    configurations
    {
-   	   "Debug",
-	   "Release",
-	   "Dist"
+      "Debug",
+      "Release",
+      "Dist"
    }
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+IncludeDir = {}
+IncludeDir["GLFW"] = "R3D/vendor/GLFW/include"
+IncludeDir["glad"] = "R3D/vendor/glad/include"
+IncludeDir["imgui"] = "R3D/vendor/imgui"
+
+group "Dependencies"
+   include "R3D/vendor/GLFW"
+   include "R3D/vendor/glad"
+   include "R3D/vendor/imgui"
+
+-- adds here thepremake inside R3D/vendor/GLFW
+include "R3D/vendor/GLFW"
+include "R3D/vendor/glad"
+include "R3D/vendor/imgui"
+
 project "R3D"
    location "R3D"
-   kind "SharedLib"
+   kind "StaticLib"
    language "C++"
+   cppdialect "C++17"
+   staticruntime "on"
+
 
    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -24,43 +42,48 @@ project "R3D"
 
    files 
    {
-   	   "%{prj.name}/src/**.h",
-	   "%{prj.name}/src/**.cpp"
+      "%{prj.name}/src/**.h",
+      "%{prj.name}/src/**.cpp"
    }
 
    includedirs
    {
-   	   "%{prj.name}/vendor/spdlog/include",
-   	   "%{prj.name}/src"
+      "%{prj.name}/vendor/spdlog/include",
+      "%{prj.name}/src",
+      "%{IncludeDir.GLFW}",
+      "%{IncludeDir.glad}",
+      "%{IncludeDir.imgui}"
+   }
+   
+
+   links
+   {
+      "GLFW",
+      "glad",
+      "imgui",
+      "opengl32.lib"
    }
 
    filter "system:windows"
-      cppdialect "C++17"
-	  staticruntime "on"
-	  systemversion "latest"
+     systemversion "latest"
 
-	  defines
-	  {
-	     "R3D_PLATFORM_WIN",
-		 "R3D_BUILD_DLL"
-	  }
-
-	  postbuildcommands
-	  {
-	     ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
-	  }
+     defines
+     {
+        "R3D_PLATFORM_WIN",
+       "GLFW_INCLUDE_NONE"
+     }
 
    filter "configurations:Dist"
       defines "R3D_DIST"
-	  optimize "on"
+     optimize "on"
 
    filter "configurations:Release"
       defines "R3D_RELEASE"
-	  optimize "on"
+     optimize "on"
 
    filter "configurations:Debug"
       defines "R3D_DEBUG"
-	  symbols "on"
+     symbols "on"
 
    filter {"system:windows", "configurations:Release"}
       buildoptions "/MT"
@@ -70,49 +93,50 @@ project "Sandbox"
    location "Sandbox"
    kind "ConsoleApp"
    language "C++"
+   cppdialect "C++17"
+
+   staticruntime "on"
 
    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
    files 
    {
-   	   "%{prj.name}/src/**.h",
-	   "%{prj.name}/src/**.cpp"
+         "%{prj.name}/src/**.h",
+      "%{prj.name}/src/**.cpp"
    }
 
    includedirs
    {
        "R3D/src",
-	   "R3D/vendor/spdlog/include"
-
+      "R3D/vendor/spdlog/include",
+      "%{IncludeDir.GLFW}",
+      "%{IncludeDir.glad}",
+      "%{IncludeDir.imgui}"
    }
    
    links
    {
-   	   "R3D"
+         "R3D"
    }
 
    filter "system:windows"
-      cppdialect "C++17"
-	  staticruntime "on"
-	  systemversion "latest"
+     systemversion "latest"
 
-	  defines
-	  {
-	     "R3D_PLATFORM_WIN"
-	  }
+     defines
+     {
+        "R3D_PLATFORM_WIN"
+     }
 
    filter "configurations:Dist"
       defines "R3D_DIST"
-	  optimize "on"
+     optimize "on"
 
    filter "configurations:Release"
       defines "R3D_RELEASE"
-	  optimize "on"
+     optimize "on"
 
    filter "configurations:Debug"
       defines "R3D_DEBUG"
-	  symbols "on"
+     symbols "on"
 
-   filter {"system:windows", "configurations:Release"}
-      buildoptions "/MT"

@@ -5,7 +5,7 @@
 
 namespace r3d
 {
-	class R3D_API Log
+	class Log
 	{
 	public:
 		

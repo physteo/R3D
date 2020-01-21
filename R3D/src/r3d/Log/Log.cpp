@@ -2,6 +2,7 @@
 
 #include "Log.h"
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <GLFW/glfw3.h>
 
 namespace r3d
 {
@@ -11,7 +12,6 @@ namespace r3d
 
 	void Log::init()
 	{
-
 		spdlog::set_pattern("%^[%T] %n: %v%$");
 		s_coreLogger = spdlog::stdout_color_mt("R3D");
 		s_coreLogger->set_level(spdlog::level::trace);

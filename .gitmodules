@@ -4,3 +4,6 @@
 [submodule "R3D/vendor/GLFW"]
 	path = R3D/vendor/GLFW
 	url = git@github.com:physteo/glfw.git
+[submodule "R3D/vendor/imgui"]
+	path = R3D/vendor/imgui
+	url = https://github.com/physteo/imgui.git

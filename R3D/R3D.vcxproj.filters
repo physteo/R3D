@@ -4,14 +4,56 @@
     <Filter Include="R3D">
       <UniqueIdentifier>{8E16880B-FA1F-887C-839B-9E7CEFA3937C}</UniqueIdentifier>
     </Filter>
+    <Filter Include="R3D\Application">
+      <UniqueIdentifier>{5197CD89-BD22-3B4E-C633-BE42323E974E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="R3D\Archetypes">
+      <UniqueIdentifier>{B5FBD8D0-A1C9-CCD6-8A5D-3DFD76CAA83B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="R3D\Entities">
+      <UniqueIdentifier>{026F3EE5-EED1-CD89-9757-06408399990C}</UniqueIdentifier>
+    </Filter>
     <Filter Include="R3D\Events">
       <UniqueIdentifier>{B216CD42-9ECE-0E90-07D6-E7EBF3ACA980}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="R3D\Log">
+      <UniqueIdentifier>{5FC5C727-CBA4-46C3-D4BC-D199401BAD24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="R3D\Utils">
+      <UniqueIdentifier>{6E4A7439-DAB4-28B0-23F3-D9558F9C0605}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\R3D.h" />
+    <ClInclude Include="src\R3D\Application\Application.h">
+      <Filter>R3D\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Archetypes\Archetype.h">
+      <Filter>R3D\Archetypes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Archetypes\ArchetypeManager.h">
+      <Filter>R3D\Archetypes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Archetypes\ArchetypeManagerRingBuffer.h">
+      <Filter>R3D\Archetypes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Archetypes\Metatype.h">
+      <Filter>R3D\Archetypes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Archetypes\RawPackedArray.h">
+      <Filter>R3D\Archetypes</Filter>
+    </ClInclude>
     <ClInclude Include="src\R3D\Core.h">
       <Filter>R3D</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Entities\Entity.h">
+      <Filter>R3D\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Entities\EntityEvents.h">
+      <Filter>R3D\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Entities\EntityManager.h">
+      <Filter>R3D\Entities</Filter>
     </ClInclude>
     <ClInclude Include="src\R3D\EntryPoint.h">
       <Filter>R3D</Filter>
@@ -28,40 +70,51 @@
     <ClInclude Include="src\R3D\Events\EventsListener.h">
       <Filter>R3D\Events</Filter>
     </ClInclude>
-    <ClInclude Include="src\R3Dpch.h" />
-    <ClInclude Include="src\R3D\Events\KeyEvent.h" />
-    <ClInclude Include="src\R3D\Entities\Entity.h" />
-    <ClInclude Include="src\R3D\Entities\EntityEvents.h" />
-    <ClInclude Include="src\R3D\Entities\EntityManager.h" />
-    <ClInclude Include="src\R3D\Archetypes\Archetype.h" />
-    <ClInclude Include="src\R3D\Archetypes\ArchetypeManager.h" />
-    <ClInclude Include="src\R3D\Utils\StringHash.h" />
-    <ClInclude Include="src\R3D\Archetypes\Metatype.h" />
-    <ClInclude Include="src\R3D\Archetypes\RawPackedArray.h" />
-    <ClInclude Include="src\R3D\Archetypes\ArchetypeManagerRingBuffer.h" />
-    <ClInclude Include="src\R3D\Utils\RingBuffer.h" />
+    <ClInclude Include="src\R3D\Events\KeyEvent.h">
+      <Filter>R3D\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Events\LogicEvents.h">
+      <Filter>R3D\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Events\PhysicsEvents.h">
+      <Filter>R3D\Events</Filter>
+    </ClInclude>
     <ClInclude Include="src\R3D\Log\Log.h">
-      <Filter>R3D</Filter>
+      <Filter>R3D\Log</Filter>
     </ClInclude>
-    <ClInclude Include="src\R3D\Application\Application.h">
-      <Filter>R3D</Filter>
+    <ClInclude Include="src\R3D\Utils\RingBuffer.h">
+      <Filter>R3D\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="src\R3D\Utils\StringHash.h">
+      <Filter>R3D\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3Dpch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\R3D\Application\Application.cpp">
+      <Filter>R3D\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="src\R3D\Archetypes\ArchetypeManager.cpp">
+      <Filter>R3D\Archetypes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\R3D\Archetypes\RawPackedArray.cpp">
+      <Filter>R3D\Archetypes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\R3D\Entities\EntityManager.cpp">
+      <Filter>R3D\Entities</Filter>
+    </ClCompile>
     <ClCompile Include="src\R3D\Events\EventManager.cpp">
       <Filter>R3D\Events</Filter>
     </ClCompile>
-    <ClCompile Include="src\R3Dpch.cpp" />
-    <ClCompile Include="src\R3D\Entities\EntityManager.cpp" />
-    <ClCompile Include="src\R3D\Archetypes\ArchetypeManager.cpp" />
-    <ClCompile Include="src\R3D\Utils\StringHash.cpp" />
-    <ClCompile Include="src\R3D\Archetypes\RawPackedArray.cpp" />
-    <ClCompile Include="src\R3D\Utils\RingBuffer.cpp" />
     <ClCompile Include="src\R3D\Log\Log.cpp">
-      <Filter>R3D</Filter>
+      <Filter>R3D\Log</Filter>
     </ClCompile>
-    <ClCompile Include="src\R3D\Application\Application.cpp">
-      <Filter>R3D</Filter>
+    <ClCompile Include="src\R3D\Utils\RingBuffer.cpp">
+      <Filter>R3D\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="src\R3D\Utils\StringHash.cpp">
+      <Filter>R3D\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\R3Dpch.cpp" />
   </ItemGroup>
 </Project>
