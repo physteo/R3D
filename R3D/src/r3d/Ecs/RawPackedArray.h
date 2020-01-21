@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Metatype.h"
-#include <R3D/Entities/Entity.h>
+#include <R3D/Ecs/Entity.h>
 
 namespace r3d
 {

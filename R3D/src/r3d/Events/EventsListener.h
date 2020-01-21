@@ -1,12 +1,12 @@
 #pragma once
 
-#include <R3D/Core.h>
+#include <R3D/Core/Core.h>
 #include "Event.h"
 
 namespace r3d
 {
 
-	class R3D_API EventsListener
+	class EventsListener
 	{
 	public:
 		virtual bool onEvent(Event& e) = 0;

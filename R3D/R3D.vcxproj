@@ -142,17 +142,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\R3D.h" />
-    <ClInclude Include="src\R3D\Application\Application.h" />
-    <ClInclude Include="src\R3D\Archetypes\Archetype.h" />
-    <ClInclude Include="src\R3D\Archetypes\ArchetypeManager.h" />
-    <ClInclude Include="src\R3D\Archetypes\ArchetypeManagerRingBuffer.h" />
-    <ClInclude Include="src\R3D\Archetypes\Metatype.h" />
-    <ClInclude Include="src\R3D\Archetypes\RawPackedArray.h" />
-    <ClInclude Include="src\R3D\Core.h" />
-    <ClInclude Include="src\R3D\Entities\Entity.h" />
-    <ClInclude Include="src\R3D\Entities\EntityEvents.h" />
-    <ClInclude Include="src\R3D\Entities\EntityManager.h" />
-    <ClInclude Include="src\R3D\EntryPoint.h" />
+    <ClInclude Include="src\R3D\Core\Application.h" />
+    <ClInclude Include="src\R3D\Core\Core.h" />
+    <ClInclude Include="src\R3D\Core\EntryPoint.h" />
+    <ClInclude Include="src\R3D\Core\Log.h" />
+    <ClInclude Include="src\R3D\Core\Window.h" />
+    <ClInclude Include="src\R3D\Ecs\Archetype.h" />
+    <ClInclude Include="src\R3D\Ecs\ArchetypeManager.h" />
+    <ClInclude Include="src\R3D\Ecs\ArchetypeManagerRingBuffer.h" />
+    <ClInclude Include="src\R3D\Ecs\Entity.h" />
+    <ClInclude Include="src\R3D\Ecs\EntityEvents.h" />
+    <ClInclude Include="src\R3D\Ecs\EntityManager.h" />
+    <ClInclude Include="src\R3D\Ecs\Metatype.h" />
+    <ClInclude Include="src\R3D\Ecs\RawPackedArray.h" />
     <ClInclude Include="src\R3D\Events\Event.h" />
     <ClInclude Include="src\R3D\Events\EventManager.h" />
     <ClInclude Include="src\R3D\Events\EventTypesAndCategories.h" />
@@ -160,25 +162,23 @@
     <ClInclude Include="src\R3D\Events\KeyEvent.h" />
     <ClInclude Include="src\R3D\Events\LogicEvents.h" />
     <ClInclude Include="src\R3D\Events\PhysicsEvents.h" />
-    <ClInclude Include="src\R3D\Log\Log.h" />
     <ClInclude Include="src\R3D\Utils\RingBuffer.h" />
     <ClInclude Include="src\R3D\Utils\StringHash.h" />
     <ClInclude Include="src\R3Dpch.h" />
-    <ClInclude Include="src\R3D\Window\Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\R3D\Application\Application.cpp" />
-    <ClCompile Include="src\R3D\Archetypes\ArchetypeManager.cpp" />
-    <ClCompile Include="src\R3D\Archetypes\RawPackedArray.cpp" />
-    <ClCompile Include="src\R3D\Entities\EntityManager.cpp" />
+    <ClCompile Include="src\R3D\Core\Application.cpp" />
+    <ClCompile Include="src\R3D\Core\Log.cpp" />
+    <ClCompile Include="src\R3D\Core\Window.cpp" />
+    <ClCompile Include="src\R3D\Ecs\ArchetypeManager.cpp" />
+    <ClCompile Include="src\R3D\Ecs\EntityManager.cpp" />
+    <ClCompile Include="src\R3D\Ecs\RawPackedArray.cpp" />
     <ClCompile Include="src\R3D\Events\EventManager.cpp" />
-    <ClCompile Include="src\R3D\Log\Log.cpp" />
     <ClCompile Include="src\R3D\Utils\RingBuffer.cpp" />
     <ClCompile Include="src\R3D\Utils\StringHash.cpp" />
     <ClCompile Include="src\R3Dpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\R3D\Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\GLFW\GLFW.vcxproj">

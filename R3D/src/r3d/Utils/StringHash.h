@@ -1,11 +1,11 @@
 #pragma once
 
-#include <R3D/Core.h>
+#include <R3D/Core/Core.h>
 
 namespace r3d
 {
 
-	class R3D_API StringHash
+	class StringHash
 	{
 	public:
 		static unsigned long long computeHash(const std::string& str);

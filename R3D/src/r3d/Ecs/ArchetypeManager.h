@@ -1,9 +1,9 @@
 #pragma once
 
-#include <R3D/Core.h>
+#include <R3D/Core/Core.h>
 
 #include "Archetype.h"
-#include <R3D/Entities/EntityEvents.h>
+#include <R3D/Ecs/EntityEvents.h>
 #include <R3D/Events/EventsListener.h>
 
 #include <iostream>
@@ -11,7 +11,7 @@
 namespace r3d
 {
 
-	class R3D_API ArchetypeManager : public EventsListener
+	class ArchetypeManager : public EventsListener
 	{
 	public:
 

@@ -1,5 +1,5 @@
 #pragma once
-#include <R3D/Core.h>
+#include <R3D/Core/Core.h>
 #include "EventTypesAndCategories.h"
 
 namespace r3d

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <R3D/Core.h>
+#include <R3D/Core/Core.h>
 #include <spdlog/spdlog.h>
 
 namespace r3d

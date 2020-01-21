@@ -5,7 +5,7 @@
 namespace r3d
 {
 
-	class R3D_API ArchetypeManagerRingBuffer
+	class ArchetypeManagerRingBuffer
 	{
 	public:
 		ArchetypeManagerRingBuffer(size_t size)

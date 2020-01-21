@@ -1,7 +1,7 @@
 #pragma once
 
-#include <R3D/Core.h>
-#include <R3D/Log/Log.h>
+#include <R3D/Core/Core.h>
+#include <R3D/Core/Log.h>
 
 #ifdef R3D_PLATFORM_WIN
 	

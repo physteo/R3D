@@ -1,7 +1,7 @@
 #include <R3Dpch.h>
 
 #include "Window.h"
-#include <R3D/Log/Log.h>
+#include <R3D/Core/Log.h>
 
 namespace r3d
 {
@@ -135,7 +135,6 @@ namespace r3d
 	{
 		glClearColor(red, green, blue, alpha);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClear(-1);
 		//stencil//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 	}
 
