@@ -7,6 +7,7 @@
 #include <R3D/Events/EventManager.h>
 #include <R3D/Entities/EntityManager.h>
 #include <R3D/Archetypes/ArchetypeManager.h>
+#include <R3D/Window/Window.h>
 
 #define R3D_DEBUG_APP
 //#define R3D_DEBUG_EVENTS

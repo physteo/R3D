@@ -164,6 +164,7 @@
     <ClInclude Include="src\R3D\Utils\RingBuffer.h" />
     <ClInclude Include="src\R3D\Utils\StringHash.h" />
     <ClInclude Include="src\R3Dpch.h" />
+    <ClInclude Include="src\R3D\Window\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\R3D\Application\Application.cpp" />
@@ -177,6 +178,7 @@
     <ClCompile Include="src\R3Dpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\R3D\Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\GLFW\GLFW.vcxproj">

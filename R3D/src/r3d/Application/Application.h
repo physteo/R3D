@@ -5,7 +5,7 @@
 namespace r3d
 {
 
-	class R3D_API Application
+	class Application
 	{
 	public:
 		Application();
