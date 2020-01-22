@@ -3,7 +3,6 @@
 #include <R3D/Core/Core.h>
 #include <R3D/Core/Log.h>
 
-#ifdef R3D_PLATFORM_WIN
 	
 extern r3d::Application* r3d::createApplication();
 
@@ -17,4 +16,3 @@ int main(int argc, char** argv)
 	delete app;
 }
 
-#endif

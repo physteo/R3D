@@ -3,6 +3,8 @@
 #include <R3D/Core/Core.h>
 #include "Event.h"
 
+#include <list>
+
 namespace r3d
 {
 

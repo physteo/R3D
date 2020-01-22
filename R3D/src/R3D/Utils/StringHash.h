@@ -2,6 +2,10 @@
 
 #include <R3D/Core/Core.h>
 
+#ifdef R3D_PLATFORM_LINUX
+#include <inttypes.h>
+#endif
+
 namespace r3d
 {
 
@@ -23,9 +27,9 @@ namespace r3d
 		// 1. It will not work incrementally.
 		// 2. It will not produce the same results on little-endian and big-endian
 		//    machines.
-
+#if defined(R3D_PLATFORM_WIN)
 		typedef unsigned __int64 uint64_t;
-
+#endif
 		// 64-bit hash for 64-bit platforms
 		uint64_t MurmurHash64A(const void * key, int len, unsigned int seed);
 

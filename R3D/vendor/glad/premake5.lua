@@ -18,6 +18,13 @@ project "glad"
          "_CRT_SECURE_NO_WARNINGS"
       }
 
+   filter "system:linux"
+      systemversion "latest"
+      makesettings [[
+         CXX = g++-7
+      ]]
+
+
    filter "configurations:Debug"
       runtime "Debug"
       symbols "on"

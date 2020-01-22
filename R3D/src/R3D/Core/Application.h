@@ -5,7 +5,7 @@
 #include <R3D/Events/EventManager.h>
 #include <R3D/Ecs/ArchetypeManager.h>
 #include <R3D/Ecs/EntityManager.h>
-#include <R3D/utils/RingBuffer.h>
+#include <R3D/Utils/RingBuffer.h>
 #include <R3D/Core/Layer.h>
 #include <R3D/ImGui/ImGuiLayer.h>
 

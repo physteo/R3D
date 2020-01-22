@@ -3,7 +3,7 @@
 #include <R3D/Core/Window.h>
 #include <R3D/Events/EventsListener.h>
 #include <R3D/Ecs/ArchetypeManager.h>
-#include <R3D/utils/RingBuffer.h>
+#include <R3D/Utils/RingBuffer.h>
 
 #include <unordered_map>
 

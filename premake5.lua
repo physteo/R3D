@@ -64,6 +64,19 @@ project "R3D"
       "opengl32.lib"
    }
 
+   filter "system:linux"
+     systemversion "latest"
+
+     makesettings [[
+         CXX = g++-7
+     ]]
+
+     defines
+     {
+        "R3D_PLATFORM_LINUX",
+       "GLFW_INCLUDE_NONE"
+     }
+
    filter "system:windows"
      systemversion "latest"
 
@@ -117,8 +130,24 @@ project "Sandbox"
    
    links
    {
+         "GLFW",
+         "imgui",
+         "glad",
          "R3D"
    }
+
+   filter "system:linux"
+      systemversion "latest"
+
+--      links
+--      {
+--         "stdc++"
+--      }
+
+      makesettings [[
+         CXX = g++-7
+      ]]
+
 
    filter "system:windows"
       systemversion "latest"

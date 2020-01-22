@@ -15,8 +15,13 @@
 //#define R3D_DEBUG_EVENTS
 
 #ifdef R3D_ENABLE_ASSERTS
-	#define R3D_ASSERT(x, ...)      { if(!(x)) { R3D_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
-	#define R3D_CORE_ASSERT(x, ...) { if(!(x)) { R3D_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
+	#ifdef R3D_PLATFORM_WIN
+		#define R3D_ASSERT(x, ...)      { if(!(x)) { R3D_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
+		#define R3D_CORE_ASSERT(x, ...) { if(!(x)) { R3D_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
+	#elif defined(R3D_PLATFORM_LINUX)
+		#define R3D_ASSERT(x, ...)      { if(!(x)) { R3D_ERROR("Assertion Failed: {0}", __VA_ARGS__); assert(false); } }
+		#define R3D_CORE_ASSERT(x, ...) { if(!(x)) { R3D_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); assert(false); } }
+	#endif
 #else
 	#define R3D_ASSERT(x, ...)
 	#define R3D_CORE_ASSERT(x, ...)
@@ -33,5 +38,5 @@
 		#define R3D_API 
 	#endif
 #else
-	#error R3D supports only Windows.
+        #define R3D_API
 #endif

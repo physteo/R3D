@@ -1,5 +1,6 @@
 #pragma once
 
+#include <R3D/Core/Log.h>
 #include "Metatype.h"
 #include <R3D/Ecs/Entity.h>
 
@@ -49,7 +50,7 @@ namespace r3d
 			++m_active;
 			if (m_active >= MAX_ELEMENTS)
 			{
-				std::cerr << "[ECS] Error: maximum number of components " << MAX_ELEMENTS << " exceeded." << std::endl;
+				R3D_CORE_CRITICAL("[ECS] Error: maximum number of components {0} exceeded.", MAX_ELEMENTS);
 				assert(false);
 			}
 		}
