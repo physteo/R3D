@@ -3,6 +3,7 @@
 // For use by R3D applications
 
 #include <R3D/Core/Log.h>
+#include <R3D/Core/MathUtils.h>
 #include <R3D/Core/Application.h>
 #include <R3D/Core/Window.h>
 #include <R3D/Events/EventManager.h>

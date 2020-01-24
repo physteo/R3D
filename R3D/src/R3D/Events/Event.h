@@ -60,4 +60,9 @@ namespace r3d
 
 #define HANDLE_DISPATCH(dispatcher, eventClass, function) if( dispatcher.dispatch<eventClass>(std::bind(&function, this, std::placeholders::_1)) == true ) { return true; }
 
+	inline std::ostream& operator<<(std::ostream& os, const Event& e)
+	{
+		return os << e.toString();
+	}
+
 }

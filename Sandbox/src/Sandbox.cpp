@@ -56,6 +56,7 @@ public:
 
 	virtual void onImGuiUpdate(r3d::Window* window) override
 	{
+
 		auto am = getArchetypeManager();
 		static float f = 0.0f;
 		static int counter = 0;

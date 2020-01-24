@@ -98,6 +98,7 @@
       <Filter>R3D\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\R3Dpch.h" />
+    <ClInclude Include="src\R3D\Core\MathUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\R3D\Core\Application.cpp">

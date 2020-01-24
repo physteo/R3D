@@ -15,6 +15,7 @@ IncludeDir = {}
 IncludeDir["GLFW"] = "R3D/vendor/GLFW/include"
 IncludeDir["glad"] = "R3D/vendor/glad/include"
 IncludeDir["imgui"] = "R3D/vendor/imgui"
+IncludeDir["glm"] = "R3D/vendor/glm/glm"
 
 group "Dependencies"
    include "R3D/vendor/GLFW"
@@ -52,7 +53,8 @@ project "R3D"
       "%{prj.name}/src",
       "%{IncludeDir.GLFW}",
       "%{IncludeDir.glad}",
-      "%{IncludeDir.imgui}"
+      "%{IncludeDir.imgui}",
+      "%{IncludeDir.glm}"
    }
    
 
@@ -137,7 +139,8 @@ project "Sandbox"
       "R3D/vendor/spdlog/include",
       "%{IncludeDir.GLFW}",
       "%{IncludeDir.glad}",
-      "%{IncludeDir.imgui}"
+      "%{IncludeDir.imgui}",
+      "%{IncludeDir.glm}"
    }
    
 

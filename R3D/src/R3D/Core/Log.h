@@ -2,6 +2,7 @@
 
 #include <R3D/Core/Core.h>
 #include <spdlog/spdlog.h>
+#include <spdlog/fmt/ostr.h>
 
 namespace r3d
 {
