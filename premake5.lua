@@ -22,8 +22,8 @@ group "Dependencies"
    include "R3D/vendor/imgui"
 
 -- adds here thepremake inside R3D/vendor/GLFW
-include "R3D/vendor/GLFW"
 include "R3D/vendor/glad"
+include "R3D/vendor/GLFW"
 include "R3D/vendor/imgui"
 
 project "R3D"
@@ -58,10 +58,9 @@ project "R3D"
 
    links
    {
-      "GLFW",
       "glad",
-      "imgui",
-      "opengl32.lib"
+      "GLFW",
+      "imgui"
    }
 
    filter "system:linux"
@@ -74,7 +73,15 @@ project "R3D"
      defines
      {
         "R3D_PLATFORM_LINUX",
-       "GLFW_INCLUDE_NONE"
+        "GLFW_INCLUDE_NONE"
+     }
+
+     links
+     {
+        "GL",
+        "dl",
+        "X11",
+        "pthread"
      }
 
    filter "system:windows"
@@ -84,6 +91,11 @@ project "R3D"
      {
         "R3D_PLATFORM_WIN",
        "GLFW_INCLUDE_NONE"
+     }
+
+     links
+     {
+        "opengl32.lib"
      }
 
    filter "configurations:Debug"
@@ -128,25 +140,27 @@ project "Sandbox"
       "%{IncludeDir.imgui}"
    }
    
-   links
-   {
-         "GLFW",
-         "imgui",
-         "glad",
-         "R3D"
-   }
 
    filter "system:linux"
       systemversion "latest"
 
---      links
---      {
---         "stdc++"
---      }
-
       makesettings [[
          CXX = g++-7
       ]]
+
+      linkgroups "on"   
+   
+      links
+      {
+         "glad",
+         "GLFW",
+         "imgui",
+         "GL",
+         "dl",
+         "X11",
+         "pthread",
+         "R3D"
+      }
 
 
    filter "system:windows"
@@ -156,6 +170,11 @@ project "Sandbox"
       {
         "R3D_PLATFORM_WIN"
       }
+
+   links
+   {
+      "R3D"
+   }
 
    filter "configurations:Debug"
       defines "R3D_DEBUG"

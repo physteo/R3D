@@ -35,9 +35,7 @@ namespace r3d
 		template<class C>
 		C* get(ArchetypeManager& am, size_t archId)
 		{
-//			auto archetypeData = am.m_archetypeDataVector[archId].get<C>();
-//			return archetypeData->getComponents< C > ( );
-			return nullptr;
+			return am.m_archetypeDataVector[archId].get<C>()->getComponents<C>();
 		}
 
 	};
