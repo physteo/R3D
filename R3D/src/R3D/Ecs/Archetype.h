@@ -25,6 +25,7 @@ namespace r3d
 			{
 				return left.getHash() < right.getHash();
 			});
+
 			// create ID
 			std::string id;
 			for (auto& elem : m_metatypes)
@@ -32,19 +33,16 @@ namespace r3d
 				id.append(elem.getName());
 				id.append("-");
 			}
-			//m_id = id;
 			m_id = StringHash::computeHash(id);
 		}
 
 		inline       std::vector<Metatype>& getMetatypes() { return m_metatypes; }
 		inline const std::vector<Metatype>& getMetatypes() const { return m_metatypes; }
-		//inline const std::string&           getListId()    const { return m_id; }
 		inline unsigned long long           getListId()    const { return m_id; }
-		inline const bool empty() const { return m_metatypes.empty(); }
+		inline bool empty() const { return m_metatypes.empty(); }
 
 	private:
 		std::vector<Metatype> m_metatypes;
-		//std::string m_id;
 		unsigned long long m_id;
 	};
 
