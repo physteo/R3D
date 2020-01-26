@@ -57,13 +57,13 @@ namespace r3d
 		}
 
 		template <class C>
-		C& get(Entity entity)
+		C* get(Entity entity)
 		{
-			// entity is already registered in an archetype?
+			// entity is already registered?
 			auto found = m_entity_to_archetypeData.find(entity);
 			if (found != m_entity_to_archetypeData.end())
 			{
-				//yes
+				// yes
 				size_t archetypeIndex = found->second;
 				auto archetype = &m_archetypeDataVector[archetypeIndex];
 				// does the archetype of entity have C?
@@ -71,22 +71,20 @@ namespace r3d
 				{
 					// set
 					RawPackedArray* addC = archetype->get<C>();
-					return *((C*)addC->getComponent(entity));
+					return (C*)addC->getComponent(entity);
 				}
 				else
 				{
-					// no: assert
-					std::cerr << "[ ECS ] Error: entity " << entity.id <<
-						" does not have component " << typeid(C).name() << std::endl;
-					assert(false);
+					R3D_CORE_ERROR("[ ECS ] entity {0} does not have component {1}.", entity.id, typeid(C).name());
+					R3D_CORE_ASSERT(false, "");
+					return nullptr;
 				}
 			}
 			else
 			{
-				// no: assert
-				std::cerr << "[ ECS ] Error: entity " << entity.id <<
-					" is not registered." << std::endl;
-				assert(false);
+				R3D_CORE_ERROR("[ ECS ] entity {0} is not registered to any Archetype.", entity.id);
+				R3D_CORE_ASSERT(false, "");
+				return nullptr;
 			}
 		}
 
@@ -109,10 +107,12 @@ namespace r3d
 					return;
 				}
 			}
-
-			std::cerr << "[ ECS ] Error: entity " << entity.id <<
-				" does have the requested component, or does not have an archetype at all." << std::endl;
-			assert(false);
+			else
+			{
+				R3D_CORE_ERROR("[ ECS ] entity {0} is not registered to any Archetype.", entity.id);
+				R3D_CORE_ASSERT(false, "");
+				return;
+			}
 
 		}
 
@@ -122,9 +122,9 @@ namespace r3d
 			auto found = m_entity_to_archetypeData.find(entity);
 			if (found != m_entity_to_archetypeData.end())
 			{
-				// assert
-				std::cerr << "[ ECS ] Error: entity " << entity.id << " already belongs to an archetype." << std::endl;
-				assert(false);
+				R3D_CORE_ERROR("[ ECS ] entity {0} already belongs to an archetype.", entity.id);
+				R3D_CORE_ASSERT(false, "");
+				return;
 			}
 			else
 			{
@@ -157,8 +157,9 @@ namespace r3d
 			if (found != m_entity_to_archetypeData.end())
 			{
 				// assert
-				std::cerr << "[ ECS ] Error: entity " << entity.id << " already belongs to an archetype." << std::endl;
-				assert(false);
+				R3D_CORE_ERROR("[ ECS ] entity {0} already belongs to an archetype.", entity.id);
+				R3D_CORE_ASSERT(false, "");
+				return;
 			}
 			else
 			{
@@ -212,14 +213,16 @@ namespace r3d
 				}
 				else
 				{
-					std::cerr << "[ ECS ] Error: entity " << entity.id << " does not have component " << typeid(C).name() << std::endl;
-					assert(false);
+					R3D_CORE_ERROR("[ ECS ] entity {0} does not have component {1}.", entity.id, typeid(C).name());
+					R3D_CORE_ASSERT(false, "");
+					return;
 				}
 			}
 			else
 			{
-				std::cerr << "[ ECS ] Error: entity " << entity.id << " has no components. " << std::endl;
-				assert(false);
+				R3D_CORE_ERROR("[ ECS ] entity {0} is not registered to any Archetype.", entity.id);
+				R3D_CORE_ASSERT(false, "");
+				return;
 			}
 		}
 
@@ -237,8 +240,9 @@ namespace r3d
 				if (oldArchetype->has<C>())
 				{
 					// yes: assert. entity already has that component
-					std::cerr << "[ ECS ] Error: entity " << entity.id << " already has component " << typeid(C).name() << std::endl;
-					assert(false);
+					R3D_CORE_ERROR("[ ECS ] entity {0}  already has component {1}", entity.id, typeid(C).name());
+					R3D_CORE_ASSERT(false, "");
+					return;
 				}
 				else
 				{
@@ -278,15 +282,13 @@ namespace r3d
 			}
 			else
 			{
-				// entity has no archetype yet
-				// is there an archetype that has only C?
+				// entity has no archetype yet: is there an archetype that has only C?
 				ComponentList list = ComponentList::buildList<C>();
 
 				auto found_index_pair = matchExact(list);
 				if (found_index_pair.first)
 				{
 					// yes: add entity to the archetype, update map
-					//m_archetypeDataVector[found_index_pair.second].componentDataMap[typeid(C).name()].assign<C>(entity, std::move(data));
 					m_archetypeDataVector[found_index_pair.second].componentDataMap[typeid(C).hash_code()].assign<C>(entity, std::move(data));
 					m_entity_to_archetypeData[entity] = found_index_pair.second;
 				}
@@ -295,7 +297,6 @@ namespace r3d
 					// no: create such archetype, update map
 					Archetype destinationArchetypeData{ list };
 					m_archetypeDataVector.emplace_back(destinationArchetypeData);
-					//m_archetypeDataVector[m_archetypeDataVector.size() - 1].componentDataMap[typeid(C).name()].assign<C>(entity, std::move(data));
 					m_archetypeDataVector[m_archetypeDataVector.size() - 1].componentDataMap[typeid(C).hash_code()].assign<C>(entity, std::move(data));
 					m_entity_to_archetypeData[entity] = m_archetypeDataVector.size() - 1;
 				}
@@ -341,9 +342,9 @@ namespace r3d
 
 			if (archIndex1 != archIndex2)
 			{
-				std::cerr << "[ ECS ] Error: entity " << destinationEntity.id << " and " << sourceEntity.id << " have different archetypes."
-					<< std::endl;
-				assert(false);
+				R3D_CORE_ERROR("[ ECS ] entity {0} and {1} have different archetypes.", destinationEntity.id, sourceEntity.id);
+				R3D_CORE_ASSERT(false, "");
+				return;
 			}
 			else
 			{
@@ -352,14 +353,11 @@ namespace r3d
 				// loop over the list of component from old Archetype
 				for (auto jt = source->componentDataMap.begin(); jt != source->componentDataMap.end(); ++jt)
 				{
-					//std::string componentName = jt->first;
-
 					RawPackedArray& componentArray = jt->second;
 
 					char* componentData = componentArray.getComponent(sourceEntity);
 					size_t size_component = componentArray.getMetaType().getSize();
 
-					//componentArray.assign(destinationEntity, componentData);
 					componentArray.copy(destinationEntity, componentData);
 				}
 			}
