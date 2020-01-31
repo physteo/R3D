@@ -99,6 +99,19 @@
     </ClInclude>
     <ClInclude Include="src\R3Dpch.h" />
     <ClInclude Include="src\R3D\Core\MathUtils.h" />
+    <ClInclude Include="src\R3D\Graphics\Core\Buffer.h" />
+    <ClInclude Include="src\R3D\Graphics\Core\VertexArray.h" />
+    <ClInclude Include="src\R3D\Graphics\Core\Shader.h" />
+    <ClInclude Include="src\R3D\Graphics\Components\BasicGraphicsComponents.h" />
+    <ClInclude Include="src\R3D\Graphics\Core\BasicMatrixOperations.h" />
+    <ClInclude Include="src\R3D\Graphics\Core\Camera.h" />
+    <ClInclude Include="src\R3D\Graphics\Systems\PrimitivesRenderer.h" />
+    <ClInclude Include="src\R3D\Graphics\Core\InstancesRenderer.h" />
+    <ClInclude Include="src\R3D\Physics\Core\Detection.h" />
+    <ClInclude Include="src\R3D\Physics\Core\Contact.h" />
+    <ClInclude Include="src\R3D\Physics\Systems\SphereSphereContactDetector.h" />
+    <ClInclude Include="src\R3D\Physics\Components\PrimitivesComponents.h" />
+    <ClInclude Include="src\R3D\Ecs\TransformComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\R3D\Core\Application.cpp">
@@ -135,5 +148,13 @@
       <Filter>R3D\Utils</Filter>
     </ClCompile>
     <ClCompile Include="src\R3Dpch.cpp" />
+    <ClCompile Include="src\R3D\Graphics\Core\Buffer.cpp" />
+    <ClCompile Include="src\R3D\Graphics\Core\VertexArray.cpp" />
+    <ClCompile Include="src\R3D\Graphics\Core\Shader.cpp" />
+    <ClCompile Include="src\R3D\Graphics\Core\BasicMatrixOperations.cpp" />
+    <ClCompile Include="src\R3D\Graphics\Core\Camera.cpp" />
+    <ClCompile Include="src\R3D\Graphics\Systems\PrimitivesRenderer.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\Detection.cpp" />
+    <ClCompile Include="src\R3D\Physics\Systems\SphereSphereContactDetector.cpp" />
   </ItemGroup>
 </Project>

@@ -48,7 +48,7 @@ namespace r3d
 		virtual void onStepBack(Window* window) {};
 		virtual void onStepForward(Window* window) {};
 
-		int getFrameSlotIndex() const { return m_savedFrames.getActiveSlotIndex(); }
+		size_t getFrameSlotIndex() const { return m_savedFrames.getActiveSlotIndex(); }
 
 	protected:
 		std::string            m_name;

@@ -1,7 +1,16 @@
 #pragma once
 
+//#define GLM_FORCE_QUAT_DATA_WXYZ
+
 #include <glm.hpp>
-#include <iostream>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
+#include <gtx/component_wise.hpp>
+#include <gtc/quaternion.hpp>
+#include <gtx/quaternion.hpp>
+
+
+#define R3D_EPSILON 1e-6
 
 namespace r3d
 {
@@ -13,6 +22,7 @@ namespace r3d
 	typedef glm::tmat2x2<real, glm::precision::highp> real2x2;
 	typedef glm::tmat3x3<real, glm::precision::highp> real3x3;
 	typedef glm::tmat4x4<real, glm::precision::highp> real4x4;
+	typedef glm::tquat<real, glm::precision::highp> rquat;
 
 	typedef glm::vec2 float2;
 	typedef glm::vec3 float3;
@@ -20,9 +30,12 @@ namespace r3d
 	typedef glm::mat2 float2x2;
 	typedef glm::mat3 float3x3;
 	typedef glm::mat4 float4x4;
+	typedef glm::quat fquat;
+
 
 }
 
+#if 0
 std::ostream& operator<<(std::ostream& os, const r3d::float2& v)
 {
 	return os << "(" << v[0] << ", " << v[1] << ")";
@@ -82,3 +95,4 @@ std::ostream& operator<<(std::ostream& os, const r3d::real4x4& m)
 {
 	return os << "{" << m[0] << ", " << m[1] << ", " << m[2] << ", " << m[3] << "}";
 }
+#endif

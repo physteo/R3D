@@ -14,7 +14,6 @@ namespace r3d
 	class ArchetypeManager : public EventsListener
 	{
 	public:
-
 		std::unordered_map<Entity, size_t> m_entity_to_archetypeData;
 		std::vector<ArchetypeData> m_archetypeDataVector;
 
@@ -69,7 +68,7 @@ namespace r3d
 				// does the archetype of entity have C?
 				if (archetype->has<C>())
 				{
-					// set
+					// get
 					RawPackedArray* addC = archetype->get<C>();
 					return (C*)addC->getComponent(entity);
 				}
@@ -113,9 +112,7 @@ namespace r3d
 				R3D_CORE_ASSERT(false, "");
 				return;
 			}
-
 		}
-
 
 		void setArchetype(Entity entity, const Archetype& archetype)
 		{
@@ -167,7 +164,6 @@ namespace r3d
 				setArchetype(entity, arch);
 			}
 		}
-
 
 		template <class C>
 		void remove(Entity entity)
@@ -305,10 +301,6 @@ namespace r3d
 			}
 		}
 
-
-
-
-
 		std::vector<size_t> matchAtLeastWithout(const ComponentList& included, const ComponentList& excluded) const
 		{
 			std::vector<size_t> results;
@@ -333,7 +325,6 @@ namespace r3d
 
 			return results;
 		}
-
 
 		void copy(Entity destinationEntity, Entity sourceEntity)
 		{
@@ -363,9 +354,18 @@ namespace r3d
 			}
 		}
 
+		void removeEntity(Entity entity)
+		{
+			auto found = m_entity_to_archetypeData.find(entity);
+			if (found != m_entity_to_archetypeData.end())
+			{
+				size_t archetypeDataIndex = found->second;
+				m_archetypeDataVector[archetypeDataIndex].remove(entity);
+				m_entity_to_archetypeData.erase(entity);
+			}
+		}
+
 	private:
-
-
 		std::pair<bool, size_t> matchExact(const ComponentList& list) const
 		{
 			for (size_t i = 0; i < m_archetypeDataVector.size(); i++)
@@ -401,17 +401,6 @@ namespace r3d
 			}
 		}
 
-
-		void removeEntity(Entity entity)
-		{
-			auto found = m_entity_to_archetypeData.find(entity);
-			if (found != m_entity_to_archetypeData.end())
-			{
-				size_t archetypeDataIndex = found->second;
-				m_archetypeDataVector[archetypeDataIndex].remove(entity);
-				m_entity_to_archetypeData.erase(entity);
-			}
-		}
 
 		bool onEvent(Event& e) override
 		{

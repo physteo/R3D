@@ -32,12 +32,12 @@ namespace r3d
 
 	Window::Window(std::string title, double width, double height, int maxFramerate) : Window{ title, width, height, Monitor::G_NOTSPECIFIED, maxFramerate }
 	{
-		colorR = 1.0; colorG = 0.0; colorB = 0.0;
+		colorR = 0.05; colorG = 0.05; colorB = 0.05;
 	}
 
 	Window::Window(std::string title, double width, double height, Monitor monitor, int maxFramerate)
 	{
-		colorR = 1.0; colorG = 0.0; colorB = 0.0;
+		colorR = 0.05; colorG = 0.05; colorB = 0.05;
 
 		m_lastTime = getCurrentTime();
 		R3D_ASSERT(maxFramerate > 0, "MaxFramerate must be positive.");

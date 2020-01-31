@@ -62,19 +62,19 @@ namespace std
 		}
 	};
 
-	template<>
-	struct hash<std::pair<r3d::Entity, r3d::Entity> >
-	{
-		std::size_t operator()(const std::pair<r3d::Entity, r3d::Entity>& k) const
-		{
-			using std::size_t;
-			using std::hash;
-			using std::string;
-
-			// Compute individual hash values for first,
-			// second and third and combine them using XOR
-			// and bit shifting:
-			return (k.first.id << 32) + k.second.id;
-		}
-	};
+	//template<>
+	//struct hash<std::pair<r3d::Entity, r3d::Entity> >
+	//{
+	//	std::size_t operator()(const std::pair<r3d::Entity, r3d::Entity>& k) const
+	//	{
+	//		using std::size_t;
+	//		using std::hash;
+	//		using std::string;
+	//
+	//		// Compute individual hash values for first,
+	//		// second and third and combine them using XOR
+	//		// and bit shifting:
+	//		return (k.first.id << 32) + k.second.id;
+	//	}
+	//};
 }
