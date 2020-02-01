@@ -16,8 +16,20 @@ namespace r3d
 			const rquat& offRot1, const rquat& offRot2,
 			const real& rad1, const real& rad2,
 			const Entity& e1, const Entity& e2,
-			CollisionData* data);
+			CollisionData* data
+		);
 
+	};
+
+	class DetectSpherePlane
+	{
+	public:
+		static unsigned int detect(
+			const real3& spherePos, const real3& sphereOffPos, const rquat& sphereOffRot, const real& rad,
+			const real3& planeNormal, const real& planeOff,
+			const Entity& eSphere, const Entity& ePlane,
+			CollisionData* data
+		);
 	};
 
 }

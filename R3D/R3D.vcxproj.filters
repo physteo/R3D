@@ -112,6 +112,8 @@
     <ClInclude Include="src\R3D\Physics\Systems\SphereSphereContactDetector.h" />
     <ClInclude Include="src\R3D\Physics\Components\PrimitivesComponents.h" />
     <ClInclude Include="src\R3D\Ecs\TransformComponent.h" />
+    <ClInclude Include="src\R3D\Physics\Systems\SpherePlaneContactDetector.h" />
+    <ClInclude Include="src\R3D\Utils\Profiler.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\R3D\Core\Application.cpp">
@@ -154,7 +156,10 @@
     <ClCompile Include="src\R3D\Graphics\Core\BasicMatrixOperations.cpp" />
     <ClCompile Include="src\R3D\Graphics\Core\Camera.cpp" />
     <ClCompile Include="src\R3D\Graphics\Systems\PrimitivesRenderer.cpp" />
-    <ClCompile Include="src\R3D\Physics\Core\Detection.cpp" />
     <ClCompile Include="src\R3D\Physics\Systems\SphereSphereContactDetector.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\SpherePlane.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\SphereSphere.cpp" />
+    <ClCompile Include="src\R3D\Physics\Systems\SpherePlaneContactDetector.cpp" />
+    <ClCompile Include="src\R3D\Utils\Profiler.cpp" />
   </ItemGroup>
 </Project>

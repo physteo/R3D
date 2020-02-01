@@ -27,19 +27,10 @@ namespace r3d
 		{
 			maximumContacts = maximumContactsIn;
 			totalContacts = 0;
-			sphereSphereContacts.reserve(maximumContactsIn);
-			sphereSphereContacts.reserve(maximumContactsIn);
-			sphereBoxContacts.reserve(maximumContactsIn);
-			spherePlaneContacts.reserve(maximumContactsIn);
-			boxBoxContacts.reserve(maximumContactsIn);
-			boxPlaneContacts.reserve(maximumContactsIn);
+			contacts.reserve(maximumContactsIn);
 		}
 
-		std::vector<Contact> sphereSphereContacts;
-		std::vector<Contact> sphereBoxContacts;
-		std::vector<Contact> spherePlaneContacts;
-		std::vector<Contact> boxBoxContacts;
-		std::vector<Contact> boxPlaneContacts;
+		std::vector<Contact> contacts;
 
 		size_t maximumContacts;
 		size_t totalContacts;

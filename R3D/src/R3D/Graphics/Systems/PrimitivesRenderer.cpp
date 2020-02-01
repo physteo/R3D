@@ -1,6 +1,7 @@
 #include <R3Dpch.h>
 #include "PrimitivesRenderer.h"
 #include <R3D/Physics/Components/PrimitivesComponents.h>
+#include <R3D/Utils/Profiler.h>
 
 namespace r3d
 {
@@ -124,13 +125,15 @@ namespace r3d
 			auto scale = get<Scale>(am, *archIt);
 			auto color = get<Color>(am, *archIt);
 			size_t numElements = getSize<Color>(am, *archIt);
-
+			Profiler::startCollect();
 			for (size_t j = 0; j < numElements; j++)
 			{
-				outInstancesData.push_back(InstanceData{});
-				outInstancesData.back().modelMatrix = std::move(compute_model_matrix(pos[j].vec, rot[j].quat, 2.0 * scale[j].vec));
-				outInstancesData.back().color = color[j].vec;
+				outInstancesData.emplace_back(compute_model_matrix(pos[j].vec, rot[j].quat, 2.0 * scale[j].vec), color[j].vec);
+				//outInstancesData.push_back(InstanceData{});
+				//outInstancesData.back().modelMatrix = std::move(compute_model_matrix(pos[j].vec, rot[j].quat, 2.0 * scale[j].vec));
+				//outInstancesData.back().color = color[j].vec;
 			}
+			Profiler::stopCollect("Rendering primitives (not plane).");
 		}
 	}
 
@@ -145,7 +148,7 @@ namespace r3d
 		{
 			auto plane = get<Plane>(am, *archIt);
 			auto color = get<Color>(am, *archIt);
-			auto entities = getEntities<Plane>(am, *archIt);
+			auto& entities = getEntities(am, *archIt);
 			size_t numElements = getSize<Plane>(am, *archIt);
 
 			for (size_t j = 0; j < numElements; j++)

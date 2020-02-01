@@ -33,6 +33,8 @@ namespace r3d
 
 		struct InstanceData
 		{
+			InstanceData(const float4x4& modelMatrix = float4x4{ 1.0f }, const float4& color = float4{ 1.0f })
+				: modelMatrix(modelMatrix), color(color) {}
 			float4x4 modelMatrix;
 			float4 color;
 		};

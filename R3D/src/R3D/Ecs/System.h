@@ -26,10 +26,10 @@ namespace r3d
 			return am.m_archetypeDataVector[archId].get<C>()->size();
 		}
 
-		template<class C>
 		std::vector<Entity>& getEntities(ArchetypeManager& am, size_t archId)
 		{
-			return am.m_archetypeDataVector[archId].get<C>()->getEntities();
+			//return am.m_archetypeDataVector[archId].get<C>()->getEntities();
+			return am.m_archetypeDataVector[archId].componentDataMap.begin()->second.getEntities();
 		}
 
 		template<class C>

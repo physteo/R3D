@@ -1,10 +1,5 @@
 #include <R3D.h>
 
-#include <R3D/Ecs/TransformComponent.h>
-#include <R3D/Physics/Components/PrimitivesComponents.h>
-#include <R3D/Physics/Systems/SphereSphereContactDetector.h>
-
-
 namespace r3d
 {
 
@@ -18,12 +13,13 @@ namespace r3d
 			auto archetypes = am.matchAtLeastWithout(ComponentList::buildList<ContactEntityTag>(), {});
 			for (auto arch : archetypes)
 			{
-				auto entities = getEntities<ContactEntityTag>(am, arch);
+				auto& entities = getEntities(am, arch);
 				size_t numEntities = getSize<ContactEntityTag>(am, arch);
 				for (size_t i = 0; i < numEntities; ++i)
 				{
-					am.removeEntity(entities[i]);
-					Application::getEntityManager()->destroy(entities[i]);
+					Entity e = entities[0];
+					Application::getEntityManager()->destroy(e);
+					am.removeEntity(e);
 				}
 			}
 		}
@@ -41,10 +37,10 @@ namespace r3d
 		void setContacts(const CollisionData* collData) { m_collData = collData; }
 		virtual void update(r3d::ArchetypeManager& am, double t, double dt) override
 		{
-			for (size_t i = 0; i < m_collData->sphereSphereContacts.size(); ++i)
+			for (size_t i = 0; i < m_collData->contacts.size(); ++i)
 			{
-				float3 cross = glm::cross(float3{ 1.0, 0.0, 0.0 }, (float3) m_collData->sphereSphereContacts[i].contactNormal);
-				float dot = glm::dot(float3{ 1.0, 0.0, 0.0 }, (float3)m_collData->sphereSphereContacts[i].contactNormal);
+				float3 cross = glm::cross(float3{ 1.0, 0.0, 0.0 }, (float3) m_collData->contacts[i].contactNormal);
+				float dot = glm::dot(float3{ 1.0, 0.0, 0.0 }, (float3)m_collData->contacts[i].contactNormal);
 				float cos = dot;
 				float sin_half = glm::sqrt((1 - cos) / 2.0f);
 				float cos_half = glm::sqrt((1 + cos) / 2.0f);
@@ -66,7 +62,7 @@ namespace r3d
 				am.setArchetype(entity_s, archetypeCollisionNormal);
 				am.set<Segment>(entity_s, Segment{});
 				am.set<Color>(entity_s, Color{ float4{1.0, 0.0, 0.0, 1.0} });
-				am.set<Position>(entity_s, Position{ (float3) m_collData->sphereSphereContacts[i].contactPoint + rotated_displacement });
+				am.set<Position>(entity_s, Position{ (float3) m_collData->contacts[i].contactPoint + rotated_displacement });
 				am.set<Rotation>(entity_s, Rotation{ quat });
 				am.set<Scale>(entity_s, Scale{ float3{0.2} });
 
@@ -74,7 +70,7 @@ namespace r3d
 				am.setArchetype(entity_c, archetypeCollisionPoint);
 				am.set<Circle>(entity_c, Circle{});
 				am.set<Color>(entity_c, Color{ float4{1.0, 0.0, 0.0, 1.0}  });
-				am.set<Position>(entity_c, Position{ m_collData->sphereSphereContacts[i].contactPoint  });
+				am.set<Position>(entity_c, Position{ m_collData->contacts[i].contactPoint  });
 				am.set<Rotation>(entity_c, Rotation{ quat });
 				am.set<Scale>(entity_c, Scale{ float3{0.1} });
 
@@ -112,6 +108,7 @@ public:
 class WorldLayer : public r3d::Layer
 {
 	r3d::SphereSphereContactDetector sphereSphereContactDetector;
+	r3d::SpherePlaneContactDetector spherePlaneContactDetector;
 	r3d::ContactPointEntityGenerator contactEntityGenerator;
 	r3d::ContactPointEntityRemover contactEntityRemover;
 	r3d::CollisionData collisionData;
@@ -158,6 +155,10 @@ public:
 	{
 		using namespace r3d;
 
+		Profiler p;
+		Profiler::startCollect();
+		Profiler::stopCollect("Random stuff");
+
 		Application::getWindow()->setColor(0.02f, 0.02f, 0.1f);
 
 		circleEnt = Application::getEntityManager()->create();
@@ -167,7 +168,7 @@ public:
 		am->set<Rotation>(circleEnt, Rotation{ {1.0, 0.0, 0.0, 0.0} });
 		am->set<Scale>(circleEnt, Scale{ float3{1.0f} });
 		am->set<Sphere>(circleEnt, Sphere{});
-		am->set<Color>(circleEnt, float4{ 1.0, 0.64, 0.0, 1.0 });
+		am->set<Color>(circleEnt, float4{ 0.5, 0.32, 0.0, 1.0 });
 
 		squareEnt = Application::getEntityManager()->create();
 		am->setArchetype < Position, Rotation, Scale, PrimitiveTag, Square, Color >(squareEnt);
@@ -242,7 +243,7 @@ public:
 		newAngleAxis = { 1.0f, 0.0f, 0.0f };
 		newAngle = 0.0f;
 		newSize = { 1.0f };
-		newColor = { 1.0f, 1.0f, 1.0f };
+		newColor = { 0.2f, 0.2f, 0.2f };
 
 		deltaPosition = r3d::float3{ 0.0f };
 		up = float3{ 0.0f, 1.0f, 0.0f };
@@ -255,6 +256,7 @@ public:
 		
 		// physics stuff
 		sphereSphereContactDetector.setCollisionData(&collisionData);
+		spherePlaneContactDetector.setCollisionData(&collisionData);
 	}
 
 
@@ -267,13 +269,14 @@ public:
 
 		// reset contacts
 		collisionData.totalContacts = 0;
-		collisionData.sphereSphereContacts.clear();
+		collisionData.contacts.clear();
 		
 		// remove contact entities
 		contactEntityRemover.update(*am, t, dt);
 
 		// detect contacts
 		sphereSphereContactDetector.update(*am, t, dt);
+		spherePlaneContactDetector.update(*am, t, dt);
 		
 		// create contact entities
 		contactEntityGenerator.setContacts(&collisionData);
@@ -513,7 +516,9 @@ public:
 #endif
 		pushBackLayer(new WorldLayer());
 	}
-	~Sandbox() {}
+	~Sandbox()
+	{
+	}
 };
 
 r3d::Application* r3d::createApplication()

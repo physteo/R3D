@@ -38,7 +38,7 @@ namespace r3d
 		contact.e2 = e2;
 		//contact->restitution = data->restitution;
 		//contact->friction = data->friction;
-		data->sphereSphereContacts.push_back(contact);
+		data->contacts.push_back(contact);
 		++data->totalContacts;
 
 		return 1;

@@ -19,7 +19,7 @@ namespace r3d
 			auto rotations1 = get<Rotation>(am, arch1);
 			auto scales1 = get<Scale>(am, arch1);
 			auto spheres1 = get<Sphere>(am, arch1);
-			auto entities1 = getEntities<Sphere>(am, arch1);
+			auto& entities1 = getEntities(am, arch1);
 			size_t size1 = getSize<Position>(am, arch1);
 
 			for (size_t i = 0; i < size1; ++i)
@@ -46,7 +46,7 @@ namespace r3d
 			auto rotations1 = get<Rotation>(am, arch1);
 			auto scales1 = get<Scale>(am, arch1);
 			auto spheres1 = get<Sphere>(am, arch1);
-			auto entities1 = getEntities<Sphere>(am, arch1);
+			auto& entities1 = getEntities(am, arch1);
 			size_t size1 = getSize<Position>(am, arch1);
 
 			for (size_t arch2 : archetypes)
@@ -57,7 +57,7 @@ namespace r3d
 				auto rotations2 = get<Rotation>(am, arch2);
 				auto scales2 = get<Scale>(am, arch2);
 				auto spheres2 = get<Sphere>(am, arch2);
-				auto entities2 = getEntities<Sphere>(am, arch2);
+				auto& entities2 = getEntities(am, arch2);
 				size_t size2 = getSize<Position>(am, arch2);
 				
 				for (size_t i = 0; i < size1; ++i)
