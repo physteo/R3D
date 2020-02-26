@@ -1,10 +1,11 @@
 #pragma once
 
 #include <R3D/Ecs/System.h>
-#include <R3D/Physics/Core/Contact.h>
 
 namespace r3d
 {
+
+	class CollisionData;
 
 	class SphereSphereContactDetector : public System
 	{

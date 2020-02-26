@@ -7,10 +7,10 @@ namespace r3d
 
 	class CollisionData;
 
-	class SpherePlaneContactDetector : public System
+	class BoxBoxContactDetector : public System
 	{
 	public:
-		SpherePlaneContactDetector(CollisionData* collisionData = nullptr) : m_collisionData(collisionData) {}
+		BoxBoxContactDetector(CollisionData* collisionData = nullptr) : m_collisionData(collisionData) {}
 
 		void setCollisionData(CollisionData* collisionData) { m_collisionData = collisionData; }
 		virtual void update(ArchetypeManager& am, double t, double dt) override;

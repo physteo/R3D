@@ -1,13 +1,14 @@
 #pragma once
-#include <R3D/Core/MathUtils.h>
-#include <R3D/Ecs/Entity.h>
 
+#include "CollisionPrimitives.h"
 #include "Contact.h"
 
 namespace r3d
 {
 
-	class DetectSphereSphere
+	struct CollisionData;
+
+	class SphereSphere
 	{
 	public:
 		static unsigned int detect(
@@ -21,7 +22,7 @@ namespace r3d
 
 	};
 
-	class DetectSpherePlane
+	class SpherePlane
 	{
 	public:
 		static unsigned int detect(
@@ -30,6 +31,21 @@ namespace r3d
 			const Entity& eSphere, const Entity& ePlane,
 			CollisionData* data
 		);
+	};
+
+	class BoxPlane
+	{
+	public:
+		static unsigned int detect(const CollisionBox& box, const CollisionPlane& plane, Manifold* manifold);
+	};
+
+	class BoxBox
+	{
+	public:
+		static unsigned int detect(const CollisionBox& box1, const CollisionBox& box2, Manifold* manifold);
+
+		static unsigned int detectOld(const CollisionBox& box1, const CollisionBox& box2, Contact& contact);
+
 	};
 
 }

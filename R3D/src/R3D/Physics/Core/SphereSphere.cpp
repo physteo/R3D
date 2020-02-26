@@ -1,10 +1,11 @@
 #include <R3Dpch.h>
 #include "Detection.h"
+#include "World.h"
 
 namespace r3d
 {
 	// detection routines
-	unsigned int DetectSphereSphere::detect(
+	unsigned int SphereSphere::detect(
 		const real3& pos1, const real3& pos2,
 		const real3& offPos1, const real3& offPos2,
 		const rquat& offRot1, const rquat& offRot2,
@@ -30,12 +31,12 @@ namespace r3d
 		
 		
 		Contact contact;
-		contact.contactNormal = normal;
-		contact.contactPoint = pos1 - midline * (real)0.5;
+		////contact.normal = normal;
+		contact.position = pos1 - midline * (real)0.5;
 		contact.penetration = (rad1 + rad2 - magnitude);
 		// Write the appropriate data.
-		contact.e1 = e1;
-		contact.e2 = e2;
+		////contact.e1 = e1;
+		////contact.e2 = e2;
 		//contact->restitution = data->restitution;
 		//contact->friction = data->friction;
 		data->contacts.push_back(contact);

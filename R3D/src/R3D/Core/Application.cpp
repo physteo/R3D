@@ -21,6 +21,7 @@ namespace r3d
 		m_basicListeners[KeyPressedEvent::getStaticType()].push_back(this);
 
 		m_applicationInputLayer = nullptr;
+
 #ifdef R3D_DEBUG_APP
 		m_debugMode = true;
 #endif
@@ -98,7 +99,6 @@ namespace r3d
 			if(m_applicationInputLayer) m_applicationInputLayer->onUpdate(&m_window);
 			// **********  ... and poll events.
 			m_window.pollEvents();
-
 		}
 
 		m_imGuiLayer.shutdown();

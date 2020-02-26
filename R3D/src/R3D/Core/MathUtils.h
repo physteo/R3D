@@ -15,7 +15,7 @@
 namespace r3d
 {
 
-	typedef double real;
+	typedef float real;
 	typedef glm::tvec2<real, glm::precision::highp> real2;
 	typedef glm::tvec3<real, glm::precision::highp> real3;
 	typedef glm::tvec4<real, glm::precision::highp> real4;
@@ -32,6 +32,7 @@ namespace r3d
 	typedef glm::mat4 float4x4;
 	typedef glm::quat fquat;
 
+	real3x3 change_basis_of_matrix(const rquat& q, const real3x3& mat);
 
 }
 

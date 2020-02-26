@@ -113,7 +113,15 @@
     <ClInclude Include="src\R3D\Physics\Components\PrimitivesComponents.h" />
     <ClInclude Include="src\R3D\Ecs\TransformComponent.h" />
     <ClInclude Include="src\R3D\Physics\Systems\SpherePlaneContactDetector.h" />
-    <ClInclude Include="src\R3D\Utils\Profiler.h" />
+    <ClInclude Include="src\R3D\Utils\Random.h" />
+    <ClInclude Include="src\R3D\Physics\Core\CollisionPrimitives.h" />
+    <ClInclude Include="src\R3D\Physics\Systems\BoxBoxContactDetector.h" />
+    <ClInclude Include="src\R3D\Physics\Components\BasicPhysicsComponents.h" />
+    <ClInclude Include="src\R3D\Utils\Debugger.h" />
+    <ClInclude Include="src\R3D\Physics\Systems\BoxPlaneContactDetector.h" />
+    <ClInclude Include="src\R3D\Physics\Core\World.h" />
+    <ClInclude Include="src\R3D\Physics\Core\Topology.h" />
+    <ClInclude Include="src\R3D\Physics\Core\Geometry.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\R3D\Core\Application.cpp">
@@ -160,6 +168,17 @@
     <ClCompile Include="src\R3D\Physics\Core\SpherePlane.cpp" />
     <ClCompile Include="src\R3D\Physics\Core\SphereSphere.cpp" />
     <ClCompile Include="src\R3D\Physics\Systems\SpherePlaneContactDetector.cpp" />
-    <ClCompile Include="src\R3D\Utils\Profiler.cpp" />
+    <ClCompile Include="src\R3D\Utils\Random.cpp" />
+    <ClCompile Include="src\R3D\Physics\Systems\BoxBoxContactDetector.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\Contact.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\CollisionPrimitives.cpp" />
+    <ClCompile Include="src\R3D\Utils\Debugger.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\BoxPlane.cpp" />
+    <ClCompile Include="src\R3D\Physics\Systems\BoxPlaneContactDetector.cpp" />
+    <ClCompile Include="src\R3D\Core\MathUtils.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\BoxBox.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\World.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\Geometry.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\Topology.cpp" />
   </ItemGroup>
 </Project>

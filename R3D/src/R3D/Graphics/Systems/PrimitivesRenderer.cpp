@@ -1,7 +1,6 @@
 #include <R3Dpch.h>
 #include "PrimitivesRenderer.h"
 #include <R3D/Physics/Components/PrimitivesComponents.h>
-#include <R3D/Utils/Profiler.h>
 
 namespace r3d
 {
@@ -121,19 +120,17 @@ namespace r3d
 		for (auto archIt = archetypes.begin(); archIt != archetypes.end(); ++archIt)
 		{
 			auto pos = get<Position>(am, *archIt);
-			auto rot = get<Rotation>(am, *archIt);
+			auto ori = get<Orientation>(am, *archIt);
 			auto scale = get<Scale>(am, *archIt);
 			auto color = get<Color>(am, *archIt);
 			size_t numElements = getSize<Color>(am, *archIt);
-			Profiler::startCollect();
 			for (size_t j = 0; j < numElements; j++)
 			{
-				outInstancesData.emplace_back(compute_model_matrix(pos[j].vec, rot[j].quat, 2.0 * scale[j].vec), color[j].vec);
+				outInstancesData.emplace_back(compute_model_matrix(pos[j].vec, ori[j].quat, real(2.0) * scale[j].vec), color[j].vec);
 				//outInstancesData.push_back(InstanceData{});
-				//outInstancesData.back().modelMatrix = std::move(compute_model_matrix(pos[j].vec, rot[j].quat, 2.0 * scale[j].vec));
+				//outInstancesData.back().modelMatrix = std::move(compute_model_matrix(pos[j].vec, ori[j].quat, 2.0 * scale[j].vec));
 				//outInstancesData.back().color = color[j].vec;
 			}
-			Profiler::stopCollect("Rendering primitives (not plane).");
 		}
 	}
 
@@ -183,26 +180,26 @@ namespace r3d
 	{
 		ComponentList requiredComponents;
 
-		requiredComponents = ComponentList::buildList<Position, Rotation, Scale, PrimitiveTag, Color, Circle>();
+		requiredComponents = ComponentList::buildList<Position, Orientation, Scale, PrimitiveTag, Color, Circle>();
 		m_instancesData.push_back({});
 		getInstancesData(am, requiredComponents, m_instancesData.back());
 
-		requiredComponents = ComponentList::buildList<Position, Rotation, Scale, PrimitiveTag, Color, Square>();
+		requiredComponents = ComponentList::buildList<Position, Orientation, Scale, PrimitiveTag, Color, Square>();
 		m_instancesData.push_back({});
 		getInstancesData(am, requiredComponents, m_instancesData.back());
 
-		requiredComponents = ComponentList::buildList<Position, Rotation, Scale, PrimitiveTag, Color, Segment>();
+		requiredComponents = ComponentList::buildList<Position, Orientation, Scale, PrimitiveTag, Color, Segment>();
 		m_instancesData.push_back({});
 		getInstancesData(am, requiredComponents, m_instancesData.back());
 
 		m_instancesData.push_back({});
 		getInstancesDataPlane(am, m_instancesData.back());
 
-		requiredComponents = ComponentList::buildList<Position, Rotation, Scale, PrimitiveTag, Color, Sphere>();
+		requiredComponents = ComponentList::buildList<Position, Orientation, Scale, PrimitiveTag, Color, Sphere>();
 		m_instancesData.push_back({});
 		getInstancesData(am, requiredComponents, m_instancesData.back());
 
-		requiredComponents = ComponentList::buildList<Position, Rotation, Scale, PrimitiveTag, Color, Box>();
+		requiredComponents = ComponentList::buildList<Position, Orientation, Scale, PrimitiveTag, Color, Box>();
 		m_instancesData.push_back({});
 		getInstancesData(am, requiredComponents, m_instancesData.back());
 	}

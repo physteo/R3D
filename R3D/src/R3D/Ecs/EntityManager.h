@@ -12,7 +12,7 @@ namespace r3d
 		const unsigned MIN_FREE_IDS = 1024;
 	}
 
-	class R3D_API EntityManager : public EventsListener
+	class EntityManager : public EventsListener
 	{
 	public:
 		Entity create();

@@ -1,4 +1,5 @@
 #include <R3Dpch.h>
+#include <R3D/Utils/Random.h>
 #include "RawPackedArray.h"
 
 namespace r3d
@@ -204,6 +205,28 @@ namespace r3d
 		other.m_dataEntities.clear();
 		other.m_meta = Metatype{};
 	}
+
+//void RawPackedArray::clean(const EntityManager& em)
+//{
+//	unsigned int alive_in_row = 0;
+//	while (m_map.size() > 0 && alive_in_row < 4) {
+//
+//		int bucket, bucket_size;
+//		do
+//		{
+//			bucket = Random::randInt(0, m_map.bucket_count() - 1);
+//		} while ((bucket_size = m_map.bucket_size(bucket)) == 0);
+//		Entity e = std::next(m_map.begin(bucket), Random::randInt(0, bucket_size))->first;
+//		
+//		if (em.alive(e))
+//		{
+//			++alive_in_row;
+//			continue;
+//		}
+//		alive_in_row = 0;
+//		m_map.erase(e);
+//	}
+//}
 
 	void TestingRawArray::testAll() const
 	{

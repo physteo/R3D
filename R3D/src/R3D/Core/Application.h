@@ -10,6 +10,7 @@
 #include <R3D/ImGui/ImGuiLayer.h>
 
 #include <R3D/Events/KeyEvent.h>
+#include <R3D/Utils/Debugger.h>
 
 namespace r3d
 {
@@ -19,11 +20,6 @@ namespace r3d
 	public:
 		Application(std::string applicationName, double windowWidth, double windowHeight, int maxFramerate = 60, bool saveFrames = false);
 		~Application();
-
-		//static std::unordered_map<std::string, Entity>* getCommonEntities()
-		//{
-		//	return &(s_instance->m_commonEntities);
-		//}
 
 #ifdef R3D_DEBUG_APP
 		static bool isInDebugMode()
@@ -39,6 +35,11 @@ namespace r3d
 		static Window* getWindow()
 		{
 			return &(s_instance->m_window);
+		}
+
+		static Debugger* getDebugger()
+		{
+			return &(s_instance->m_debugger);
 		}
 
 		static void dispatchEventStatic(Event& e)
@@ -117,9 +118,10 @@ namespace r3d
 
 	protected:
 		Window		      m_window;
-		GLFWwindow*		      window;
+		GLFWwindow*		  window;
 		EntityManager     m_entityManager;
 		EventManager      m_eventManager;
+		Debugger m_debugger;
 
 		Layer* m_applicationInputLayer;
 		std::list<Layer*>    m_layers;
@@ -131,12 +133,12 @@ namespace r3d
 		bool m_paused;
 		bool m_stepping;
 		bool m_saveFrames;
+
 #ifdef R3D_DEBUG_APP
 		bool m_debugMode;
 #endif
 		static Application* s_instance;
 
-		//std::unordered_map<std::string, Entity>  m_commonEntities;
 	};
 
 

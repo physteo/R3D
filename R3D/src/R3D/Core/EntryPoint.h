@@ -8,11 +8,14 @@ extern r3d::Application* r3d::createApplication();
 
 int main(int argc, char** argv)
 {
+	r3d::Random::init();
 	r3d::Log::init();
+
 	R3D_CORE_INFO("Rendara3D Engine.");
 
 	auto app = r3d::createApplication();
 	app->run();
+
 	delete app;
 }
 
