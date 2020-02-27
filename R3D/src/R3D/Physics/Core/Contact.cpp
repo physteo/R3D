@@ -4,7 +4,7 @@
 #include <R3D/Ecs/TransformComponent.h>
 #include <R3D/Physics/Components/BasicPhysicsComponents.h>
 
-#include "CollisionPrimitives.h"
+#include "Colliders.h"
 
 namespace r3d
 {
@@ -74,18 +74,23 @@ namespace r3d
 			std::swap(e1, e2);
 		}
 
-		real3& position1 = am->get<Position>(e1)->vec;
-		real3& position2 = am->get<Position>(e2)->vec;
-		real3& velocity1 = am->get<Velocity>(e1)->vec;
-		real3& velocity2 = am->get<Velocity>(e2)->vec;
-		real3& angVelocity1 = am->get<AngVelocity>(e1)->vec;
-		real3& angVelocity2 = am->get<AngVelocity>(e2)->vec;
-		const rquat& orientation1 = am->get<Orientation>(e1)->quat;
-		const rquat& orientation2 = am->get<Orientation>(e2)->quat;
-		const real& invMass1 = am->get<InvMass>(e1)->invMass;
-		const real& invMass2 = am->get<InvMass>(e2)->invMass;
-		const real3x3& invI1 = change_basis_of_matrix(orientation1, am->get<InvI>(e1)->invI);
-		const real3x3& invI2 = change_basis_of_matrix(orientation2, am->get<InvI>(e2)->invI);
+		Transform* tr1 = am->get<Transform>(e1);
+		Transform* tr2 = am->get<Transform>(e2);
+		RigidBody* rb1 = am->get<RigidBody>(e1);
+		RigidBody* rb2 = am->get<RigidBody>(e2);
+
+		real3& position1          = tr1->position;
+		real3& position2          = tr2->position;
+		const rquat& orientation1 = tr1->orientation;
+		const rquat& orientation2 = tr2->orientation;
+		real3& velocity1     = rb1->velocity;
+		real3& velocity2     = rb2->velocity;
+		real3& angVelocity1  = rb1->angVelocity;
+		real3& angVelocity2  = rb2->angVelocity;
+		const real& invMass1 = rb1->invMass;
+		const real& invMass2 = rb2->invMass;
+		const real3x3& invI1 = change_basis_of_matrix(orientation1, rb1->invI);
+		const real3x3& invI2 = change_basis_of_matrix(orientation2, rb2->invI);
 
 		const real3& n = manifold.normal;
 		const real3 tangent[2] = { manifold.tangent[0], manifold.tangent[1] };
@@ -146,18 +151,23 @@ namespace r3d
 			std::swap(e1, e2);
 		}
 
-		const real3& position1 = am->get<Position>(e1)->vec;
-		const real3& position2 = am->get<Position>(e2)->vec;
-		real3& velocity1 = am->get<Velocity>(e1)->vec;
-		real3& velocity2 = am->get<Velocity>(e2)->vec;
-		real3& angVelocity1 = am->get<AngVelocity>(e1)->vec;
-		real3& angVelocity2 = am->get<AngVelocity>(e2)->vec;
-		const rquat& orientation1 = am->get<Orientation>(e1)->quat;
-		const rquat& orientation2 = am->get<Orientation>(e2)->quat;
-		const real& invMass1 = am->get<InvMass>(e1)->invMass;
-		const real& invMass2 = am->get<InvMass>(e2)->invMass;
-		const real3x3& invI1 = change_basis_of_matrix(orientation1, am->get<InvI>(e1)->invI);
-		const real3x3& invI2 = change_basis_of_matrix(orientation2, am->get<InvI>(e2)->invI);
+		Transform* tr1 = am->get<Transform>(e1);
+		Transform* tr2 = am->get<Transform>(e2);
+		RigidBody* rb1 = am->get<RigidBody>(e1);
+		RigidBody* rb2 = am->get<RigidBody>(e2);
+
+		real3& position1          = tr1->position;
+		real3& position2          = tr2->position;
+		const rquat& orientation1 = tr1->orientation;
+		const rquat& orientation2 = tr2->orientation;
+		real3& velocity1     = rb1->velocity;
+		real3& velocity2     = rb2->velocity;
+		real3& angVelocity1  = rb1->angVelocity;
+		real3& angVelocity2  = rb2->angVelocity;
+		const real& invMass1 = rb1->invMass;
+		const real& invMass2 = rb2->invMass;
+		const real3x3& invI1 = change_basis_of_matrix(orientation1, rb1->invI);
+		const real3x3& invI2 = change_basis_of_matrix(orientation2, rb2->invI);
 
 		real3 v1 = velocity1;
 		real3 w1 = angVelocity1;

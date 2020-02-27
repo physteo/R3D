@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CollisionPrimitives.h"
+#include "Colliders.h"
 #include "Contact.h"
 
 namespace r3d

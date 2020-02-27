@@ -66,6 +66,7 @@ namespace r3d
 		void buildBox(std::vector<float>& positions, std::vector<unsigned int>& indices);
 
 		void getInstancesData(ArchetypeManager& am, const ComponentList& componentList, std::vector<InstanceData>& outInstancesData);
+		void getInstancesDataNew(ArchetypeManager& am, const ComponentList& componentList, std::vector<InstanceData>& outInstancesData);
 		void getInstancesDataPlane(ArchetypeManager& am, std::vector<InstanceData>& outInstancesData);
 
 	private:

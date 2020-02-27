@@ -11,17 +11,15 @@ namespace r3d
 
 	void BoxBoxContactDetector::update(ArchetypeManager& am, double t, double dt)
 	{
-		auto archetypes = am.matchAtLeastWithout(ComponentList::buildList<Box, Position, Orientation, Scale>(), {});
+		auto archetypes = am.matchAtLeastWithout(ComponentList::buildList<Box, Transform>(), {});
 
 		// same archetype
 		for (auto arch1 : archetypes)
 		{
-			auto positions1 = get<Position>(am, arch1);
-			auto orientations1 = get<Orientation>(am, arch1);
-			auto scales1 = get<Scale>(am, arch1);
+			auto transform1 = get<Transform>(am, arch1);
 			auto boxes1 = get<Box>(am, arch1);
 			auto& entities1 = getEntities(am, arch1);
-			size_t size1 = getSize<Position>(am, arch1);
+			size_t size1 = getSize<Transform>(am, arch1);
 
 			for (size_t i = 0; i < size1; ++i)
 			{
@@ -29,14 +27,14 @@ namespace r3d
 				{
 					CollisionBox box1;
 					box1.e = entities1[i];
-					box1.position = boxes1[i].offsetPos + positions1[i].vec;
-					box1.orientation = boxes1[i].offsetRot * orientations1[i].quat;
-					box1.halfSize = scales1[i].vec;
+					box1.position = boxes1[i].offsetPos + transform1[i].position;
+					box1.orientation = boxes1[i].offsetRot * transform1[i].orientation;
+					box1.halfSize = transform1[i].scale;
 					CollisionBox box2;
 					box2.e = entities1[j];
-					box2.position = boxes1[j].offsetPos + positions1[j].vec;
-					box2.orientation = boxes1[j].offsetRot * orientations1[j].quat;
-					box2.halfSize = scales1[j].vec;
+					box2.position = boxes1[j].offsetPos + transform1[j].position;
+					box2.orientation = boxes1[j].offsetRot * transform1[j].orientation;
+					box2.halfSize = transform1[j].scale;
 
 					ArbiterKey key{ box1.e, box2.e };
 
@@ -67,23 +65,18 @@ namespace r3d
 		// different archetypes
 		for (auto arch1 : archetypes)
 		{
-			auto positions1 = get<Position>(am, arch1);
-			auto orientations1 = get<Orientation>(am, arch1);
-			auto scales1 = get<Scale>(am, arch1);
+			auto transform1 = get<Transform>(am, arch1);
 			auto boxes1 = get<Box>(am, arch1);
 			auto& entities1 = getEntities(am, arch1);
-			size_t size1 = getSize<Position>(am, arch1);
+			size_t size1 = getSize<Transform>(am, arch1);
 
 			for (size_t arch2 : archetypes)
 			{
 				if (arch1 == arch2) continue;
-
-				auto positions2 = get<Position>(am, arch2);
-				auto orientations2 = get<Orientation>(am, arch2);
-				auto scales2 = get<Scale>(am, arch2);
+				auto transform2 = get<Transform>(am, arch2);
 				auto boxes2 = get<Box>(am, arch2);
 				auto& entities2 = getEntities(am, arch2);
-				size_t size2 = getSize<Position>(am, arch2);
+				size_t size2 = getSize<Transform>(am, arch2);
 
 				for (size_t i = 0; i < size1; ++i)
 				{
@@ -92,14 +85,14 @@ namespace r3d
 
 						CollisionBox box1;
 						box1.e = entities1[i];
-						box1.position = boxes1[i].offsetPos + positions1[i].vec;
-						box1.orientation = boxes1[i].offsetRot * orientations1[i].quat;
-						box1.halfSize = scales1[i].vec;
+						box1.position = boxes1[i].offsetPos + transform1[i].position;
+						box1.orientation = boxes1[i].offsetRot * transform1[i].orientation;
+						box1.halfSize = transform1[i].scale;
 						CollisionBox box2;
 						box2.e = entities2[j];
-						box2.position = boxes2[j].offsetPos + positions2[j].vec;
-						box2.orientation = boxes2[j].offsetRot * orientations2[j].quat;
-						box2.halfSize = scales2[j].vec;
+						box2.position = boxes2[j].offsetPos + transform2[j].position;
+						box2.orientation = boxes2[j].offsetRot * transform2[j].orientation;
+						box2.halfSize = transform2[j].scale;
 
 						ArbiterKey key{ box1.e, box2.e };
 

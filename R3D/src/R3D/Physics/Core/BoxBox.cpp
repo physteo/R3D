@@ -438,7 +438,7 @@ namespace r3d
 		}
 
 #if defined(R3D_DEBUG) || defined(R3D_RELEASE)
-		Application::getDebugger()->draw_segment(manifoldCenter, manifold->normal, { 1.0, 1.0, 1.0 });
+		//Application::getDebugger()->draw_segment(manifoldCenter, manifold->normal, { 1.0, 1.0, 1.0 });
 		
 		if (numContacts > 8)
 		{

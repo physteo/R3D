@@ -1,6 +1,7 @@
 #include <R3Dpch.h>
 #include "PrimitivesRenderer.h"
 #include <R3D/Physics/Components/PrimitivesComponents.h>
+#include <R3D/Physics/Core/Colliders.h>
 
 namespace r3d
 {
@@ -114,19 +115,36 @@ namespace r3d
 		}
 	}
 
+	void PrimitivesRenderer::getInstancesDataNew(ArchetypeManager& am, const ComponentList& componentList, std::vector<InstanceData>& outInstancesData)
+	{
+		auto archetypes = am.matchAtLeastWithout(componentList, {});
+		for (auto archIt = archetypes.begin(); archIt != archetypes.end(); ++archIt)
+		{
+			auto transform = get<Transform>(am, *archIt);
+			auto color = get<Color>(am, *archIt);
+			size_t numElements = getSize<Color>(am, *archIt);
+			for (size_t j = 0; j < numElements; j++)
+			{
+				outInstancesData.emplace_back(compute_model_matrix(transform[j].position, transform[j].orientation, real(2.0) * transform[j].scale), color[j].vec);
+				//outInstancesData.push_back(InstanceData{});
+				//outInstancesData.back().modelMatrix = std::move(compute_model_matrix(pos[j].vec, ori[j].quat, 2.0 * scale[j].vec));
+				//outInstancesData.back().color = color[j].vec;
+			}
+		}
+	}
+
+
 	void PrimitivesRenderer::getInstancesData(ArchetypeManager& am, const ComponentList& componentList, std::vector<InstanceData>& outInstancesData)
 	{
 		auto archetypes = am.matchAtLeastWithout(componentList, {});
 		for (auto archIt = archetypes.begin(); archIt != archetypes.end(); ++archIt)
 		{
-			auto pos = get<Position>(am, *archIt);
-			auto ori = get<Orientation>(am, *archIt);
-			auto scale = get<Scale>(am, *archIt);
+			auto transform = get<Transform>(am, *archIt);
 			auto color = get<Color>(am, *archIt);
 			size_t numElements = getSize<Color>(am, *archIt);
 			for (size_t j = 0; j < numElements; j++)
 			{
-				outInstancesData.emplace_back(compute_model_matrix(pos[j].vec, ori[j].quat, real(2.0) * scale[j].vec), color[j].vec);
+				outInstancesData.emplace_back(compute_model_matrix(transform[j].position, transform[j].orientation, real(2.0) * transform[j].scale), color[j].vec);
 				//outInstancesData.push_back(InstanceData{});
 				//outInstancesData.back().modelMatrix = std::move(compute_model_matrix(pos[j].vec, ori[j].quat, 2.0 * scale[j].vec));
 				//outInstancesData.back().color = color[j].vec;
@@ -167,7 +185,7 @@ namespace r3d
 				q.z = sin * axis.z;
 				q = glm::normalize(q);
 
-				if (am.has<Scale>(entities[j])) scale = am.get<Scale>(entities[j])->vec;
+				if (am.has<Transform>(entities[j])) scale = am.get<Transform>(entities[j])->scale;
 
 				outInstancesData.push_back(InstanceData{});
 				outInstancesData.back().modelMatrix = std::move(compute_model_matrix((float3)(off * n), q, 2.0f * scale));
@@ -180,28 +198,29 @@ namespace r3d
 	{
 		ComponentList requiredComponents;
 
-		requiredComponents = ComponentList::buildList<Position, Orientation, Scale, PrimitiveTag, Color, Circle>();
+		requiredComponents = ComponentList::buildList<Transform, PrimitiveTag, Color, Circle>();
 		m_instancesData.push_back({});
 		getInstancesData(am, requiredComponents, m_instancesData.back());
 
-		requiredComponents = ComponentList::buildList<Position, Orientation, Scale, PrimitiveTag, Color, Square>();
+		requiredComponents = ComponentList::buildList<Transform, PrimitiveTag, Color, Square>();
 		m_instancesData.push_back({});
 		getInstancesData(am, requiredComponents, m_instancesData.back());
 
-		requiredComponents = ComponentList::buildList<Position, Orientation, Scale, PrimitiveTag, Color, Segment>();
+		requiredComponents = ComponentList::buildList<Transform, PrimitiveTag, Color, Segment>();
 		m_instancesData.push_back({});
 		getInstancesData(am, requiredComponents, m_instancesData.back());
 
 		m_instancesData.push_back({});
 		getInstancesDataPlane(am, m_instancesData.back());
 
-		requiredComponents = ComponentList::buildList<Position, Orientation, Scale, PrimitiveTag, Color, Sphere>();
+		requiredComponents = ComponentList::buildList<Transform, PrimitiveTag, Color, Sphere>();
 		m_instancesData.push_back({});
 		getInstancesData(am, requiredComponents, m_instancesData.back());
 
-		requiredComponents = ComponentList::buildList<Position, Orientation, Scale, PrimitiveTag, Color, Box>();
+		requiredComponents = ComponentList::buildList<Transform, Box>();
 		m_instancesData.push_back({});
-		getInstancesData(am, requiredComponents, m_instancesData.back());
+		getInstancesDataNew(am, requiredComponents, m_instancesData.back());
+
 	}
 
 	void PrimitivesRenderer::update(ArchetypeManager& am, double t, double dt)

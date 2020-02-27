@@ -8,7 +8,6 @@ namespace r3d
 
 	struct ColliderBox
 	{
-
 	};
 
 	struct CollisionSphere

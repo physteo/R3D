@@ -149,12 +149,13 @@
     <ClInclude Include="src\R3D\Core\Log.h" />
     <ClInclude Include="src\R3D\Core\MathUtils.h" />
     <ClInclude Include="src\R3D\Physics\Components\BasicPhysicsComponents.h" />
-    <ClInclude Include="src\R3D\Physics\Core\CollisionPrimitives.h" />
+    <ClInclude Include="src\R3D\Physics\Core\Colliders.h" />
     <ClInclude Include="src\R3D\Physics\Core\World.h" />
     <ClInclude Include="src\R3D\Physics\Core\Topology.h" />
     <ClInclude Include="src\R3D\Physics\Core\Geometry.h" />
     <ClInclude Include="src\R3D\Physics\Systems\BoxBoxContactDetector.h" />
     <ClInclude Include="src\R3D\Physics\Systems\BoxPlaneContactDetector.h" />
+    <ClInclude Include="src\R3D\Physics\Systems\Integrator.h" />
     <ClInclude Include="src\R3D\Utils\Debugger.h" />
     <ClInclude Include="src\R3D\Utils\Random.h" />
     <ClInclude Include="src\R3D\Core\Window.h" />
@@ -199,7 +200,7 @@
     <ClCompile Include="src\R3D\Core\Log.cpp" />
     <ClCompile Include="src\R3D\Core\MathUtils.cpp" />
     <ClCompile Include="src\R3D\Physics\Core\BoxPlane.cpp" />
-    <ClCompile Include="src\R3D\Physics\Core\CollisionPrimitives.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\Colliders.cpp" />
     <ClCompile Include="src\R3D\Physics\Core\Contact.cpp" />
     <ClCompile Include="src\R3D\Physics\Core\BoxBox.cpp" />
     <ClCompile Include="src\R3D\Physics\Core\World.cpp" />
@@ -207,6 +208,7 @@
     <ClCompile Include="src\R3D\Physics\Core\Geometry.cpp" />
     <ClCompile Include="src\R3D\Physics\Systems\BoxBoxContactDetector.cpp" />
     <ClCompile Include="src\R3D\Physics\Systems\BoxPlaneContactDetector.cpp" />
+    <ClCompile Include="src\R3D\Physics\Systems\Integrator.cpp" />
     <ClCompile Include="src\R3D\Utils\Debugger.cpp" />
     <ClCompile Include="src\R3D\Utils\Random.cpp" />
     <ClCompile Include="src\R3D\Core\Window.cpp" />

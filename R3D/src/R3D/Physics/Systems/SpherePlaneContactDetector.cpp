@@ -11,17 +11,15 @@ namespace r3d
 {
 	void SpherePlaneContactDetector::update(ArchetypeManager& am, double t, double dt)
 	{
-		auto archetypesSphere = am.matchAtLeastWithout(ComponentList::buildList<Sphere, Position, Orientation, Scale>(), {});
+		auto archetypesSphere = am.matchAtLeastWithout(ComponentList::buildList<Sphere, Transform>(), {});
 		auto archetypesPlane = am.matchAtLeastWithout(ComponentList::buildList<Plane>(), {});
 
 		for (size_t arch1 : archetypesSphere)
 		{
-			auto positions1 = get<Position>(am, arch1);
-			auto orientations1 = get<Orientation>(am, arch1);
-			auto scales1 = get<Scale>(am, arch1);
+			auto transforms1 = get<Transform>(am, arch1);
 			auto spheres1 = get<Sphere>(am, arch1);
 			auto& entities1 = getEntities(am, arch1);
-			size_t size1 = getSize<Position>(am, arch1);
+			size_t size1 = getSize<Sphere>(am, arch1);
 
 			for (size_t arch2 : archetypesPlane)
 			{
@@ -33,13 +31,13 @@ namespace r3d
 				{
 					for (size_t j = 0; j < size2; ++j)
 					{
-						if (SpherePlane::detect(
-							positions1[i].vec, spheres1[i].offsetPos, spheres1[i].offsetRot, scales1[i].vec.x,
-							planes2[j].normal, planes2[j].offset,
-							entities1[i], entities2[j], m_collisionData))
-						{
-							//R3D_INFO("Collision {0} {1}", entities1[i].id, entities2[j].id);
-						}
+						//if (SpherePlane::detect(
+						//	positions1[i].vec, spheres1[i].offsetPos, spheres1[i].offsetRot, scales1[i].vec.x,
+						//	planes2[j].normal, planes2[j].offset,
+						//	entities1[i], entities2[j], m_collisionData))
+						//{
+						//	//R3D_INFO("Collision {0} {1}", entities1[i].id, entities2[j].id);
+						//}
 
 					}
 				}

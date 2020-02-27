@@ -10,17 +10,15 @@ namespace r3d
 {
 	void BoxPlaneContactDetector::update(ArchetypeManager& am, double t, double dt)
 	{
-		auto archetypesBox = am.matchAtLeastWithout(ComponentList::buildList<Box, Position, Orientation, Scale>(), {});
+		auto archetypesBox = am.matchAtLeastWithout(ComponentList::buildList<Box, Transform>(), {});
 		auto archetypesPlane = am.matchAtLeastWithout(ComponentList::buildList<Plane>(), {});
 
 		for (size_t arch1 : archetypesBox)
 		{
-			auto positions1 = get<Position>(am, arch1);
-			auto orientations1 = get<Orientation>(am, arch1);
-			auto scales1 = get<Scale>(am, arch1);
+			auto transform1 = get<Transform>(am, arch1);
 			auto boxes1 = get<Box>(am, arch1);
 			auto& entities1 = getEntities(am, arch1);
-			size_t size1 = getSize<Position>(am, arch1);
+			size_t size1 = getSize<Transform>(am, arch1);
 
 			for (size_t arch2 : archetypesPlane)
 			{
@@ -34,9 +32,9 @@ namespace r3d
 					{
 						CollisionBox box;
 						box.e = entities1[i];
-						box.position = boxes1[i].offsetPos + positions1[i].vec;
-						box.orientation = boxes1[i].offsetRot * orientations1[i].quat;
-						box.halfSize = scales1[i].vec;
+						box.position = boxes1[i].offsetPos + transform1[i].position;
+						box.orientation = boxes1[i].offsetRot * transform1[i].orientation;
+						box.halfSize = transform1[i].scale;
 						
 						CollisionPlane plane;
 						plane.e = entities2[j];

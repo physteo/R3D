@@ -44,12 +44,10 @@ namespace r3d
 		rotated_displacement = segLength * rotated_displacement / glm::length(rotated_displacement);
 
 		Entity entity_s = m_em->create();
-		m_am->setArchetype(entity_s, ComponentList::buildList<Segment, Color, Position, Orientation, Scale, ContactEntityTag, PrimitiveTag>());
+		m_am->setArchetype(entity_s, ComponentList::buildList<Segment, Color, Transform, ContactEntityTag, PrimitiveTag>());
 		m_am->set<Segment>(entity_s, Segment{});
 		m_am->set<Color>(entity_s, Color{ float4{color.r, color.g, color.b, 1.0} });
-		m_am->set<Position>(entity_s, Position{ (float3)position + rotated_displacement });
-		m_am->set<Orientation>(entity_s, Orientation{ q });
-		m_am->set<Scale>(entity_s, Scale{ float3{1.0} });
+		m_am->set<Transform>(entity_s, Transform{ (float3)position + rotated_displacement, q, float3{1.0} });
 	}
 
 	void Debugger::draw_polygon(const std::vector<real3>& positions)
@@ -67,11 +65,9 @@ namespace r3d
 		fquat q{ 1.0, 0.0, 0.0, 0.0 };
 
 		Entity entity_c = m_em->create();
-		m_am->setArchetype(entity_c, ComponentList::buildList<Circle, Color, Position, Orientation, Scale, ContactEntityTag, PrimitiveTag>());
+		m_am->setArchetype(entity_c, ComponentList::buildList<Circle, Color, Transform, ContactEntityTag, PrimitiveTag>());
 		m_am->set<Circle>(entity_c, Circle{});
 		m_am->set<Color>(entity_c, Color{ float4{color.r, color.g, color.b, 1.0} });
-		m_am->set<Position>(entity_c, Position{ position });
-		m_am->set<Orientation>(entity_c, Orientation{ q });
-		m_am->set<Scale>(entity_c, Scale{ float3{rad, rad, rad } });
+		m_am->set<Transform>(entity_c, Transform{ position, q, float3{rad} });
 	}
 }
