@@ -254,12 +254,12 @@ namespace r3d
 		}
 	}
 
-	std::vector<PointQuery> clip_face(const Facet& incidentFace, const Transform& incidentBox, 
-		const Facet& referenceFace, const Transform& referenceBox)
+	int clip_face(const Facet& incidentFace, const Transform& incidentBox, 
+		const Facet& referenceFace, const Transform& referenceBox, PointQuery* pq)
 	{
 		const ColliderPlane& refPlane = get_plane_from_face(referenceBox, referenceFace);
 
-		std::vector<PointQuery> clippedPoints;
+		int numClippedPoints = 0;
 		// loop over side planes of refface, clip each segment of the incface.
 		HalfEdge* begin = referenceFace.halfEdge;
 		HalfEdge* half = begin;
@@ -294,11 +294,11 @@ namespace r3d
 					real3 intersection;
 					if (is_point_below_face(result.second, referenceBox, refPlane, referenceFace, dist, intersection))
 					{
-						PointQuery p;
-						p.penetration = -dist;
-						p.pointID = segmentID;
-						p.position = intersection;
-						clippedPoints.push_back(p);
+						PointQuery* p = pq + numClippedPoints;
+						p->penetration = -dist;
+						p->pointID = segmentID;
+						p->position = intersection;
+						++numClippedPoints;
 					}
 				}
 				--segmentID;
@@ -308,13 +308,13 @@ namespace r3d
 			half = half->next;
 		} while (half != begin);
 
-		return clippedPoints;
+		return numClippedPoints;
 	}
 
-	std::vector<PointQuery> collect_penetrating_points(const Transform& boxPoint, const Transform& referenceBox, const ColliderPlane& refPlane, const Facet& referenceFace, bool project)
+	int collect_penetrating_points(const Transform& boxPoint, const Transform& referenceBox, const ColliderPlane& refPlane, const Facet& referenceFace, bool project, PointQuery* pq)
 	{
 		const Topology& top = BoxBox::getTopology();
-		std::vector<PointQuery> penetratingPoints;
+		int numPenetratingPoints = 0;
 		for (int i = 0; i < top.vertices.size(); ++i)
 		{
 			real3 point = boxPoint.position + boxPoint.orientation * (boxPoint.scale * top.vertices[i].position);
@@ -322,15 +322,15 @@ namespace r3d
 			real3 intersection;
 			if (is_point_below_face(point, referenceBox, refPlane, referenceFace, dist, intersection))
 			{
-				PointQuery p;
-				p.penetration = -dist;
-				p.pointID = i;
-				p.position = project ? intersection : point;
-				penetratingPoints.push_back(p);
+				PointQuery* p = pq + numPenetratingPoints;
+				p->penetration = -dist;
+				p->pointID = i;
+				p->position = project ? intersection : point;
+				++numPenetratingPoints;
 			}
 		}
 
-		return penetratingPoints;
+		return numPenetratingPoints;
 	}
 
 	int create_point_face_contacts(FaceQuery fq, const Transform& referenceBox, Entity eRef, const Transform& incidentBox, Entity eInc, Manifold* manifold)
@@ -348,13 +348,16 @@ namespace r3d
 		const ColliderPlane& incPlane = get_plane_from_face(incidentBox, incidentFace);
 
 		// which points of the incident face are just below the reference face?
-		std::vector<PointQuery> penetratingPoints = collect_penetrating_points(incidentBox, referenceBox, refPlane, referenceFace, true);
+		PointQuery penetratingPoints[4];
+		int numPenetratingPoints = collect_penetrating_points(incidentBox, referenceBox, refPlane, referenceFace, true, penetratingPoints);
 		 
 		// which points of the reference face are just below the incident face?
-		std::vector<PointQuery> penetratingPoints2 = collect_penetrating_points(referenceBox, incidentBox, incPlane, incidentFace, false);
+		PointQuery penetratingPoints2[4];
+		int numPenetratingPoints2 = collect_penetrating_points(referenceBox, incidentBox, incPlane, incidentFace, false, penetratingPoints2);
 
 		// clip segments of the incident face against side planes
-		std::vector<PointQuery> clippedPointsOfIncidentFace = clip_face(incidentFace, incidentBox, referenceFace, referenceBox);
+		PointQuery clippedPointsOfIncidentFace[8];
+		int numClippedPoints = clip_face(incidentFace, incidentBox, referenceFace, referenceBox, clippedPointsOfIncidentFace);
 		
 #if defined(R3D_DEBUG) || defined(R3D_RELEASE)
 		// debug draw
@@ -384,38 +387,37 @@ namespace r3d
 		manifold->normal = glm::normalize(referenceNormal);
 		compute_basis(manifold->normal, manifold->tangent[0], manifold->tangent[1]);
 
-
 		int numContacts = 0;
-		for (auto& p : clippedPointsOfIncidentFace)
+		for (int i = 0; i < numClippedPoints; ++i)
 		{
 			Contact* c = manifold->contacts + numContacts;
 			c->type = ContactType::BOXBOX__POINT_FACE;
 			c->fp.first = fq.faceID;
-			c->fp.second = p.pointID;
-			c->penetration = p.penetration;
-			c->position = p.position;
+			c->fp.second =   clippedPointsOfIncidentFace[i].pointID;
+			c->penetration = clippedPointsOfIncidentFace[i].penetration;
+			c->position =    clippedPointsOfIncidentFace[i].position;
 			++numContacts;
 		}
 		
-		for (auto& p : penetratingPoints)
+		for (int i = 0; i < numPenetratingPoints; ++i)
 		{
 			Contact* c = manifold->contacts + numContacts;
 			c->type = ContactType::BOXBOX__POINT_FACE;
 			c->fp.first = fq.faceID;
-			c->fp.second = p.pointID;
-			c->penetration = p.penetration;
-			c->position = p.position;
+			c->fp.second =   penetratingPoints[i].pointID;
+			c->penetration = penetratingPoints[i].penetration;
+			c->position =    penetratingPoints[i].position;
 			++numContacts;
 		}
 
-		for (auto& p : penetratingPoints2)
+		for (int i = 0; i < numPenetratingPoints2; ++i)
 		{
 			Contact* c = manifold->contacts + numContacts;
 			c->type = ContactType::BOXBOX__POINT_FACE;
 			c->fp.first = fq.faceID;
-			c->fp.second = p.pointID;
-			c->penetration = p.penetration;
-			c->position = p.position;
+			c->fp.second =   penetratingPoints2[i].pointID;
+			c->penetration = penetratingPoints2[i].penetration;
+			c->position =    penetratingPoints2[i].position;
 			++numContacts;
 		}
 
