@@ -2,12 +2,20 @@
 #include "Contact.h"
 #include <R3D/Ecs/ArchetypeManager.h>
 #include <R3D/Ecs/TransformComponent.h>
-#include <R3D/Physics/Components/BasicPhysicsComponents.h>
 
+#include "RigidBody.h"
 #include "Colliders.h"
 
 namespace r3d
 {
+
+	Arbiter::Arbiter(Entity b1, Entity b2, Manifold manifold)
+	{
+		body1 = b1;
+		body2 = b2;
+
+		this->manifold = std::move(manifold);
+	}
 
 	void Arbiter::update(Manifold* newManifold)
 	{
@@ -67,17 +75,10 @@ namespace r3d
 		const float k_allowedPenetration = 0.01f;
 		float k_biasFactor = positionCorrection ? 0.2f : 0.0f;
 
-		Entity e1 = body1;
-		Entity e2 = body2;
-		if (e2 == manifold.e1)
-		{
-			std::swap(e1, e2);
-		}
-
-		Transform* tr1 = am->get<Transform>(e1);
-		Transform* tr2 = am->get<Transform>(e2);
-		RigidBody* rb1 = am->get<RigidBody>(e1);
-		RigidBody* rb2 = am->get<RigidBody>(e2);
+		Transform* tr1 = am->get<Transform>(body1);
+		Transform* tr2 = am->get<Transform>(body2);
+		RigidBody* rb1 = am->get<RigidBody>(body1);
+		RigidBody* rb2 = am->get<RigidBody>(body2);
 
 		real3& position1          = tr1->position;
 		real3& position2          = tr2->position;
@@ -91,21 +92,23 @@ namespace r3d
 		const real& invMass2 = rb2->invMass;
 		const real3x3& invI1 = change_basis_of_matrix(orientation1, rb1->invI);
 		const real3x3& invI2 = change_basis_of_matrix(orientation2, rb2->invI);
-
 		const real3& n = manifold.normal;
 		const real3 tangent[2] = { manifold.tangent[0], manifold.tangent[1] };
 		
+		// make sure the normal is pointing from 1 to 2
+		if (manifold.numContacts > 0)
+		{
+			Contact* c = manifold.contacts;
+			if (c->type != ContactType::BOXPLANE__POINT_FACE && glm::dot(manifold.normal, position2 - position1) < 0)
+			{
+				manifold.normal *= -1;
+			}
+		}
+
 		for (int i = 0; i < manifold.numContacts; ++i)
 		{
 			Contact* c = manifold.contacts + i;
 
-			if (c->type != ContactType::BOXPLANE__POINT_FACE && glm::dot(manifold.normal, position2 - position1) < 0)
-			{
-#if defined(R3D_DEBUG) || defined(R3D_RELEASE)
-				//R3D_CORE_ERROR("direction wrong: {0},{1},{2}", manifold.normal.x, manifold.normal.y, manifold.normal.z);
-#endif
-				manifold.normal *= -1;
-			}
 
 			const real3& contactPointWorld = c->position;
 			real3 r1 = contactPointWorld - position1;
@@ -144,17 +147,10 @@ namespace r3d
 
 	void Arbiter::applyImpulse(ArchetypeManager* am)
 	{
-		Entity e1 = body1;
-		Entity e2 = body2;
-		if (e2 == manifold.e1)
-		{
-			std::swap(e1, e2);
-		}
-
-		Transform* tr1 = am->get<Transform>(e1);
-		Transform* tr2 = am->get<Transform>(e2);
-		RigidBody* rb1 = am->get<RigidBody>(e1);
-		RigidBody* rb2 = am->get<RigidBody>(e2);
+		Transform* tr1 = am->get<Transform>(body1);
+		Transform* tr2 = am->get<Transform>(body2);
+		RigidBody* rb1 = am->get<RigidBody>(body1);
+		RigidBody* rb2 = am->get<RigidBody>(body2);
 
 		real3& position1          = tr1->position;
 		real3& position2          = tr2->position;
@@ -166,6 +162,8 @@ namespace r3d
 		real3& angVelocity2  = rb2->angVelocity;
 		const real& invMass1 = rb1->invMass;
 		const real& invMass2 = rb2->invMass;
+		const real friction = glm::sqrt(rb1->friction * rb1->friction);
+
 		const real3x3& invI1 = change_basis_of_matrix(orientation1, rb1->invI);
 		const real3x3& invI2 = change_basis_of_matrix(orientation2, rb2->invI);
 
@@ -247,7 +245,6 @@ namespace r3d
 	{
 		R3D_INFO("Body 1:   {0}",this->body1.id);
 		R3D_INFO("Body 2:   {0}",this->body2.id);
-		R3D_INFO("friction: {0}",this->friction);
 		R3D_INFO("Manifold: ");
 		R3D_INFO("    e1: {0}", manifold.e1.id);
 		R3D_INFO("    e2: {0}", manifold.e2.id);
@@ -267,22 +264,6 @@ namespace r3d
 
 	
 
-	Arbiter::Arbiter(Entity b1, Entity b2, Manifold manifold, real friction)
-	{
-		if (b1 < b2)
-		{
-			body1 = b1;
-			body2 = b2;
-		}
-		else
-		{
-			body1 = b2;
-			body2 = b1;
-		}
-
-		this->manifold = std::move(manifold);
-		this->friction = friction;//sqrtf(body1->friction * body2->friction);
-	}
 
 
 

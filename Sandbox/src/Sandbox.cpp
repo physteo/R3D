@@ -57,8 +57,8 @@ namespace r3d
 	public:
 		ContactPointEntityGenerator()
 		{
-			archetypeCollisionPoint = Archetype{ ComponentList::buildList<Circle, Color, Transform, ContactEntityTag, PrimitiveTag>() };
-			archetypeCollisionNormal = Archetype{ ComponentList::buildList<Segment, Color, Transform, ContactEntityTag, PrimitiveTag>() };
+			archetypeCollisionPoint = Archetype{ ComponentList::buildList<CirclePrimitive, Color, Transform, ContactEntityTag>() };
+			archetypeCollisionNormal = Archetype{ ComponentList::buildList<SegmentPrimitive, Color, Transform, ContactEntityTag>() };
 		}
 
 		void setContacts(const CollisionData* collData) { m_collData = collData; }
@@ -109,13 +109,11 @@ namespace r3d
 
 			auto entity_s = Application::getEntityManager()->create();
 			am.setArchetype(entity_s, archetypeCollisionNormal);
-			am.set<Segment>(entity_s, Segment{});
 			am.set<Color>(entity_s, Color{ float4{1.0, 0.0, 0.0, 1.0} });
 			am.set<Transform>(entity_s, Transform{ (float3)contactPositionWorld + rotated_displacement, q, float3{0.3} });
 
 			auto entity_c = Application::getEntityManager()->create();
 			am.setArchetype(entity_c, archetypeCollisionPoint);
-			am.set<Circle>(entity_c, Circle{});
 			am.set<Color>(entity_c, Color{ float4{1.0, 0.0, 0.0, 1.0} });
 			am.set<Transform>(entity_s, Transform{ contactPositionWorld, q, float3{0.1} });
 		}
@@ -196,19 +194,17 @@ private:
 		real3 squareAngleAxis = sinSquareAngle * axis;
 		rquat squareOrientationQuat = glm::normalize(rquat{ cosSquareAngle, squareAngleAxis.x, squareAngleAxis.y, squareAngleAxis.z });
 		
-		real3x3 invI = (invMass < R3D_EPSILON) ? real3x3{0.0f} : glm::inverse(r3d::CollisionBox::computeInertiaTensor(scale, 1.0 / invMass)); // TODO: put back the inverse
-		//real3x3 invI = glm::inverse(r3d::CollisionBox::computeInertiaTensor(scale, invMass));
+		real3x3 invI = (invMass < R3D_EPSILON) ? real3x3{0.0f} : glm::inverse(r3d::ColliderBox::computeInertiaTensor(scale, 1.0 / invMass)); // TODO: put back the inverse
 		real3 force = real3{ 0.0, (invMass < R3D_EPSILON) ? 0.0 : gravity / invMass,0.0 };
 		real3 torque = real3{ 0.0 };
 		real3 angVelocity = real3{ 0.0 };
 		real friction = 0.1;
 
-		am->setArchetype < Transform, RigidBody, PrimitiveTag, Color, Box >(boxEnt);
+		am->setArchetype < Transform, RigidBody, Color, ColliderBox, BoxPrimitive >(boxEnt);
 		am->set<Transform>(boxEnt, Transform{position, squareOrientationQuat, scale});
-		am->set<Square>(boxEnt, Square{});
 		am->set<Color>(boxEnt, color);
 		am->set<RigidBody>(boxEnt, RigidBody{invI, velocity, angVelocity, force, torque, invMass, friction});
-		am->set<Box>(boxEnt, Box{});
+		
 
 		return boxEnt;
 	}
@@ -217,12 +213,12 @@ public:
 	WorldLayer() : r3d::Layer("World layer.")
 	{
 		using namespace r3d;
-
+		 
 		Application::getWindow()->setColor(0.02f, 0.02f, 0.1f);
 		auto am = getArchetypeManager();
 
 		circleEnt = Application::getEntityManager()->create();
-		am->setArchetype < Transform, PrimitiveTag, Color> (circleEnt);
+		am->setArchetype < Transform, CirclePrimitive, Color> (circleEnt);
 		am->set<Transform>(circleEnt, Transform{ {-3.75f, 2.5, 0.0}, {1.0, 0.0, 0.0, 0.0}, float3{1.0} });
 		am->set<Color>(circleEnt, float4{ 0.5, 0.32, 0.0, 1.0 });
 
@@ -248,7 +244,7 @@ public:
 		}
 #else
 		physicsOn = false;
-		create_box(real3{ 0.0, 1.0, 0.0 }, 0.0, real3{ 1.0 ,0.0, 0.0 }, real3{ 1.0 }, -2.0, 0.00001, real3{ 0.0 }, float4{ 0.5, 0.5, 0.5, 1.0 });
+		create_box(real3{ 0.0, 1.0, 0.0 }, 0.0, real3{ 1.0 ,0.0, 0.0 }, real3{ 1.0 }, 0.0, 0.00001, real3{ 0.0 }, float4{ 0.5, 0.5, 0.5, 1.0 });
 		
 		newAngle = 36.0f;
 		newAngleAxis = float3{ 0.995f, 0.006f, 0.101f };
@@ -263,35 +259,34 @@ public:
 		r3d::fquat quat1;
 		quat1.w = 1.0; quat1.x = 0.0; quat1.y = 0.0; quat1.z = 0.0;
 		segmentEntX = Application::getEntityManager()->create();
-		am->setArchetype < Transform, PrimitiveTag, Segment, Color >(segmentEntX);
+		am->setArchetype < Transform, SegmentPrimitive, Color >(segmentEntX);
 		am->set<Transform>(segmentEntX, Transform{ {0.0, 0.01, 0.0}, quat1, real3{1.0} });
-		am->set<Segment>(segmentEntX, Segment{});
 		am->set<Color>(segmentEntX, float4{ 1.0, 0.5, 0.5, 1.0 });
 
 		r3d::fquat quatz;
 		quatz.w = cos45; quatz.x = 0.0; quatz.y = sin45; quatz.z = 0.0;
 		segmentEntZ = Application::getEntityManager()->create();
-		am->setArchetype < Transform, PrimitiveTag, Segment, Color >(segmentEntZ);
+		am->setArchetype < Transform, SegmentPrimitive, Color >(segmentEntZ);
 		am->set<Transform>(segmentEntZ, Transform{ {0.0, 0.01, 0.0}, quatz, real3{1.0} });
-		am->set<Segment>(segmentEntZ, Segment{});
 		am->set<Color>(segmentEntZ, float4{ 0.5, 0.5, 1.0, 1.0 });
 
 		r3d::fquat quaty;
 		quaty.w = cos45; quaty.x = 0.0; quaty.y = 0.0; quaty.z = sin45;
 		segmentEntY = Application::getEntityManager()->create();
-		am->setArchetype < Transform, PrimitiveTag, Segment, Color >(segmentEntY);
+		am->setArchetype < Transform, SegmentPrimitive, Color >(segmentEntY);
 		am->set<Transform>(segmentEntY, Transform{ {0.0, 0.01, 0.0}, quaty, real3{1.0} });
-		am->set<Segment>(segmentEntY, Segment{});
 		am->set<Color>(segmentEntY, float4{ 0.5, 1.0, 0.5, 1.0 });
 
-		r3d::fquat quatg;
+		
+		ColliderPlane plane;
+		plane.normal = { 0.0, 1.0, 0.0 };
+		plane.offset = 0.0;
 		gridEnt = Application::getEntityManager()->create();
-		quatg.w = cos45; quatg.x = sin45; quatg.y = 0.0; quatg.z = 0.0;
-		am->setArchetype < Transform, PrimitiveTag, Plane, Color, RigidBody >(gridEnt);
-		am->set<Plane>(gridEnt, Plane{ float3{0.0f,1.0f,0.0f}, 0.0 });
+		am->setArchetype < Transform, ColliderPlane, Color, RigidBody, PlanePrimitive >(gridEnt);
 		am->set<Color>(gridEnt, float4{ 0.5, 0.0, 0.5, 1.0 });
-		am->set<RigidBody>(gridEnt, RigidBody{ real3x3{0.0}, 0.0, 0.1, real3{0.0} });
-		am->set<Transform>(gridEnt, Transform{ {},{}, real3{20.} });
+		am->set<RigidBody>(gridEnt, RigidBody{ real3x3{0.0}, 0.0, 0.9, real3{0.0} });
+		am->set<Transform>(gridEnt, Transform{ real3{plane.offset}, rquat{1.0, plane.normal.x, plane.normal.y, plane.normal.z}, real3{20.} });
+		am->set<ColliderPlane>(gridEnt, plane);
 
 #ifdef STACKING
 		{
@@ -391,13 +386,14 @@ public:
 		if(physicsOn)
 		{
 #endif
+
 		forceIntegrator.update(*am, t, dt);
 		
 		for (auto arb = collisionData.arbiters.begin(); arb != collisionData.arbiters.end(); ++arb)
 		{
 			arb->second.preStep(am, 1.0 / dt);
 		}
-
+		
 		const int iterations = 10;
 		for (int i = 0; i < iterations; ++i)
 		{
@@ -406,7 +402,7 @@ public:
 				arb->second.applyImpulse(am);
 			}
 		}
-
+		
 		// integrate positions
 		velocityIntegrator.update(*am, t, dt);
 
@@ -639,8 +635,9 @@ public:
 			if (physicsOn)
 			{
 				physicsOn = false;
-				am->set<Velocity>(newEntity, real3{ 0.0, 0.0, 0.0 });
-				am->set<AngVelocity>(newEntity, real3{ 0.0, 0.0, 0.0 });
+				auto* rb = am->get<RigidBody>(newEntity);
+				rb->angVelocity = real3{ 0.0 };
+				rb->velocity = real3{ 0.0 };
 			}
 			else
 			{
@@ -649,6 +646,7 @@ public:
 
 		}
 #endif 
+#ifdef STACKING
 		if (frameCounter % 1500 == 0)//ImGui::Button("Shoot"))
 		{
 			//float3 v{0.2*Random::randFloat(), 1.0 + 0.2*Random::randFloat(), 0.2*Random::randFloat()};
@@ -659,22 +657,24 @@ public:
 			float angle = 30;
 			create_box({ 2, 5, 13 }, angle, { 0.0, 1.0, -1.0 }, v, -0.6, 0.1, real3{0.0, 0.0, -6.0}, { c.r, c.g, c.b, 1.0 });
 		}
+#endif
 		ImGui::Checkbox("Demo Window", &show_demo_window);
 		ImGui::ColorEdit3("Bckg color", (float*)&clear_color);
 		window->setColor(clear_color[0], clear_color[1], clear_color[2]);
 		ImGui::Text("%.1f FPS (%.1f ms/frame)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
 
 
-		float plane_x = am->get<Plane>(gridEnt)->normal.x;
-		float plane_y = am->get<Plane>(gridEnt)->normal.y;
-		float plane_z = am->get<Plane>(gridEnt)->normal.z;
-		float plane_o = am->get<Plane>(gridEnt)->offset;
+		float plane_x = am->get<Transform>(gridEnt)->orientation.x;
+		float plane_y = am->get<Transform>(gridEnt)->orientation.y;
+		float plane_z = am->get<Transform>(gridEnt)->orientation.z;
+		float plane_o = am->get<Transform>(gridEnt)->position.x;
 		ImGui::SliderFloat("plane nx",  &plane_x, -1, 1);
 		ImGui::SliderFloat("plane ny",  &plane_y, -1, 1);
 		ImGui::SliderFloat("plane nz",  &plane_z, -1, 1);
 		ImGui::SliderFloat("plane off", &plane_o, -5.0, 5.0);
-		am->get<Plane>(gridEnt)->normal = glm::normalize(float3{ plane_x, plane_y, plane_z });
-		am->get<Plane>(gridEnt)->offset = plane_o;
+		auto planeNormal = glm::normalize(float3{ plane_x, plane_y, plane_z });
+		am->get<Transform>(gridEnt)->orientation = rquat{ 1.0, planeNormal.x, planeNormal.y, planeNormal.z };
+		am->get<Transform>(gridEnt)->position.x = plane_o;
 
 		ImGui::Text("Sphere Settings");
 		int circleResolution = primitivesRenderer.getCircleResolution();

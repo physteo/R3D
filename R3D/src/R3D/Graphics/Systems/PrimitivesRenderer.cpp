@@ -1,6 +1,5 @@
 #include <R3Dpch.h>
 #include "PrimitivesRenderer.h"
-#include <R3D/Physics/Components/PrimitivesComponents.h>
 #include <R3D/Physics/Core/Colliders.h>
 
 namespace r3d
@@ -154,22 +153,23 @@ namespace r3d
 
 	void PrimitivesRenderer::getInstancesDataPlane(ArchetypeManager& am, std::vector<InstanceData>& outInstancesData)
 	{
-		ComponentList componentList = ComponentList::buildList<Plane, Color, PrimitiveTag>();
+		ComponentList componentList = ComponentList::buildList<Transform, PlanePrimitive, Color>();
 		auto archetypes = am.matchAtLeastWithout(componentList, {});
 
 		float3 scale{ 10.0f, 10.0f, 0.0f };
 
 		for (auto archIt = archetypes.begin(); archIt != archetypes.end(); ++archIt)
 		{
-			auto plane = get<Plane>(am, *archIt);
+			auto transform = get<Transform>(am, *archIt);
+			auto plane = get<PlanePrimitive>(am, *archIt);
 			auto color = get<Color>(am, *archIt);
 			auto& entities = getEntities(am, *archIt);
-			size_t numElements = getSize<Plane>(am, *archIt);
+			size_t numElements = getSize<PlanePrimitive>(am, *archIt);
 
 			for (size_t j = 0; j < numElements; j++)
 			{
-				const real3& n = glm::normalize(plane[j].normal);
-				const real& off = plane[j].offset;
+				const float3& n = glm::normalize(float3{ transform[j].orientation.x, transform[j].orientation.y, transform[j].orientation.z });
+				const float& off = transform[j].position.x;
 
 				float3 N1{ 0.0f,0.0f,1.0f };
 				float3 N2 = (float3)n;
@@ -198,26 +198,26 @@ namespace r3d
 	{
 		ComponentList requiredComponents;
 
-		requiredComponents = ComponentList::buildList<Transform, PrimitiveTag, Color, Circle>();
+		requiredComponents = ComponentList::buildList<Transform, Color, CirclePrimitive>();
 		m_instancesData.push_back({});
 		getInstancesData(am, requiredComponents, m_instancesData.back());
 
-		requiredComponents = ComponentList::buildList<Transform, PrimitiveTag, Color, Square>();
+		requiredComponents = ComponentList::buildList<Transform, Color, SquarePrimitive>();
 		m_instancesData.push_back({});
 		getInstancesData(am, requiredComponents, m_instancesData.back());
 
-		requiredComponents = ComponentList::buildList<Transform, PrimitiveTag, Color, Segment>();
+		requiredComponents = ComponentList::buildList<Transform, Color, SegmentPrimitive>();
 		m_instancesData.push_back({});
 		getInstancesData(am, requiredComponents, m_instancesData.back());
 
 		m_instancesData.push_back({});
 		getInstancesDataPlane(am, m_instancesData.back());
 
-		requiredComponents = ComponentList::buildList<Transform, PrimitiveTag, Color, Sphere>();
+		requiredComponents = ComponentList::buildList<Transform, Color, SpherePrimitive>();
 		m_instancesData.push_back({});
 		getInstancesData(am, requiredComponents, m_instancesData.back());
 
-		requiredComponents = ComponentList::buildList<Transform, Box>();
+		requiredComponents = ComponentList::buildList<Transform, Color, BoxPrimitive>();
 		m_instancesData.push_back({});
 		getInstancesDataNew(am, requiredComponents, m_instancesData.back());
 

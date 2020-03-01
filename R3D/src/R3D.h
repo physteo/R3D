@@ -19,8 +19,7 @@
 #include <R3D/Graphics/Systems/PrimitivesRenderer.h>
 
 #include <R3D/Physics/Core/Contact.h>
-#include <R3D/Physics/Components/PrimitivesComponents.h>
-#include <R3D/Physics/Components/BasicPhysicsComponents.h>
+#include <R3D/Physics/Core/RigidBody.h>
 #include <R3D/Physics/Systems/SphereSphereContactDetector.h>
 #include <R3D/Physics/Systems/SpherePlaneContactDetector.h>
 #include <R3D/Physics/Systems/BoxPlaneContactDetector.h>

@@ -7,15 +7,14 @@ namespace r3d
 
 	struct RigidBody
 	{
-
 		RigidBody
 		(
-			const real3x3& invI      = real3x3{ 1.0 },
-			const real3& velocity    = real3{ 0.0 },
+			const real3x3& invI = real3x3{ 1.0 },
+			const real3& velocity = real3{ 0.0 },
 			const real3& angVelocity = real3{ 0.0 },
-			const real3& force   = real3{ 0.0 },
-			const real3& torque  = real3{ 0.0 },
-			const real& invMass  = real{ 1.0 },
+			const real3& force = real3{ 0.0 },
+			const real3& torque = real3{ 0.0 },
+			const real& invMass = real{ 1.0 },
 			const real& friction = real{ 0.0 }
 		) : invI(invI), velocity(velocity), angVelocity(angVelocity), force(force),
 			torque(torque), invMass(invMass), friction(friction) {}
@@ -36,8 +35,7 @@ namespace r3d
 		real3 torque;
 		real invMass;
 		real friction;
-	};
 
-	struct ContactEntityTag { };
+	};
 
 }

@@ -1,7 +1,6 @@
 #include <R3Dpch.h>
 #include "Detection.h"
 #include "Geometry.h"
-#include "Topology.h"
 
 #if defined(R3D_DEBUG) || defined(R3D_RELEASE)
 #include <R3D/Core/Log.h>
@@ -10,6 +9,14 @@
 
 namespace r3d
 {
+
+	const Topology BoxBox::s_BoxTopology = create_box_topology();
+
+	const Topology& BoxBox::getTopology()
+	{
+		return BoxBox::s_BoxTopology;
+	}
+
 	struct FaceQuery
 	{
 		FaceQuery()
@@ -41,27 +48,28 @@ namespace r3d
 		real3 normal;
 	};
 
-	CollisionPlane get_plane_from_face(const CollisionBox& box, const Facet& face)
+	ColliderPlane get_plane_from_face(const Transform& box, const Facet& face)
 	{
-		real3 vertexInPlane = box.toWorld(box.halfSize * face.halfEdge->origin->position);
+		real3 vertexInPlane = box.position + box.orientation * (box.scale * face.halfEdge->origin->position);
 
-		CollisionPlane plane;
+		ColliderPlane plane;
 		plane.normal = box.orientation * face.computeNormal();
 		plane.offset = glm::dot(plane.normal, vertexInPlane);
 
 		return plane;
 	}
 
-	FaceQuery query_point_faces(const CollisionBox& box1, const CollisionBox& box2)
+	FaceQuery query_point_faces(const Transform& box1, const Transform& box2)
 	{
-		const Topology& top = box1.getTopology();
+		const Topology& top = BoxBox::getTopology();
+
 		FaceQuery fq;
 
 		for (int i = 0; i < top.faces.size(); ++i)
 		{
 			const Facet& face = top.faces[i];
 			real distance;
-			int pointID = get_deepest_point_id(box2, get_plane_from_face(box1, face), distance);
+			int pointID = get_deepest_point_id(top, box2, get_plane_from_face(box1, face), distance);
 
 			if (pointID < 0)
 			{
@@ -132,17 +140,17 @@ namespace r3d
 		return glm::dot(N, P2 - P1);
 	}
 
-	EdgeQuery query_edges(const CollisionBox& box1, const CollisionBox& box2)
+	EdgeQuery query_edges(const Transform& box1, const Transform& box2)
 	{
-		const Topology& top = box2.getTopology();
+		const Topology& top = BoxBox::getTopology();
 		
 		EdgeQuery eq;
 		eq.separation = -std::numeric_limits<real>::infinity();
 
 		for (int i = 0; i < top.halfEdges.size(); i+=2) 
 		{
-			real3 origin1 = box1.toWorld(box1.halfSize * top.halfEdges[i].origin->position);
-			real3 end1 = box1.toWorld(box1.halfSize * top.halfEdges[i].next->origin->position);
+			real3 origin1 = box1.position + box1.orientation * (box1.scale * top.halfEdges[i].origin->position);
+			real3 end1    = box1.position + box1.orientation * (box1.scale * top.halfEdges[i].next->origin->position);
 			real3 edge1 = end1 - origin1;
 
 			real3 normA = box1.orientation * top.halfEdges[i].left->computeNormal();
@@ -150,8 +158,8 @@ namespace r3d
 
 			for (int j = 0; j < top.halfEdges.size(); j+=2)
 			{
-				const real3& origin2 = box2.toWorld(box2.halfSize * top.halfEdges[j].origin->position);
-				const real3& end2 = box2.toWorld(box2.halfSize * top.halfEdges[j].next->origin->position);
+				const real3& origin2 = box2.position + box2.orientation * (box2.scale * top.halfEdges[j].origin->position);
+				const real3& end2    = box2.position + box2.orientation * (box2.scale * top.halfEdges[j].next->origin->position);
 				const real3& edge2 = end2 - origin2;
 
 				real3 normC = box2.orientation * top.halfEdges[j].left->computeNormal();
@@ -160,7 +168,7 @@ namespace r3d
 				if (build_minkowsky_face(normA, normB, -edge1, -normC, -normD, -edge2))
 				{
 					//real3 c1, c2;
-					real separation = get_separation(origin1, edge1, origin2, edge2, box1.position);// closest_points_edges(origin1, end1, origin2, end2, c1, c2);
+					real separation = get_separation(origin1, edge1, origin2, edge2, box1.position);
 
 					if (separation > eq.separation)
 					{
@@ -184,9 +192,9 @@ namespace r3d
 		return eq;
 	}
 
-	std::pair<bool, real3> clip_segment_to_face(real3 po, real3 pe, const Facet& referenceFace, const CollisionBox& boxFace)
+	std::pair<bool, real3> clip_segment_to_face(real3 po, real3 pe, const Facet& referenceFace, const Transform& boxFace)
 	{
-		CollisionPlane plane = get_plane_from_face(boxFace, referenceFace);
+		ColliderPlane plane = get_plane_from_face(boxFace, referenceFace);
 		real3 q;
 		if (intersect_segment_plane(po, pe, plane, q))
 		{
@@ -195,9 +203,9 @@ namespace r3d
 		return { false, real3{0.0} };
 	}
 
-	int get_incident_face_id(const real3& referenceNormal, const CollisionBox& boxPoint)
+	int get_incident_face_id(const real3& referenceNormal, const Transform& boxPoint)
 	{
-		const Topology& top = boxPoint.getTopology();
+		const Topology& top = BoxBox::getTopology();
 
 		real dotmin = std::numeric_limits<real>::infinity();
 		int idmin = -1;
@@ -216,7 +224,7 @@ namespace r3d
 		return idmin;
 	}
 
-	bool is_point_below_face(const real3& point, const CollisionBox& box, const CollisionPlane& plane, const Facet& face, real& dist, real3& intersection)
+	bool is_point_below_face(const real3& point, const Transform& box, const ColliderPlane& plane, const Facet& face, real& dist, real3& intersection)
 	{
 
 		if (is_point_below_plane(point, plane, dist))
@@ -225,7 +233,7 @@ namespace r3d
 			face.getFaceVertices(facePoints);
 			for (int i = 0; i < 4; ++i)
 			{
-				facePoints[i] = box.toWorld(box.halfSize * facePoints[i]);
+				facePoints[i] = box.position + box.orientation * (box.scale * facePoints[i]);
 			}
 
 			real3 p = point + real(2.) * dist * plane.normal;
@@ -246,10 +254,10 @@ namespace r3d
 		}
 	}
 
-	std::vector<PointQuery> clip_face(const Facet& incidentFace, const CollisionBox& incidentBox, 
-		const Facet& referenceFace, const CollisionBox& referenceBox)
+	std::vector<PointQuery> clip_face(const Facet& incidentFace, const Transform& incidentBox, 
+		const Facet& referenceFace, const Transform& referenceBox)
 	{
-		const CollisionPlane& refPlane = get_plane_from_face(referenceBox, referenceFace);
+		const ColliderPlane& refPlane = get_plane_from_face(referenceBox, referenceFace);
 
 		std::vector<PointQuery> clippedPoints;
 		// loop over side planes of refface, clip each segment of the incface.
@@ -275,8 +283,8 @@ namespace r3d
 			do
 			{
 				// clip this halfedge with sideface
-				real3& po = incidentBox.toWorld(incidentBox.halfSize * halfInc->origin->position);
-				real3& pe = incidentBox.toWorld(incidentBox.halfSize * halfInc->next->origin->position);
+				real3& po = incidentBox.position + incidentBox.orientation * (incidentBox.scale * halfInc->origin->position);
+				real3& pe = incidentBox.position + incidentBox.orientation * (incidentBox.scale * halfInc->next->origin->position);
 
 				auto result = clip_segment_to_face(po, pe, *sideFace, referenceBox);
 				if (result.first)
@@ -289,7 +297,7 @@ namespace r3d
 						PointQuery p;
 						p.penetration = -dist;
 						p.pointID = segmentID;
-						p.position = intersection;//project_point_to_plane(result.second, refPlane); // TODO: should I *not* project?
+						p.position = intersection;
 						clippedPoints.push_back(p);
 					}
 				}
@@ -303,38 +311,13 @@ namespace r3d
 		return clippedPoints;
 	}
 
-	int create_edge_edge_contact(EdgeQuery eq, const CollisionBox& referenceBox, const CollisionBox& incidentBox, Manifold* manifold)
+	std::vector<PointQuery> collect_penetrating_points(const Transform& boxPoint, const Transform& referenceBox, const ColliderPlane& refPlane, const Facet& referenceFace, bool project)
 	{
-		// find closest point between edges
-		real3 c1, c2;
-		real penetration = glm::sqrt(closest_points_edges(eq.origin1, eq.end1, eq.origin2, eq.end2, c1, c2));
-
-		manifold->numContacts = 1;
-		manifold->e1 = referenceBox.e;
-		manifold->e2 = incidentBox.e;
-		manifold->normal = glm::normalize(eq.normal);
-		compute_basis(manifold->normal, manifold->tangent[0], manifold->tangent[1]);
-
-		Contact* c = manifold->contacts;
-		c->type = ContactType::BOXBOX__EDGE_EDGE;
-		c->fp.first = eq.edgeID1;
-		c->fp.second = eq.edgeID2;
-		c->penetration = -eq.separation;
-		c->position = real(0.5) * (c1 + c2);
-
-#if defined(R3D_DEBUG) || defined(R3D_RELEASE)
-		Application::getDebugger()->draw_circle(c->position, 0.15, { 1.0, 0.64, 0.0 });
-#endif
-		return manifold->numContacts;
-	}
-
-	std::vector<PointQuery> collect_penetrating_points(const CollisionBox& boxPoint, const CollisionBox& referenceBox, const CollisionPlane& refPlane, const Facet& referenceFace, bool project)
-	{
-		const Topology& top = boxPoint.getTopology();
+		const Topology& top = BoxBox::getTopology();
 		std::vector<PointQuery> penetratingPoints;
 		for (int i = 0; i < top.vertices.size(); ++i)
 		{
-			real3 point = boxPoint.toWorld(boxPoint.halfSize * top.vertices[i].position);
+			real3 point = boxPoint.position + boxPoint.orientation * (boxPoint.scale * top.vertices[i].position);
 			real dist;
 			real3 intersection;
 			if (is_point_below_face(point, referenceBox, refPlane, referenceFace, dist, intersection))
@@ -350,19 +333,19 @@ namespace r3d
 		return penetratingPoints;
 	}
 
-	int create_point_face_contacts(FaceQuery fq, const CollisionBox& referenceBox, const CollisionBox& incidentBox, Manifold* manifold)
+	int create_point_face_contacts(FaceQuery fq, const Transform& referenceBox, Entity eRef, const Transform& incidentBox, Entity eInc, Manifold* manifold)
 	{
-		const Topology& top = referenceBox.getTopology();
+		const Topology& top = BoxBox::getTopology();
 		
 		// get reference face
 		const Facet& referenceFace = top.faces[fq.faceID];
 		const real3& referenceNormal = glm::normalize(referenceBox.orientation * referenceFace.computeNormal());
-		const CollisionPlane& refPlane = get_plane_from_face(referenceBox, referenceFace);
+		const ColliderPlane& refPlane = get_plane_from_face(referenceBox, referenceFace);
 
 		// get incident face
 		const Facet& incidentFace = top.faces[get_incident_face_id(referenceNormal, incidentBox)];
 		const real3& incidentNormal = glm::normalize(incidentBox.orientation * incidentFace.computeNormal());
-		const CollisionPlane& incPlane = get_plane_from_face(incidentBox, incidentFace);
+		const ColliderPlane& incPlane = get_plane_from_face(incidentBox, incidentFace);
 
 		// which points of the incident face are just below the reference face?
 		std::vector<PointQuery> penetratingPoints = collect_penetrating_points(incidentBox, referenceBox, refPlane, referenceFace, true);
@@ -376,10 +359,10 @@ namespace r3d
 #if defined(R3D_DEBUG) || defined(R3D_RELEASE)
 		// debug draw
 		{
-			real3 faceCenter = referenceBox.position + referenceBox.orientation * referenceBox.halfSize * referenceFace.computeCenter();
+			real3 faceCenter = referenceBox.position + referenceBox.orientation * referenceBox.scale * referenceFace.computeCenter();
 			Application::getDebugger()->draw_segment(faceCenter, referenceNormal, { 1,0,0 });
 		
-			faceCenter = incidentBox.position + incidentBox.orientation * referenceBox.halfSize *  incidentFace.computeCenter();
+			faceCenter = incidentBox.position + incidentBox.orientation * referenceBox.scale *  incidentFace.computeCenter();
 			Application::getDebugger()->draw_segment(faceCenter, incidentNormal, { 0,1,0 });
 		}
 		// debug draw
@@ -395,10 +378,9 @@ namespace r3d
 		
 		}
 #endif
-
 		// *************** reduce
-		manifold->e1 = referenceBox.e;
-		manifold->e2 = incidentBox.e;
+		manifold->e1 = eRef;
+		manifold->e2 = eInc;
 		manifold->normal = glm::normalize(referenceNormal);
 		compute_basis(manifold->normal, manifold->tangent[0], manifold->tangent[1]);
 
@@ -450,7 +432,32 @@ namespace r3d
 		return numContacts;
 	}
 
-	unsigned int BoxBox::detect(const CollisionBox& box1, const CollisionBox& box2, Manifold* manifold)
+	int create_edge_edge_contact(EdgeQuery eq, const Transform& referenceBox, Entity eRef, const Transform& incidentBox, Entity eInc, Manifold* manifold)
+	{
+		// find closest point between edges
+		real3 c1, c2;
+		closest_points_edges(eq.origin1, eq.end1, eq.origin2, eq.end2, c1, c2);
+
+		manifold->numContacts = 1;
+		manifold->e1 = eRef;
+		manifold->e2 = eInc;
+		manifold->normal = glm::normalize(eq.normal);
+		compute_basis(manifold->normal, manifold->tangent[0], manifold->tangent[1]);
+
+		Contact* c = manifold->contacts;
+		c->type = ContactType::BOXBOX__EDGE_EDGE;
+		c->fp.first = eq.edgeID1;
+		c->fp.second = eq.edgeID2;
+		c->penetration = -eq.separation;
+		c->position = real(0.5) * (c1 + c2);
+
+#if defined(R3D_DEBUG) || defined(R3D_RELEASE)
+		Application::getDebugger()->draw_circle(c->position, 0.15, { 1.0, 0.64, 0.0 });
+#endif
+		return manifold->numContacts;
+	}
+
+	unsigned int BoxBox::detect(const Transform& box1, const Entity& e1, const Transform& box2, const Entity& e2, Manifold* manifold)
 	{
 		// query face-point contacts
  		FaceQuery fq1 = query_point_faces(box1, box2);  
@@ -467,16 +474,15 @@ namespace r3d
 		const real bias = 0.0001;
 		if (abs(eq.separation) + bias < abs(fq1.penetration) && abs(eq.separation) + bias < abs(fq2.penetration))
 		{
-			return create_edge_edge_contact(eq, box1, box2, manifold);
-		}				
+			return create_edge_edge_contact(eq, box1, e1, box2, e2, manifold);
+		}			
 		else if (abs(fq1.penetration) <= abs(fq2.penetration) + bias )
 		{
-			return create_point_face_contacts(fq1, box1, box2, manifold);
+			return create_point_face_contacts(fq1, box1, e1, box2, e2, manifold);
 		}
 		else
 		{
-			return create_point_face_contacts(fq2, box2, box1, manifold);
+			return create_point_face_contacts(fq2, box2, e2, box1, e1, manifold);
 		}
-		 
 	} 
 }

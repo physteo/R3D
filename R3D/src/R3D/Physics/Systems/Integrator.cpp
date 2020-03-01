@@ -1,8 +1,9 @@
 #include <R3Dpch.h>
 
 #include "Integrator.h"
+
+#include "../Core/RigidBody.h"
 #include <R3D/Ecs/TransformComponent.h>
-#include <R3D/Physics/Components/BasicPhysicsComponents.h>
 
 namespace r3d
 {

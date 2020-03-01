@@ -110,12 +110,10 @@
     <ClInclude Include="src\R3D\Physics\Core\Detection.h" />
     <ClInclude Include="src\R3D\Physics\Core\Contact.h" />
     <ClInclude Include="src\R3D\Physics\Systems\SphereSphereContactDetector.h" />
-    <ClInclude Include="src\R3D\Physics\Components\PrimitivesComponents.h" />
     <ClInclude Include="src\R3D\Ecs\TransformComponent.h" />
     <ClInclude Include="src\R3D\Physics\Systems\SpherePlaneContactDetector.h" />
     <ClInclude Include="src\R3D\Utils\Random.h" />
     <ClInclude Include="src\R3D\Physics\Systems\BoxBoxContactDetector.h" />
-    <ClInclude Include="src\R3D\Physics\Components\BasicPhysicsComponents.h" />
     <ClInclude Include="src\R3D\Utils\Debugger.h" />
     <ClInclude Include="src\R3D\Physics\Systems\BoxPlaneContactDetector.h" />
     <ClInclude Include="src\R3D\Physics\Core\World.h" />
@@ -123,6 +121,7 @@
     <ClInclude Include="src\R3D\Physics\Core\Geometry.h" />
     <ClInclude Include="src\R3D\Physics\Core\Colliders.h" />
     <ClInclude Include="src\R3D\Physics\Systems\Integrator.h" />
+    <ClInclude Include="src\R3D\Physics\Core\RigidBody.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\R3D\Core\Application.cpp">

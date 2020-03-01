@@ -11,21 +11,21 @@ namespace r3d
 {
 	void SpherePlaneContactDetector::update(ArchetypeManager& am, double t, double dt)
 	{
-		auto archetypesSphere = am.matchAtLeastWithout(ComponentList::buildList<Sphere, Transform>(), {});
-		auto archetypesPlane = am.matchAtLeastWithout(ComponentList::buildList<Plane>(), {});
+		auto archetypesSphere = am.matchAtLeastWithout(ComponentList::buildList<ColliderSphere, Transform>(), {});
+		auto archetypesPlane = am.matchAtLeastWithout(ComponentList::buildList<ColliderPlane>(), {});
 
 		for (size_t arch1 : archetypesSphere)
 		{
 			auto transforms1 = get<Transform>(am, arch1);
-			auto spheres1 = get<Sphere>(am, arch1);
+			auto spheres1 = get<ColliderSphere>(am, arch1);
 			auto& entities1 = getEntities(am, arch1);
-			size_t size1 = getSize<Sphere>(am, arch1);
+			size_t size1 = getSize<ColliderSphere>(am, arch1);
 
 			for (size_t arch2 : archetypesPlane)
 			{
-				auto planes2 = get<Plane>(am, arch2);
+				auto planes2 = get<ColliderPlane>(am, arch2);
 				auto& entities2 = getEntities(am, arch2);
-				size_t size2 = getSize<Plane>(am, arch2);
+				size_t size2 = getSize<ColliderPlane>(am, arch2);
 
 				for (size_t i = 0; i < size1; ++i)
 				{

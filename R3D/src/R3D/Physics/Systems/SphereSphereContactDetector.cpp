@@ -3,7 +3,7 @@
 #include "SphereSphereContactDetector.h"
 
 #include <R3D/Ecs/TransformComponent.h>
-#include <R3D/Physics/Components/PrimitivesComponents.h>
+#include <R3D/Physics/Core/RigidBody.h>
 #include <R3D/Physics/Core/Detection.h>
 #include <R3D/Physics/Core/World.h>
 
@@ -11,15 +11,15 @@ namespace r3d
 {
 	void SphereSphereContactDetector::update(ArchetypeManager& am, double t, double dt)
 	{
-		auto archetypes = am.matchAtLeastWithout(ComponentList::buildList<Sphere, Transform>(), {});
+		auto archetypes = am.matchAtLeastWithout(ComponentList::buildList<ColliderSphere, Transform>(), {});
 
 		// same archetype
 		for (auto arch1 : archetypes)
 		{
 			auto transforms1 = get<Transform>(am, arch1);
-			auto spheres1 = get<Sphere>(am, arch1);
+			auto spheres1 = get<ColliderSphere>(am, arch1);
 			auto& entities1 = getEntities(am, arch1);
-			size_t size1 = getSize<Sphere>(am, arch1);
+			size_t size1 = getSize<ColliderSphere>(am, arch1);
 
 			for (size_t i = 0; i < size1; ++i)
 			{
@@ -42,18 +42,18 @@ namespace r3d
 		for (auto arch1 : archetypes)
 		{
 			auto transforms1 = get<Transform>(am, arch1);
-			auto spheres1 = get<Sphere>(am, arch1);
+			auto spheres1 = get<ColliderSphere>(am, arch1);
 			auto& entities1 = getEntities(am, arch1);
-			size_t size1 = getSize<Sphere>(am, arch1);
+			size_t size1 = getSize<ColliderSphere>(am, arch1);
 
 			for (size_t arch2 : archetypes)
 			{
 				if (arch1 == arch2) continue;
 
 				auto transforms2 = get<Transform>(am, arch2);
-				auto spheres2 = get<Sphere>(am, arch2);
+				auto spheres2 = get<ColliderSphere>(am, arch2);
 				auto& entities2 = getEntities(am, arch2);
-				size_t size2 = getSize<Sphere>(am, arch2);
+				size_t size2 = getSize<ColliderSphere>(am, arch2);
 				
 				for (size_t i = 0; i < size1; ++i)
 				{

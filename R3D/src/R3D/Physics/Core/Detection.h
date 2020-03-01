@@ -1,7 +1,9 @@
 #pragma once
 
+#include "Topology.h"
 #include "Colliders.h"
 #include "Contact.h"
+#include <R3D/Ecs/TransformComponent.h>
 
 namespace r3d
 {
@@ -36,16 +38,17 @@ namespace r3d
 	class BoxPlane
 	{
 	public:
-		static unsigned int detect(const CollisionBox& box, const CollisionPlane& plane, Manifold* manifold);
+		static unsigned int detect(const Transform& box, const Entity& boxEnt, const ColliderPlane& plane, const Entity& planeEnt, Manifold* manifold);
 	};
 
 	class BoxBox
 	{
 	public:
-		static unsigned int detect(const CollisionBox& box1, const CollisionBox& box2, Manifold* manifold);
+		static const Topology& getTopology();
+		static unsigned int detect(const Transform& box1, const Entity& e1, const Transform& box2, const Entity& e2, Manifold* manifold);
 
-		static unsigned int detectOld(const CollisionBox& box1, const CollisionBox& box2, Contact& contact);
-
+	private:
+		static const Topology s_BoxTopology;
 	};
 
 }

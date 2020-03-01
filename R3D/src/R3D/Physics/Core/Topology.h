@@ -44,7 +44,7 @@ namespace r3d
 	};
 
 	Topology create_box_topology();
-	static const Topology s_boxTopology;
+	//static const Topology s_boxTopology;
 	void test_box_topology();
 	
 }

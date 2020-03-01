@@ -5,13 +5,23 @@
 namespace r3d
 {
 
+	struct SegmentPrimitive {};
+
+	struct CirclePrimitive {};
+
+	struct SquarePrimitive {};
+
+	struct BoxPrimitive {};
+
+	struct SpherePrimitive {};
+
+	struct PlanePrimitive {};
+
 	struct Color
 	{
 		Color(const float4& vector = float4{ 1.0f, 0.0f, 0.0f, 1.0f }) : vec(vector) {}	
 		float4 vec;
 	};
-
-	struct PrimitiveTag {};
 
 	struct ShaderComponent
 	{

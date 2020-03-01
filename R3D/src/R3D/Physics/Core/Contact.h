@@ -30,6 +30,8 @@ namespace r3d
 		FeaturePair fp;   //!< Features involved
 	};
 
+	struct ContactEntityTag { };
+
 	struct Manifold
 	{
 		enum { MAX_CONTACTS = 16 };
@@ -50,7 +52,7 @@ namespace r3d
 		const bool positionCorrection{ true };
 		const bool accumulateImpulses{ true };
 
-		Arbiter(Entity b1, Entity b2, Manifold manifold, real friction);
+		Arbiter(Entity b1, Entity b2, Manifold manifold);
 		
 		void update(Manifold* newManifold);
 		void preStep(ArchetypeManager* am, float inv_dt);
@@ -60,7 +62,6 @@ namespace r3d
 		Manifold manifold;
 		Entity body1;
 		Entity body2;
-		float friction;
 	};
 
 	struct ArbiterKey

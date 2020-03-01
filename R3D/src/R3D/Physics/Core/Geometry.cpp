@@ -1,10 +1,11 @@
 #include <R3Dpch.h>
 #include "Geometry.h"
+#include <R3D/Ecs/TransformComponent.h>
 
 namespace r3d
 {
 
-	bool intersect_segment_plane(const real3& a, const real3& b, const CollisionPlane& p, real3 &q)
+	bool intersect_segment_plane(const real3& a, const real3& b, const ColliderPlane& p, real3 &q)
 	{
 		// Compute the t value for the directed line ab intersecting the plane
 		real3 ab = b - a;
@@ -18,28 +19,26 @@ namespace r3d
 		return false;
 	}
 
-	bool is_point_below_plane(const real3& point, const CollisionPlane& plane, real& distance, real tolerance)
+	bool is_point_below_plane(const real3& point, const ColliderPlane& plane, real& distance, real tolerance)
 	{
 		distance = glm::dot(point, plane.normal) - plane.offset;
 		return distance <= tolerance;
 	}
 
-	real3 project_point_to_plane(const real3& point, const CollisionPlane& plane)
+	real3 project_point_to_plane(const real3& point, const ColliderPlane& plane)
 	{ 
 		real3 p0 = plane.offset * plane.normal;
 		real dist = glm::dot((point - p0), plane.normal);
 		return point - dist * plane.normal;
 	}
 
-	int get_deepest_point_id(const CollisionBox& box, const CollisionPlane& plane, real& distance)
+	int get_deepest_point_id(const Topology& top, const Transform& box, const ColliderPlane& plane, real& distance)
 	{
-		const Topology& top = box.getTopology();
-
 		real minDistance = std::numeric_limits<real>::infinity();
 		int support = -1;
 		for (int i = 0; i < top.vertices.size(); ++i)
 		{
-			real3 point = box.toWorld(top.vertices[i].position * box.halfSize);
+			real3 point = box.position + box.orientation * (top.vertices[i].position * box.scale);
 
 			real distance;
 			bool point_is_below = is_point_below_plane(point, plane, distance);
@@ -142,25 +141,25 @@ namespace r3d
 		return glm::dot(c1 - c2, c1 - c2);
 	}
 
-	real3 get_support_point(const CollisionBox& box, const real3& direction, int& pointID, real& projection)
-	{
-		const Topology& top = box.getTopology();
-		real largestDot = -std::numeric_limits<real>::infinity();
-		real3 bestPoint;
-		for (int i = 0; i < top.vertices.size(); ++i)
-		{
-			real3 point = box.toWorld(box.halfSize * top.vertices[i].position);
-			real dot = glm::dot(direction, point);
-			if (dot > largestDot)
-			{
-				largestDot = dot;
-				bestPoint = point;
-				pointID = i;
-				projection = dot;
-			}
-		}
-		return bestPoint;
-	}
+	//real3 get_support_point(const CollisionBox& box, const real3& direction, int& pointID, real& projection)
+	//{
+	//	const Topology& top = BoxBox::getTopology();
+	//	real largestDot = -std::numeric_limits<real>::infinity();
+	//	real3 bestPoint;
+	//	for (int i = 0; i < top.vertices.size(); ++i)
+	//	{
+	//		real3 point = box.toWorld(box.halfSize * top.vertices[i].position);
+	//		real dot = glm::dot(direction, point);
+	//		if (dot > largestDot)
+	//		{
+	//			largestDot = dot;
+	//			bestPoint = point;
+	//			pointID = i;
+	//			projection = dot;
+	//		}
+	//	}
+	//	return bestPoint;
+	//}
 
 	// Given line pq and ccw quadrilateral abcd, return whether the line
 	// pierces the triangle. If so, also return the point r of intersection

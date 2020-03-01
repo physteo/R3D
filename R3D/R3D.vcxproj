@@ -148,8 +148,8 @@
     <ClInclude Include="src\R3D\Core\Layer.h" />
     <ClInclude Include="src\R3D\Core\Log.h" />
     <ClInclude Include="src\R3D\Core\MathUtils.h" />
-    <ClInclude Include="src\R3D\Physics\Components\BasicPhysicsComponents.h" />
     <ClInclude Include="src\R3D\Physics\Core\Colliders.h" />
+    <ClInclude Include="src\R3D\Physics\Core\RigidBody.h" />
     <ClInclude Include="src\R3D\Physics\Core\World.h" />
     <ClInclude Include="src\R3D\Physics\Core\Topology.h" />
     <ClInclude Include="src\R3D\Physics\Core\Geometry.h" />
@@ -184,7 +184,6 @@
     <ClInclude Include="src\R3D\Graphics\Core\VertexArray.h" />
     <ClInclude Include="src\R3D\Graphics\Systems\PrimitivesRenderer.h" />
     <ClInclude Include="src\R3D\ImGui\ImGuiLayer.h" />
-    <ClInclude Include="src\R3D\Physics\Components\PrimitivesComponents.h" />
     <ClInclude Include="src\R3D\Ecs\TransformComponent.h" />
     <ClInclude Include="src\R3D\Physics\Core\Detection.h" />
     <ClInclude Include="src\R3D\Physics\Core\Contact.h" />

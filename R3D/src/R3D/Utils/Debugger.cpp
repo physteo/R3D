@@ -3,11 +3,9 @@
 
 #include <R3D/Ecs/EntityManager.h>
 #include <R3D/Ecs/ArchetypeManager.h>
-
-#include <R3D/Graphics/Components/BasicGraphicsComponents.h>
-#include <R3D/Physics/Components/BasicPhysicsComponents.h>
-#include <R3D/Physics/Components/PrimitivesComponents.h>
 #include <R3D/Ecs/TransformComponent.h>
+#include <R3D/Graphics/Components/BasicGraphicsComponents.h>
+#include <R3D/Physics/Core/Contact.h>
 
 namespace r3d
 {
@@ -44,8 +42,8 @@ namespace r3d
 		rotated_displacement = segLength * rotated_displacement / glm::length(rotated_displacement);
 
 		Entity entity_s = m_em->create();
-		m_am->setArchetype(entity_s, ComponentList::buildList<Segment, Color, Transform, ContactEntityTag, PrimitiveTag>());
-		m_am->set<Segment>(entity_s, Segment{});
+		m_am->setArchetype(entity_s, ComponentList::buildList<SegmentPrimitive, Color, Transform, ContactEntityTag>());
+		m_am->set<SegmentPrimitive>(entity_s, SegmentPrimitive{});
 		m_am->set<Color>(entity_s, Color{ float4{color.r, color.g, color.b, 1.0} });
 		m_am->set<Transform>(entity_s, Transform{ (float3)position + rotated_displacement, q, float3{1.0} });
 	}
@@ -65,8 +63,8 @@ namespace r3d
 		fquat q{ 1.0, 0.0, 0.0, 0.0 };
 
 		Entity entity_c = m_em->create();
-		m_am->setArchetype(entity_c, ComponentList::buildList<Circle, Color, Transform, ContactEntityTag, PrimitiveTag>());
-		m_am->set<Circle>(entity_c, Circle{});
+		m_am->setArchetype(entity_c, ComponentList::buildList<CirclePrimitive, Color, Transform, ContactEntityTag>());
+		m_am->set<CirclePrimitive>(entity_c, CirclePrimitive{});
 		m_am->set<Color>(entity_c, Color{ float4{color.r, color.g, color.b, 1.0} });
 		m_am->set<Transform>(entity_c, Transform{ position, q, float3{rad} });
 	}
