@@ -1,7 +1,6 @@
 #include <R3Dpch.h>
 
 #include <R3D/Ecs/TransformComponent.h>
-#include <R3D/Physics/Components/PrimitivesComponents.h>
 #include <R3D/Physics/Core/Detection.h>
 #include <R3D/Physics/Core/World.h>
 #include "BoxBoxContactDetector.h"
@@ -11,6 +10,8 @@ namespace r3d
 
 	void BoxBoxContactDetector::update(ArchetypeManager& am, double t, double dt)
 	{
+		auto start = std::chrono::system_clock::now();
+
 		auto archetypes = am.matchAtLeastWithout(ComponentList::buildList<ColliderBox, Transform>(), {});
 
 		// same archetype
@@ -96,5 +97,10 @@ namespace r3d
 				}
 			}
 		}
+
+		auto end = std::chrono::system_clock::now();
+		measuredTime += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+		++trials;
+
 	}
 }
