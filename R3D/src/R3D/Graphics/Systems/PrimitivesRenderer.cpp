@@ -1,6 +1,7 @@
 #include <R3Dpch.h>
 #include "PrimitivesRenderer.h"
 #include <R3D/Physics/Core/Colliders.h>
+#include <R3D/Physics/Core/Geometry.h>
 
 namespace r3d
 {
@@ -114,25 +115,6 @@ namespace r3d
 		}
 	}
 
-	void PrimitivesRenderer::getInstancesDataNew(ArchetypeManager& am, const ComponentList& componentList, std::vector<InstanceData>& outInstancesData)
-	{
-		auto archetypes = am.matchAtLeastWithout(componentList, {});
-		for (auto archIt = archetypes.begin(); archIt != archetypes.end(); ++archIt)
-		{
-			auto transform = get<Transform>(am, *archIt);
-			auto color = get<Color>(am, *archIt);
-			size_t numElements = getSize<Color>(am, *archIt);
-			for (size_t j = 0; j < numElements; j++)
-			{
-				outInstancesData.emplace_back(compute_model_matrix(transform[j].position, transform[j].orientation, real(2.0) * transform[j].scale), color[j].vec);
-				//outInstancesData.push_back(InstanceData{});
-				//outInstancesData.back().modelMatrix = std::move(compute_model_matrix(pos[j].vec, ori[j].quat, 2.0 * scale[j].vec));
-				//outInstancesData.back().color = color[j].vec;
-			}
-		}
-	}
-
-
 	void PrimitivesRenderer::getInstancesData(ArchetypeManager& am, const ComponentList& componentList, std::vector<InstanceData>& outInstancesData)
 	{
 		auto archetypes = am.matchAtLeastWithout(componentList, {});
@@ -144,9 +126,6 @@ namespace r3d
 			for (size_t j = 0; j < numElements; j++)
 			{
 				outInstancesData.emplace_back(compute_model_matrix(transform[j].position, transform[j].orientation, real(2.0) * transform[j].scale), color[j].vec);
-				//outInstancesData.push_back(InstanceData{});
-				//outInstancesData.back().modelMatrix = std::move(compute_model_matrix(pos[j].vec, ori[j].quat, 2.0 * scale[j].vec));
-				//outInstancesData.back().color = color[j].vec;
 			}
 		}
 	}
@@ -171,19 +150,9 @@ namespace r3d
 				const float3& n = glm::normalize(float3{ transform[j].orientation.x, transform[j].orientation.y, transform[j].orientation.z });
 				const float& off = transform[j].position.x;
 
-				float3 N1{ 0.0f,0.0f,1.0f };
-				float3 N2 = (float3)n;
-				float3 M = glm::normalize(N1 + N2);
-				float3 axis = glm::normalize(glm::cross(M, N2));
-
-				float cos = glm::dot(M, N2);
-				float sin = glm::length(glm::cross(M, N2));
-				fquat q;
-				q.w = cos;
-				q.x = sin * axis.x;
-				q.y = sin * axis.y;
-				q.z = sin * axis.z;
-				q = glm::normalize(q);
+				float3 tangent[2];
+				compute_basis(n, tangent[0], tangent[1]);
+				fquat q = glm::quat_cast(glm::transpose(real3x3{ n, tangent[0], tangent[1] }));
 
 				if (am.has<Transform>(entities[j])) scale = am.get<Transform>(entities[j])->scale;
 
@@ -219,7 +188,7 @@ namespace r3d
 
 		requiredComponents = ComponentList::buildList<Transform, Color, BoxPrimitive>();
 		m_instancesData.push_back({});
-		getInstancesDataNew(am, requiredComponents, m_instancesData.back());
+		getInstancesData(am, requiredComponents, m_instancesData.back());
 
 	}
 

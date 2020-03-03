@@ -3,7 +3,6 @@
 #include "SpherePlaneContactDetector.h"
 
 #include <R3D/Ecs/TransformComponent.h>
-#include <R3D/Physics/Components/PrimitivesComponents.h>
 #include <R3D/Physics/Core/Detection.h>
 #include <R3D/Physics/Core/World.h>
 
