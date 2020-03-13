@@ -23,6 +23,7 @@ namespace r3d {
 		double		 m_width;
 		double		 m_height;
 		GLFWmonitor* m_monitor;
+		float        m_fontscale;
 		bool		 m_fullscreen;
 
 		float colorR, colorG, colorB;
@@ -35,13 +36,13 @@ namespace r3d {
 		/*!
 		Width and Height must be specified in pixels.
 		*/
-		Window(std::string title, double width /* in pixels */, double height, int maxFramerate = 60);
+		Window(std::string title, double width /* in pixels */, double height, int maxFramerate = 60, float fontscale = 1.0);
 		/*!
 		Width and Height must be specified in pixels. The Monitor can be either G_PRIMARY or G_SECONDARY or G_NOTSPECIFIED. G_NOTSPECIFIED will take the default primary
-		monitor.
+		monitor. The scaling of fonts can also be specified.
 		*/
-		Window(std::string title, double width /* in pixels */, double height, Monitor monitor, int maxFramerate = 60);
-		
+		Window(std::string title, double width /* in pixels */, double height, Monitor monitor, int maxFramerate = 60, float fontscale = 1.0);
+
 		bool isClosed() const;
 		void close() const { glfwSetWindowShouldClose(m_window, true); }
 		void setViewPort(float width, float height) const;
@@ -55,12 +56,16 @@ namespace r3d {
 		void setWidth(double width) { m_width = width; }
 		void setHeight(double height) { m_height = height; }
 		void setColor(float r, float g, float b) { colorR = r; colorG = g; colorB = b; }
+		void setCursorDisabled() const;
+		void setCursorVisible() const;
+		void setCursorPosition(std::pair<float, float> pos) const;
+		void setFontscale(float fontscale);
 		double getWidth() const { return m_width; }
 		double getHeight() const { return m_height; }
-		float getColorR() { return colorR; }
-		float getColorG() { return colorG; }
-		float getColorB() { return colorB; }
-
+		float getColorR() const { return colorR; }
+		float getColorG() const { return colorG; }
+		float getColorB() const { return colorB; }
+		float getFontscale() const { return m_fontscale; }
 		//!< Updates the stored time (in seconds) with the real time.
 		void  updateTime();
 		//!< Gets the latest stored time (stored when using updateTime)

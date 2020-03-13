@@ -131,7 +131,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Sandbox.cpp" />
+    <ClInclude Include="src\Palette.h" />
+    <ClInclude Include="src\SolidPrimitivesRenderer.h" />
+    <ClInclude Include="src\WorldLayer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Palette.cpp" />
+    <ClCompile Include="src\SandboxApp.cpp" />
+    <ClCompile Include="src\SandboxGui.cpp" />
+    <ClCompile Include="src\SolidPrimitivesRenderer.cpp" />
+    <ClCompile Include="src\WorldLayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\R3D\R3D.vcxproj">

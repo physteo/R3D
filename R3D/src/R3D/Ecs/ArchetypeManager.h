@@ -14,7 +14,7 @@ namespace r3d
 	class ArchetypeManager : public EventsListener
 	{
 	public:
-		std::unordered_map<Entity, size_t> m_entity_to_archetypeData;
+		std::unordered_map<Entity, size_t, EntityHasher> m_entity_to_archetypeData;
 		std::vector<ArchetypeData> m_archetypeDataVector;
 
 		ArchetypeManager()

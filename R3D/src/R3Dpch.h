@@ -27,6 +27,7 @@
 #include <chrono>
 #include <thread>
 #include <regex>
+#include <filesystem>
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>

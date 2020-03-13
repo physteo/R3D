@@ -6,6 +6,7 @@
 #include <R3D/Core/MathUtils.h>
 #include <R3D/Core/Application.h>
 #include <R3D/Core/Window.h>
+#include <R3D/Core/Input.h>
 #include <R3D/Utils/Random.h>
 #include <R3D/Events/EventManager.h>
 #include <R3D/Ecs/EntityManager.h>
@@ -15,6 +16,7 @@
 
 #include <R3D/Graphics/Core/Camera.h>
 #include <R3D/Graphics/Core/Shader.h>
+#include <R3D/Graphics/Core/FrameBuffer.h>
 #include <R3D/Graphics/Components/BasicGraphicsComponents.h>
 #include <R3D/Graphics/Systems/PrimitivesRenderer.h>
 
@@ -24,8 +26,3 @@
 #include <R3D/Physics/Systems/SpherePlaneContactDetector.h>
 #include <R3D/Physics/Systems/BoxPlaneContactDetector.h>
 #include <R3D/Physics/Systems/BoxBoxContactDetector.h>
-
-
-// ----------- Entry point -----------
-#include <R3D/Core/EntryPoint.h>
-// ----------- ----------- -----------

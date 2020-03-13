@@ -9,7 +9,7 @@ namespace r3d
 
 	void ImGuiLayer::onUpdate(Window* window)
 	{
-		// Start the Dear ImGui frame
+		// Start the Dear ImGui frame 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -43,6 +43,8 @@ namespace r3d
 		// Setup Platform/Renderer bindings
 		ImGui_ImplOpenGL3_Init("#version 410");
 		ImGui_ImplGlfw_InitForOpenGL(window->getGLFWwindow(), true);
+		ImGui::GetStyle().ScaleAllSizes(window->getFontscale());
+
 	}
 
 	void ImGuiLayer::shutdown()
@@ -50,6 +52,18 @@ namespace r3d
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
+	}
+
+}
+
+namespace ImGui
+{
+
+	bool Begin(const char* name, float fontscale, bool* p_open, ImGuiWindowFlags flags)
+	{
+		bool result = ImGui::Begin(name, p_open, flags);
+		ImGui::SetWindowFontScale(fontscale);
+		return result;
 	}
 
 }

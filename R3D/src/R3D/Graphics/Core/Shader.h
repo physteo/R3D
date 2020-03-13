@@ -9,23 +9,41 @@
 namespace r3d
 {
 
+	enum class ShaderType
+	{
+		NONE = -1, VERTEX = 0, FRAGMENT = 1, GEOMETRY = 2, COMPUTE = 3
+	};
+
 	struct ShaderProgramSource
 	{
+		ShaderProgramSource(
+			const std::string& vertex = "",
+			const std::string& fragment = "",
+			const std::string& geometry = "",
+			const std::string& compute = "") :
+			VertexSource{ vertex },
+			FragmentSource{ fragment },
+			GeometrySource{ geometry },
+			ComputeShader{ compute } {}
 		std::string VertexSource;
 		std::string FragmentSource;
 		std::string GeometrySource;
 		std::string ComputeShader;
 	};
-	static ShaderProgramSource ParseShader(const std::string& filepath);
+
+	ShaderProgramSource ParseShader(const std::string& filepath);
+
+	unsigned int compileShader(unsigned int type, const std::string& shader);
+
+	unsigned int generateProgram(ShaderProgramSource source);
+
 
 	class Shader
 	{
 	public:
-		Shader() : m_id(0), m_path("") {};
-		Shader(const std::string& path) : m_id(0), m_path("")
-		{
-			generate(path);
-		};
+		Shader();
+		Shader(const std::string& path);
+		Shader(unsigned int id, ShaderProgramSource source, const std::string& path);
 
 		//Cannot use the copy constructor/assignment.
 		Shader(const Shader &) = delete;
@@ -39,6 +57,9 @@ namespace r3d
 		static void bind(unsigned int id) { glUseProgram(id); }
 		static void unbind() { glUseProgram(0); }
 
+		inline const std::string& getFilename() const { return m_path; }
+		inline const ShaderProgramSource& getSource() const { return m_source; }
+
 		void setUniformValue(const std::string& name, int          value) const;
 		void setUniformValue(const std::string& name, double       value) const;
 		void setUniformValue(const std::string& name, unsigned int value) const;
@@ -46,7 +67,8 @@ namespace r3d
 		void setUniformValue(const std::string& name, float v1, float v2) const;
 		void setUniformValue(const std::string& name, float v1, float v2, float v3) const;
 		void setUniformValue(const std::string& name, float v1, float v2, float v3, float v4) const;
-		void setUniformValue(const std::string& name, float3) const;
+		void setUniformValue(const std::string& name, float3 value) const;
+		void setUniformValue(const std::string& name, float4 value) const;
 		void setUniformMatrix(const std::string& name, const float4x4& matrix, bool transpose) const;
 
 		static void setUniformValue(unsigned int id, const std::string& name, int          value);
@@ -63,14 +85,13 @@ namespace r3d
 		inline unsigned int getID() const { return m_id; }
 
 	private:
-		void generate(const std::string& path);
-		unsigned int compileShader(unsigned int type, const std::string& shader);
 		void release();
 		void swapData(Shader& other);
 
 		unsigned int m_id;
 		std::string  m_path;
 		std::vector<std::string> m_textureUnits;
+		ShaderProgramSource m_source;
 
 	};
 

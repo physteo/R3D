@@ -1,0 +1,18 @@
+
+FBO: draw quad using fbo. Need to change the basic loop on the Application class.
+
+*** read themachinery for dpi options
+*** Imgui docking changes fontscale of titles
+*** better managing input and camera modes
+*** shader editing at runtime
+
+1) Reimplement rendering
+	A) Instanced renderer for colored, untextured basic shapes (box, sphere, plane) with
+	   lights(point, omni, torch) and shadows.
+	B) Renderer for any mesh, with textures (diffuse, normal, reflection).
+		- keep shader at beginning (then, renderer should organize data first renderables according to their shader). 
+	C) Acceleration (frustrum culling ...)
+
+2) Physics optimizations with spatial queries
+
+3) Camera controls

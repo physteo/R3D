@@ -13,7 +13,7 @@ namespace r3d
 		const Entity& e1, const Entity& e2,
 		CollisionData* data)
 	{
-		if (data->totalContacts >= data->maximumContacts) return 0;
+		//if (data->totalContacts >= data->maximumContacts) return 0;
 
 		// Find the vector between the objects.
 		real3 midline = pos1 - pos2;
@@ -39,8 +39,8 @@ namespace r3d
 		////contact.e2 = e2;
 		//contact->restitution = data->restitution;
 		//contact->friction = data->friction;
-		data->contacts.push_back(contact);
-		++data->totalContacts;
+		//data->contacts.push_back(contact);
+		//++data->totalContacts;
 
 		return 1;
 	}

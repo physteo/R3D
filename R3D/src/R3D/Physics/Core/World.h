@@ -3,22 +3,18 @@
 
 namespace r3d {
 
-	struct CollisionData
+	class EntityManager;
+	class ArchetypeManager;
+
+	class CollisionData
 	{
-		CollisionData(size_t maximumContactsIn = 100, real toleranceIn = 0.01)
-		{
-			maximumContacts = maximumContactsIn;
-			totalContacts = 0;
-			contacts.reserve(maximumContactsIn);
-			tolerance = toleranceIn;
-		}
-
+	public:
+		void clearArbiters(EntityManager* em);
+		void preStep(ArchetypeManager* am, real dt);
+		void applyImpulses(ArchetypeManager* am, int iterations);
+	
 		std::unordered_map<ArbiterKey, Arbiter> arbiters;
-		std::vector<Contact> contacts;
 
-		size_t maximumContacts;
-		size_t totalContacts;
-		float tolerance;
 	};
 
 	typedef std::pair<ArbiterKey, Arbiter> ArbPair;

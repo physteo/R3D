@@ -12,7 +12,7 @@ namespace r3d
 		CollisionData* data
 	)
 	{
-		if (data->totalContacts >= data->maximumContacts) return 0;
+		//if (data->totalContacts >= data->maximumContacts) return 0;
 
 		real ballDistance = glm::dot(planeNormal, spherePos) -rad - planeOff;
 
@@ -26,8 +26,8 @@ namespace r3d
 		////contact.e2 = ePlane;
 		//contact->restitution = data->restitution;
 		//contact->friction = data->friction;
-		data->contacts.push_back(contact);
-		++data->totalContacts;
+		//data->contacts.push_back(contact);
+		//++data->totalContacts;
 
 		return 1;
 	}

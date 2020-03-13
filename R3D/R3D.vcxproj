@@ -145,19 +145,10 @@
     <ClInclude Include="src\R3D\Core\Application.h" />
     <ClInclude Include="src\R3D\Core\Core.h" />
     <ClInclude Include="src\R3D\Core\EntryPoint.h" />
+    <ClInclude Include="src\R3D\Core\Input.h" />
     <ClInclude Include="src\R3D\Core\Layer.h" />
     <ClInclude Include="src\R3D\Core\Log.h" />
     <ClInclude Include="src\R3D\Core\MathUtils.h" />
-    <ClInclude Include="src\R3D\Physics\Core\Colliders.h" />
-    <ClInclude Include="src\R3D\Physics\Core\RigidBody.h" />
-    <ClInclude Include="src\R3D\Physics\Core\World.h" />
-    <ClInclude Include="src\R3D\Physics\Core\Topology.h" />
-    <ClInclude Include="src\R3D\Physics\Core\Geometry.h" />
-    <ClInclude Include="src\R3D\Physics\Systems\BoxBoxContactDetector.h" />
-    <ClInclude Include="src\R3D\Physics\Systems\BoxPlaneContactDetector.h" />
-    <ClInclude Include="src\R3D\Physics\Systems\Integrator.h" />
-    <ClInclude Include="src\R3D\Utils\Debugger.h" />
-    <ClInclude Include="src\R3D\Utils\Random.h" />
     <ClInclude Include="src\R3D\Core\Window.h" />
     <ClInclude Include="src\R3D\Ecs\Archetype.h" />
     <ClInclude Include="src\R3D\Ecs\ArchetypeManager.h" />
@@ -168,6 +159,7 @@
     <ClInclude Include="src\R3D\Ecs\Metatype.h" />
     <ClInclude Include="src\R3D\Ecs\RawPackedArray.h" />
     <ClInclude Include="src\R3D\Ecs\System.h" />
+    <ClInclude Include="src\R3D\Ecs\TransformComponent.h" />
     <ClInclude Include="src\R3D\Events\Event.h" />
     <ClInclude Include="src\R3D\Events\EventManager.h" />
     <ClInclude Include="src\R3D\Events\EventTypesAndCategories.h" />
@@ -179,37 +171,36 @@
     <ClInclude Include="src\R3D\Graphics\Core\BasicMatrixOperations.h" />
     <ClInclude Include="src\R3D\Graphics\Core\Buffer.h" />
     <ClInclude Include="src\R3D\Graphics\Core\Camera.h" />
+    <ClInclude Include="src\R3D\Graphics\Core\FrameBuffer.h" />
     <ClInclude Include="src\R3D\Graphics\Core\InstancesRenderer.h" />
     <ClInclude Include="src\R3D\Graphics\Core\Shader.h" />
     <ClInclude Include="src\R3D\Graphics\Core\VertexArray.h" />
     <ClInclude Include="src\R3D\Graphics\Systems\PrimitivesRenderer.h" />
     <ClInclude Include="src\R3D\ImGui\ImGuiLayer.h" />
-    <ClInclude Include="src\R3D\Ecs\TransformComponent.h" />
-    <ClInclude Include="src\R3D\Physics\Core\Detection.h" />
+    <ClInclude Include="src\R3D\Physics\Core\Colliders.h" />
     <ClInclude Include="src\R3D\Physics\Core\Contact.h" />
+    <ClInclude Include="src\R3D\Physics\Core\Detection.h" />
+    <ClInclude Include="src\R3D\Physics\Core\Geometry.h" />
+    <ClInclude Include="src\R3D\Physics\Core\RigidBody.h" />
+    <ClInclude Include="src\R3D\Physics\Core\Topology.h" />
+    <ClInclude Include="src\R3D\Physics\Core\World.h" />
+    <ClInclude Include="src\R3D\Physics\Systems\BoxBoxContactDetector.h" />
+    <ClInclude Include="src\R3D\Physics\Systems\BoxPlaneContactDetector.h" />
+    <ClInclude Include="src\R3D\Physics\Systems\Integrator.h" />
     <ClInclude Include="src\R3D\Physics\Systems\SpherePlaneContactDetector.h" />
     <ClInclude Include="src\R3D\Physics\Systems\SphereSphereContactDetector.h" />
+    <ClInclude Include="src\R3D\Utils\Debugger.h" />
+    <ClInclude Include="src\R3D\Utils\Random.h" />
     <ClInclude Include="src\R3D\Utils\RingBuffer.h" />
     <ClInclude Include="src\R3D\Utils\StringHash.h" />
     <ClInclude Include="src\R3Dpch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\R3D\Core\Application.cpp" />
+    <ClCompile Include="src\R3D\Core\Input.cpp" />
     <ClCompile Include="src\R3D\Core\Layer.cpp" />
     <ClCompile Include="src\R3D\Core\Log.cpp" />
     <ClCompile Include="src\R3D\Core\MathUtils.cpp" />
-    <ClCompile Include="src\R3D\Physics\Core\BoxPlane.cpp" />
-    <ClCompile Include="src\R3D\Physics\Core\Colliders.cpp" />
-    <ClCompile Include="src\R3D\Physics\Core\Contact.cpp" />
-    <ClCompile Include="src\R3D\Physics\Core\BoxBox.cpp" />
-    <ClCompile Include="src\R3D\Physics\Core\World.cpp" />
-    <ClCompile Include="src\R3D\Physics\Core\Topology.cpp" />
-    <ClCompile Include="src\R3D\Physics\Core\Geometry.cpp" />
-    <ClCompile Include="src\R3D\Physics\Systems\BoxBoxContactDetector.cpp" />
-    <ClCompile Include="src\R3D\Physics\Systems\BoxPlaneContactDetector.cpp" />
-    <ClCompile Include="src\R3D\Physics\Systems\Integrator.cpp" />
-    <ClCompile Include="src\R3D\Utils\Debugger.cpp" />
-    <ClCompile Include="src\R3D\Utils\Random.cpp" />
     <ClCompile Include="src\R3D\Core\Window.cpp" />
     <ClCompile Include="src\R3D\Ecs\ArchetypeManager.cpp" />
     <ClCompile Include="src\R3D\Ecs\EntityManager.cpp" />
@@ -218,14 +209,27 @@
     <ClCompile Include="src\R3D\Graphics\Core\BasicMatrixOperations.cpp" />
     <ClCompile Include="src\R3D\Graphics\Core\Buffer.cpp" />
     <ClCompile Include="src\R3D\Graphics\Core\Camera.cpp" />
+    <ClCompile Include="src\R3D\Graphics\Core\FrameBuffer.cpp" />
     <ClCompile Include="src\R3D\Graphics\Core\Shader.cpp" />
     <ClCompile Include="src\R3D\Graphics\Core\VertexArray.cpp" />
     <ClCompile Include="src\R3D\Graphics\Systems\PrimitivesRenderer.cpp" />
     <ClCompile Include="src\R3D\ImGui\ImGuiLayer.cpp" />
-    <ClCompile Include="src\R3D\Physics\Core\SphereSphere.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\BoxBox.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\BoxPlane.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\Colliders.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\Contact.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\Geometry.cpp" />
     <ClCompile Include="src\R3D\Physics\Core\SpherePlane.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\SphereSphere.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\Topology.cpp" />
+    <ClCompile Include="src\R3D\Physics\Core\World.cpp" />
+    <ClCompile Include="src\R3D\Physics\Systems\BoxBoxContactDetector.cpp" />
+    <ClCompile Include="src\R3D\Physics\Systems\BoxPlaneContactDetector.cpp" />
+    <ClCompile Include="src\R3D\Physics\Systems\Integrator.cpp" />
     <ClCompile Include="src\R3D\Physics\Systems\SpherePlaneContactDetector.cpp" />
     <ClCompile Include="src\R3D\Physics\Systems\SphereSphereContactDetector.cpp" />
+    <ClCompile Include="src\R3D\Utils\Debugger.cpp" />
+    <ClCompile Include="src\R3D\Utils\Random.cpp" />
     <ClCompile Include="src\R3D\Utils\RingBuffer.cpp" />
     <ClCompile Include="src\R3D\Utils\StringHash.cpp" />
     <ClCompile Include="src\R3Dpch.cpp">
@@ -242,6 +246,15 @@
     <ProjectReference Include="vendor\imgui\imgui.vcxproj">
       <Project>{0098A80F-6CAC-D0C0-352E-7420A101CDF1}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\shaders\fbo.shader" />
+    <None Include="res\shaders\lamp.shader" />
+    <None Include="res\shaders\lines.shader" />
+    <None Include="res\shaders\solid.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="res\TODO.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

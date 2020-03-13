@@ -1,6 +1,7 @@
 #pragma once
 
 #include <R3D/Core/Core.h>
+#include <functional>
 
 namespace r3d
 {
@@ -46,14 +47,9 @@ namespace r3d
 
 	};
 
-}
-
-namespace std
-{
-	template<>
-	struct hash<r3d::Entity>
+	struct EntityHasher
 	{
-		using argument_type = r3d::Entity;
+		using argument_type = Entity;
 		using result_type = size_t;
 
 		result_type operator()(const argument_type& f) const
@@ -61,6 +57,22 @@ namespace std
 			return std::hash<size_t>()(f.id);
 		}
 	};
+
+}
+
+namespace std
+{
+	//template<>
+	//struct hash<r3d::Entity>
+	//{
+	//	using argument_type = r3d::Entity;
+	//	using result_type = size_t;
+	//
+	//	result_type operator()(const argument_type& f) const
+	//	{
+	//		return std::hash<size_t>()(f.id);
+	//	}
+	//};
 
 	//template<>
 	//struct hash<std::pair<r3d::Entity, r3d::Entity> >

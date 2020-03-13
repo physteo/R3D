@@ -66,7 +66,7 @@ namespace r3d
 	private:
 		static constexpr size_t MAX_ELEMENTS = 32768;
 
-		std::unordered_map<Entity, size_t>	m_map;
+		std::unordered_map<Entity, size_t, EntityHasher>	m_map;
 		std::vector<Entity>	m_dataEntities;
 		size_t			    m_active;
 

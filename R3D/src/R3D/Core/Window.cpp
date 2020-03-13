@@ -30,15 +30,16 @@ namespace r3d
 
 #endif
 
-	Window::Window(std::string title, double width, double height, int maxFramerate) : Window{ title, width, height, Monitor::G_NOTSPECIFIED, maxFramerate }
+	Window::Window(std::string title, double width, double height, int maxFramerate, float fontscale) : Window{ title, width, height, Monitor::G_NOTSPECIFIED, maxFramerate }
 	{
 		colorR = 0.05; colorG = 0.05; colorB = 0.05;
+		m_fontscale = fontscale;
 	}
 
-	Window::Window(std::string title, double width, double height, Monitor monitor, int maxFramerate)
+	Window::Window(std::string title, double width, double height, Monitor monitor, int maxFramerate, float fontscale)
 	{
 		colorR = 0.05; colorG = 0.05; colorB = 0.05;
-
+		m_fontscale = fontscale;
 		m_lastTime = getCurrentTime();
 		R3D_ASSERT(maxFramerate > 0, "MaxFramerate must be positive.");
 		m_maxFramerate = maxFramerate;
@@ -124,9 +125,6 @@ namespace r3d
 		R3D_CORE_ASSERT(versionMajor > 4 || (versionMajor == 4 && versionMinor >= 5), "R3D requires at least OpenGL version 4.5!");
 		
 		// Event callbacks
-
-
-
 	}
 
 	void Window::setViewPort(float width, float height) const
@@ -164,6 +162,26 @@ namespace r3d
 	void Window::terminate() const
 	{
 		glfwTerminate();
+	}
+
+	void Window::setCursorDisabled() const
+	{
+		glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+
+	void Window::setCursorVisible() const
+	{
+		glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
+	void Window::setCursorPosition(std::pair<float, float> pos) const
+	{
+		glfwSetCursorPos(m_window, pos.first, pos.second);
+	}
+
+	void Window::setFontscale(float fontscale)
+	{
+		m_fontscale = fontscale;
 	}
 
 	double Window::getLastTime() const

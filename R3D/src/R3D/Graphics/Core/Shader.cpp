@@ -4,16 +4,12 @@
 namespace r3d
 {
 
-	static ShaderProgramSource ParseShader(const std::string& filepath)
+	ShaderProgramSource ParseShader(const std::string& filepath)
 	{
 		bool geometryShaderExists = false;
 		bool computeShaderExists = false;
 
 		std::ifstream stream(filepath);
-		enum class ShaderType
-		{
-			NONE = -1, VERTEX = 0, FRAGMENT = 1, GEOMETRY = 2, COMPUTE = 3
-		};
 		std::string line = "";
 		std::stringstream ss[4];
 		ss[0].str(std::string());
@@ -54,6 +50,30 @@ namespace r3d
 		return source;
 	}
 
+	Shader::Shader() : m_id(0), m_path("") {};
+
+	Shader::Shader(const std::string& path) : m_id(0), m_path(path)
+	{
+		ShaderProgramSource source = ParseShader(path);
+		unsigned int id = generateProgram(source);
+		if (id != 0)
+		{
+			m_id = id;
+			m_source = source;
+		}
+		else
+		{
+			m_id = 0;
+		}
+	};
+
+	Shader::Shader(unsigned int id, ShaderProgramSource source, const std::string& path)
+	{
+		m_path = path;
+		m_id = id;
+		m_source = std::move(source);
+	}
+
 	Shader::Shader(Shader&& other)
 	{
 		swapData(other);
@@ -68,11 +88,8 @@ namespace r3d
 		return *this;
 	}
 
-	void Shader::generate(const std::string& path)
+	unsigned int generateProgram(ShaderProgramSource source)
 	{
-		m_path = path;
-		ShaderProgramSource source = ParseShader(m_path);
-
 		std::string vertexShader = source.VertexSource;
 		std::string fragmentShader = source.FragmentSource;
 		std::string geometryShader = source.GeometrySource;
@@ -81,6 +98,12 @@ namespace r3d
 		/* create and compile vertex, fragment and geometry (if present) shaders */
 		unsigned int vs = compileShader(GL_VERTEX_SHADER, vertexShader);
 		unsigned int fs = compileShader(GL_FRAGMENT_SHADER, fragmentShader);
+
+		if (vs == 0 || fs == 0)
+		{
+			return 0;
+		}
+
 		unsigned int gs = -1;
 		if (geometryShader != "") {
 			gs = compileShader(GL_GEOMETRY_SHADER, geometryShader);
@@ -92,29 +115,28 @@ namespace r3d
 			cs = compileShader(GL_COMPUTE_SHADER, computeShader);
 		}
 
-
 		/* create a program and attach the shaders */
-		m_id = glCreateProgram();
+		unsigned int id = glCreateProgram();
 
 		// is there a compute shader? discard the rest
 		if (computeShader != "")
 		{
-			glAttachShader(m_id, cs);
+			glAttachShader(id, cs);
 		}
 		else
 		{
-			glAttachShader(m_id, vs);
-			glAttachShader(m_id, fs);
+			glAttachShader(id, vs);
+			glAttachShader(id, fs);
 			if (geometryShader != "") {
-				glAttachShader(m_id, gs);
+				glAttachShader(id, gs);
 			}
 		}
 
 		/* link the program */
-		glLinkProgram(m_id);
+		glLinkProgram(id);
 
 		/* validate the program */
-		//glValidateProgram(m_id); //TODO: needed?
+		//glValidateProgram(id); //TODO: needed?
 
 		/* now the shaders' memory can be freed */
 		if (computeShader != "")
@@ -132,21 +154,23 @@ namespace r3d
 
 		/* check the status of linking and print log if linking failed */
 		GLint linked;
-		glGetProgramiv(m_id, GL_LINK_STATUS, &linked);
+		glGetProgramiv(id, GL_LINK_STATUS, &linked);
 		if (linked == GL_FALSE)
 		{
 			// retrieve the length of the log
 			GLint logLength;
-			glGetProgramiv(m_id, GL_INFO_LOG_LENGTH, &logLength);
+			glGetProgramiv(id, GL_INFO_LOG_LENGTH, &logLength);
 
 			// retrieve the log
 			char* log = (char*)alloca(logLength);
-			glGetProgramInfoLog(m_id, logLength, nullptr, log);
+			glGetProgramInfoLog(id, logLength, nullptr, log);
 
 			// print the log
 			std::cout << "Failure at linking program. Log: \n" << log << std::endl;
-			throw - 1;
+			return 0;
 		}
+
+		return id;
 	}
 
 	void Shader::setTexture(GLenum target, const std::string& uniformName, unsigned int textureID)
@@ -170,7 +194,7 @@ namespace r3d
 		glBindTexture(target, textureID);
 	}
 
-	unsigned int Shader::compileShader(unsigned int type, const std::string & shader)
+	unsigned int compileShader(unsigned int type, const std::string& shader)
 	{
 		unsigned int s;
 		const char* src = shader.c_str();
@@ -203,12 +227,6 @@ namespace r3d
 		return s;
 	}
 
-	//void Shader::registerUniforms(const std::string& shaderText)
-	//{
-	//
-	//}
-
-
 	void Shader::release()
 	{
 		glDeleteProgram(m_id);
@@ -226,10 +244,15 @@ namespace r3d
 		{
 			m_textureUnits.push_back(*it);
 		}
+		m_source = other.m_source;
 
 		other.m_id = 0;
 		other.m_path = "";
 		other.m_textureUnits.clear();
+		other.m_source.VertexSource = "";
+		other.m_source.FragmentSource = "";
+		other.m_source.GeometrySource = "";
+		other.m_source.ComputeShader = "";
 	}
 
 	void Shader::setUniformValue(unsigned int id, const std::string& name, int          value)
@@ -291,39 +314,51 @@ namespace r3d
 		glUniformMatrix4fv(location, 1, transpose, glm::value_ptr(matrix));
 	}
 
-
 	void Shader::setUniformValue(const std::string& name, int value) const
 	{
 		setUniformValue(m_id, name, value);
 	}
+
 	void Shader::setUniformValue(const std::string& name, double value)const
 	{
 		setUniformValue(m_id, name, value);
 	}
+
 	void Shader::setUniformValue(const std::string& name, unsigned int value)const
 	{
 		setUniformValue(m_id, name, value);
 	}
+
 	void Shader::setUniformValue(const std::string& name, float value)const
 	{
 		setUniformValue(m_id, name, value);
 	}
+
 	void Shader::setUniformValue(const std::string& name, float v1, float v2)const
 	{
 		setUniformValue(m_id, name, v1, v2);
 	}
+
 	void Shader::setUniformValue(const std::string& name, float v1, float v2, float v3)const
 	{
 		setUniformValue(m_id, name, v1, v2, v3);
 	}
+
 	void Shader::setUniformValue(const std::string& name, float v1, float v2, float v3, float v4)const
 	{
 		setUniformValue(m_id, name, v1, v2, v3, v4);
 	}
+
 	void Shader::setUniformValue(const std::string& name, float3 value) const
 	{
 		setUniformValue(m_id, name, value);
 	}
+
+	void Shader::setUniformValue(const std::string& name, float4 value) const
+	{
+		setUniformValue(m_id, name, value);
+	}
+
 	void Shader::setUniformMatrix(const std::string& name, const float4x4& matrix, bool transpose) const
 	{
 		setUniformMatrix(m_id, name, matrix, transpose);
