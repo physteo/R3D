@@ -12,7 +12,8 @@ namespace r3d
 		RGBA = GL_RGBA,
 		sRGB = GL_SRGB,
 		sRGBA = GL_SRGB_ALPHA,
-		RGBA16 = GL_RGBA16
+		RGBA16 = GL_RGBA16,
+		RGBA16F = GL_RGBA16F,
 	};
 
 	//! Class for OpenGL Framebuffers
@@ -41,11 +42,14 @@ namespace r3d
 		//!< Binds the current framebuffer target to zero.
 		void unbind();
 		//!< creates a texture and owns it, stores its ID.
-		void attach2DTexture(GLenum attachment, int width, int height, TextureFormat internalFormat, GLenum dataFormat);
+		void attach2DTexture(GLenum attachment, int width, int height, TextureFormat internalFormat, TextureFormat format, GLenum dataFormat);
 		////!< Attaches a texture, taking its ownership.
 		//void attach2DTexture(GLenum attachment, Texture&& texture);
 		//!< creates a renderbuffer and owns it, stores its ID.
 		void attachRenderBuffer(GLenum internalFormat, int width, int height);
+
+		void setDrawBuffers();
+
 		//!< check if the framebuffer is complete (OpenGL requires at least one color attachment).
 		bool isComplete();
 		////!< retrieves the ID of the specified texture.
@@ -57,7 +61,7 @@ namespace r3d
 
 		std::vector<unsigned int> textureAttachments;
 		std::vector<unsigned int> renderBuffersAttachments;
-
+		std::vector<GLenum> drawBuffers;
 		void generate();
 
 		void release();

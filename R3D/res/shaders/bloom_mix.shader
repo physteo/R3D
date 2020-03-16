@@ -8,18 +8,22 @@ out vec2 TexCoords;
 void main()
 {
 	gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);
-	TexCoords =     aTexCoords;
+	TexCoords = aTexCoords;
 }
 
 #shader fragment
 #version 330 core
 
-layout(location = 0) out vec3 FragColor;
+layout(location = 0) out vec4 FragColor;
 in vec2 TexCoords;
 
 uniform sampler2D screenTexture;
+uniform sampler2D brightColors;
+
+uniform float bloom;
 
 void main()
 {
-	FragColor = texture(screenTexture, TexCoords).rgb;
+	FragColor = vec4(texture(screenTexture, TexCoords).rgb 
+		+ bloom * texture(brightColors, TexCoords).rgb, 1.0f);
 }

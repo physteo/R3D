@@ -7,13 +7,40 @@
 namespace r3d
 {
 
-	struct SunLight
+	struct LightAttenuation
+	{
+		float constant;
+		float linear;
+		float quadratic;
+	};
+
+	struct PointLight
 	{
 		float3 eye;
-		float3 center;
 		float3 ambient;
 		float3 diffuse;
 		float3 specular;
+		LightAttenuation attenuation;
+	};
+
+	struct SunLight
+	{
+		float3 center;
+		float3 eye;
+		float3 ambient;
+		float3 diffuse;
+		float3 specular;
+	};
+
+	struct SpotLight
+	{
+		float cutOff;
+		float3 eye;
+		float3 direction;
+		float3 ambient;
+		float3 diffuse;
+		float3 specular;
+		LightAttenuation attenuation;
 	};
 
 	class Shader;
@@ -22,23 +49,34 @@ namespace r3d
 	{
 	public:
 		SolidPrimitivesRenderer();
+		inline float3 getSunPosition() const { return pointLight.eye; }
 		inline void setShader(Shader* shader) { m_shader = shader; }
-		inline void setLampShader(Shader* shader) { m_lampShader = shader; }
-		inline void setSunPosition(float3 position) { sun.eye = position; }
-		inline float3 getSunPosition() const { return sun.eye; }
-		void drawSun(const float3& position, bool center) const;
-
+		inline void setSunShader(Shader* shader) { m_sunLightShader = shader; }
+		inline void setPointShader(Shader* shader) { m_pointLightShader = shader; }
+		inline PointLight& getPointLight() { return pointLight; }
+		inline SunLight& getSunLight() { return sunLight; }
+		inline SpotLight& getSpotLight() { return spotLight; }
+		inline void switchSpotLight() { spotLightOn = !spotLightOn; }
+		void drawLights(const float3& cameraPosition) const;
 		virtual void update(ArchetypeManager& am, double t, double dt) override;
 		
 	private:
 
 		VertexArray m_vao;
-		VertexArray m_lampVao;
+		VertexArray m_pointLightVao;
+		VertexArray m_sunLightVao;
 
 		Shader* m_shader;
-		Shader* m_lampShader;
+		Shader* m_sunLightShader;
+		Shader* m_pointLightShader;
 
-		SunLight sun;
+		PointLight pointLight;
+		SunLight sunLight;
+		SpotLight spotLight;
+		bool spotLightOn;
+
+		void drawPointLight(const float3& position, const float3& cameraPosition) const;
+		void drawSunLight(const float3& position, const float3& center, const float3& cameraPosition) const;
 	};
 
 }

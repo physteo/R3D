@@ -16,13 +16,12 @@ namespace r3d
 
 	Palette::Palette()
 	{
-
-		red = float4{ 205 / 255., 92 / 255.,   92 / 255., 1.0 };
-		orange = float4{ 255 / 255., 179 / 255.,  71 / 255., 1.0 };
-		green = float4{ 135 / 255., 169 / 255., 107 / 255., 1.0 };
-		blue = float4{ 65 / 255., 105 / 255., 225 / 255., 1.0 };
-		white = float4{ 1.0f };
-		colorsVec = { red, orange, green, blue };
+		red    = float4{ 190.0f / 255.0f,  34.0f / 255.0f,  34.0f / 255.0f, 1.0f };
+		blue   = float4{  19.0f / 255.0f,  50.0f / 255.0f, 255.0f / 255.0f, 1.0f };
+		green  = float4{  52.0f / 255.0f,  94.0f / 255.0f,  28.0f / 255.0f, 1.0f };
+		orange = float4{ 126.0f / 255.0f,  83.0f / 255.0f,  22.0f / 255.0f, 1.0f };
+		white  = float4{ 1.0f };
+		colorsVec = { red, green, blue, orange, white };
 	}
 
 }

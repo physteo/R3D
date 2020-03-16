@@ -21,11 +21,30 @@ namespace r3d
 	SolidPrimitivesRenderer::SolidPrimitivesRenderer()
 	{
 		// build light
-		sun.center = float3{ 0.0 };
-		sun.eye = float3{ 0.0, 10.0, 10.0 };
-		sun.ambient =  Palette::getInstance().white;
-		sun.diffuse =  Palette::getInstance().white;
-		sun.specular = Palette::getInstance().white;
+		pointLight.eye = float3{ 0.0, 10.0, 10.0 };
+		pointLight.ambient =  0.5f * Palette::getInstance().white;
+		pointLight.diffuse =  Palette::getInstance().white;
+		pointLight.specular = Palette::getInstance().white;
+		pointLight.attenuation.constant = 1.0f;
+		pointLight.attenuation.linear = 0.0f;//0.015f;
+		pointLight.attenuation.quadratic = 0.007f;
+
+		sunLight.eye     = float3{ 0.0, 15.0, -15.0 };
+		sunLight.center  = float3{ 0.0, 0.0, 0.0 };
+		sunLight.ambient =  0.5f * Palette::getInstance().white;
+		sunLight.diffuse =  Palette::getInstance().white;
+		sunLight.specular = Palette::getInstance().white;
+
+		spotLight.cutOff = 0.9f;
+		spotLight.eye = float3{ -10.0, 10.0, 0.0 };
+		spotLight.direction = -spotLight.eye;
+		spotLight.ambient = 0.5f * Palette::getInstance().white;
+		spotLight.diffuse = Palette::getInstance().white;
+		spotLight.specular = Palette::getInstance().white;
+		spotLight.attenuation.constant = 1.0f;
+		spotLight.attenuation.linear = 0.0f;//0.015f;
+		spotLight.attenuation.quadratic = 0.007f;
+		spotLightOn = true;
 
 		std::vector<unsigned int> indices =
 		{
@@ -151,7 +170,8 @@ namespace r3d
 
 		std::vector<unsigned int> components{3, 3, 3, 4};
 		m_vao = VertexArray{ {vertices, normals, tangents, colors}, components, indices };
-		m_lampVao = VertexArray{ {{-1,-1,0, 1,-1,0, 1,1,0, -1,1,0}, {1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1}}, {3, 4}, {0, 1, 2, 0, 2, 3} };
+		m_pointLightVao = VertexArray{ {{-1,-1,0, 1,-1,0, 1,1,0, -1,1,0}, {1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1}}, {3, 4}, {0, 1, 2, 0, 2, 3} };
+		m_sunLightVao = VertexArray{ {{0,0,0}, {1,1,1,1}}, {3, 4}, {0} };
 	}
 	
 	void SolidPrimitivesRenderer::update(ArchetypeManager& am, double t, double dt)
@@ -159,10 +179,30 @@ namespace r3d
 
 		m_shader->bind();
 		// pass lights
-		m_shader->setUniformValue("sun.direction", glm::normalize(sun.center - sun.eye) );
-		m_shader->setUniformValue("sun.ambient",   sun.ambient);
-		m_shader->setUniformValue("sun.diffuse",   sun.diffuse);
-		m_shader->setUniformValue("sun.specular",  sun.specular);
+		//m_shader->setUniformValue("sun.direction", glm::normalize(sun.center - sun.eye) );
+		m_shader->setUniformValue("pointLight.eye", pointLight.eye );
+		m_shader->setUniformValue("pointLight.ambient",   pointLight.ambient);
+		m_shader->setUniformValue("pointLight.diffuse",   pointLight.diffuse);
+		m_shader->setUniformValue("pointLight.specular",  pointLight.specular);
+		m_shader->setUniformValue("pointLight.attenuation.constant",  pointLight.attenuation.constant);
+		m_shader->setUniformValue("pointLight.attenuation.linear",    pointLight.attenuation.linear);
+		m_shader->setUniformValue("pointLight.attenuation.quadratic", pointLight.attenuation.quadratic);
+
+		m_shader->setUniformValue("sunLight.eye", sunLight.eye);
+		m_shader->setUniformValue("sunLight.center", sunLight.center);
+		m_shader->setUniformValue("sunLight.ambient", sunLight.ambient);
+		m_shader->setUniformValue("sunLight.diffuse", sunLight.diffuse);
+		m_shader->setUniformValue("sunLight.specular", sunLight.specular);
+
+		m_shader->setUniformValue("spotLight.eye",      spotLight.eye);
+		m_shader->setUniformValue("spotLight.direction",   spotLight.direction);
+		m_shader->setUniformValue("spotLight.ambient",  float(spotLightOn) * spotLight.ambient);
+		m_shader->setUniformValue("spotLight.diffuse",  float(spotLightOn) * spotLight.diffuse);
+		m_shader->setUniformValue("spotLight.specular", float(spotLightOn) * spotLight.specular);
+		m_shader->setUniformValue("spotLight.cutOff", spotLight.cutOff);
+		m_shader->setUniformValue("spotLight.attenuation.constant", spotLight.attenuation.constant);
+		m_shader->setUniformValue("spotLight.attenuation.linear", spotLight.attenuation.linear);
+		m_shader->setUniformValue("spotLight.attenuation.quadratic", spotLight.attenuation.quadratic);
 
 		m_vao.bind();
 
@@ -176,8 +216,9 @@ namespace r3d
 			{
 				auto model = compute_model_matrix(transform[j].position, transform[j].orientation, real(2.0) * transform[j].scale);
 				m_shader->setUniformMatrix("model", model, false);
-				m_shader->setUniformMatrix("normalMat", glm::inverse(glm::transpose(model)), false);
-				m_shader->setUniformValue("uniColor", float3{ color[j].vec.x, color[j].vec.y, color[j].vec.z });
+				m_shader->setUniformMatrix("normalMat", glm::transpose(glm::inverse(model)), false);
+				m_shader->setUniformValue("material.color", float3{ color[j].vec.x, color[j].vec.y, color[j].vec.z });
+				m_shader->setUniformValue("material.shininess", 128.0f);
 				glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 			}
 		}
@@ -185,32 +226,66 @@ namespace r3d
 		m_vao.unbind();
 		m_shader->unbind();
 
-		drawSun(sun.eye, false);
 
 	}
 
-	void SolidPrimitivesRenderer::drawSun(const float3& position, bool center) const
+	void SolidPrimitivesRenderer::drawLights(const float3& cameraPosition) const
 	{
-		m_lampShader->bind();
-		float3 lamppos = position;
-		fquat  lamprot{ 1,0,0,0 };
-		float3 lampsca{ 0.1 };
-		float4x4 lampmodel = compute_model_matrix(lamppos, lamprot, lampsca);
-		if (center)
-		{
-			m_shader->setUniformMatrix("model", lampmodel, false);
-			m_shader->setUniformMatrix("view", glm::identity<float4x4>(), false);
-			m_shader->setUniformMatrix("projection", glm::identity<float4x4>(), false);
-		}
-		m_shader->setUniformMatrix("model", lampmodel, false);
+		drawPointLight(pointLight.eye, cameraPosition);
+		drawSunLight(sunLight.eye, sunLight.center, cameraPosition);
+		//drawSun(spotLight.eye, false, cameraPosition);
+	}
 
-		m_lampVao.bind();
+	void SolidPrimitivesRenderer::drawSunLight(const float3& position, const float3& center, const float3& cameraPosition) const
+	{
+		float3 distanceFromCameraVec = position - cameraPosition;
+		float distanceFromCameraLen = glm::length(distanceFromCameraVec);
+
+		m_sunLightShader->bind();
+		float3 lamppos = position;
+		float3 lampsca = float3{ 1.0f };
+		fquat lamprot = fquat{ 1.0f, 0.0f, 0.0f, 0.0f };
+				
+		float4x4 lampmodel = compute_model_matrix(lamppos, lamprot, lampsca);
+		
+		m_sunLightShader->setUniformMatrix("model", lampmodel, false);
+		float3 direction = center - position;
+		m_sunLightShader->setUniformValue("direction", direction.x, direction.y, direction.z);
+		m_sunLightShader->setUniformValue("cameraDistance", distanceFromCameraLen);
+
+		m_sunLightVao.bind();
+		glDisable(GL_CULL_FACE);
+		glDrawElements(GL_POINTS, 1, GL_UNSIGNED_INT, 0);
+		glEnable(GL_CULL_FACE);
+		m_sunLightVao.unbind();
+
+		m_sunLightShader->unbind();
+	}
+
+	void SolidPrimitivesRenderer::drawPointLight(const float3& position, const float3& cameraPosition) const
+	{
+		float3 distanceFromCameraVec = position - cameraPosition;
+		float distanceFromCameraLen = glm::length(distanceFromCameraVec);
+
+		m_pointLightShader->bind();
+		float3 lamppos = position;
+		float3 lampsca = float3{ distanceFromCameraLen } / 100.0f;
+		fquat lamprot;
+		float3 a = glm::cross({0,0,1}, distanceFromCameraVec);
+		lamprot = glm::normalize(fquat{ distanceFromCameraLen + glm::dot({0,0,1}, distanceFromCameraVec), a.x, a.y, a.z });
+
+		float4x4 lampmodel = compute_model_matrix(lamppos, lamprot, lampsca);
+
+		m_pointLightShader->setUniformMatrix("model", lampmodel, false);
+
+		m_pointLightVao.bind();
 		glDisable(GL_CULL_FACE);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		//glDrawElements(GL_LINES, 2, GL_UNSIGNED_INT, 0);
 		glEnable(GL_CULL_FACE);
+		m_pointLightVao.unbind();
 
-		m_lampVao.unbind();
-		m_lampShader->unbind();
+		m_pointLightShader->unbind();
 	}
 
 }

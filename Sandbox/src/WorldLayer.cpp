@@ -24,6 +24,7 @@ namespace r3d
 		return segmentEnt;
 	}
 
+	template<class Tag>
 	Entity WorldLayer::createBox(r3d::real3 position, r3d::rquat quat, r3d::real3 scale, r3d::real gravity, r3d::real invMass, r3d::real3 velocity, r3d::float4 color, float timer)
 	{
 		using namespace r3d;
@@ -38,7 +39,7 @@ namespace r3d
 		real3 angVelocity = real3{ 0.0 };
 		real friction = 0.1;
 
-		am->setArchetype < Transform, RigidBody, Color, ColliderBox, BoxPrimitive >(boxEnt);
+		am->setArchetype < Transform, RigidBody, Color, ColliderBox, BoxPrimitive, Tag >(boxEnt);
 		am->set<Transform>(boxEnt, Transform{ position, quat, scale });
 		am->set<Color>(boxEnt, color);
 		am->set<RigidBody>(boxEnt, RigidBody{ invI, velocity, angVelocity, force, torque, invMass, friction });
@@ -53,6 +54,7 @@ namespace r3d
 		return boxEnt;
 	}
 
+	template<class Tag>
 	Entity WorldLayer::createBox(r3d::real3 position, r3d::real angle, r3d::real3 axis, r3d::real3 scale, r3d::real gravity, r3d::real invMass, r3d::real3 velocity, r3d::float4 color, float timer)
 	{
 		real cosSquareAngle = glm::cos(glm::radians(angle / 2.0));
@@ -60,9 +62,47 @@ namespace r3d
 		real3 squareAngleAxis = sinSquareAngle * axis;
 		rquat squareOrientationQuat = glm::normalize(rquat{ cosSquareAngle, squareAngleAxis.x, squareAngleAxis.y, squareAngleAxis.z });
 		
-		return createBox(position, squareOrientationQuat, scale, gravity, invMass, velocity, color, timer);
+		return createBox<Tag>(position, squareOrientationQuat, scale, gravity, invMass, velocity, color, timer);
 	}
 	
+	void WorldLayer::setUpFboBloom()
+	{
+		fboBloom = FrameBuffer{};
+		fboBloom.attach2DTexture(GL_COLOR_ATTACHMENT0, fboSize.x, fboSize.y, TextureFormat::RGBA16F, TextureFormat::RGB, GL_FLOAT);
+		fboBloom.attach2DTexture(GL_COLOR_ATTACHMENT1, fboSize.x, fboSize.y, TextureFormat::RGBA16F, TextureFormat::RGB, GL_FLOAT);
+		fboBloom.setDrawBuffers();
+
+		fboBloomMix = FrameBuffer{};
+		fboBloomMix.attach2DTexture(GL_COLOR_ATTACHMENT0, fboSize.x, fboSize.y, TextureFormat::RGBA16F, TextureFormat::RGB, GL_FLOAT);
+		fboBloomMix.setDrawBuffers();
+	}
+
+	void WorldLayer::setUpFboBlur()
+	{
+		for (int i = 0; i < 2; ++i)
+		{
+			fboBlur[i] = FrameBuffer{};
+			fboBlur[i].attach2DTexture(GL_COLOR_ATTACHMENT0, fboSize.x, fboSize.y, TextureFormat::RGBA16F, TextureFormat::RGB, GL_FLOAT);
+			fboBlur[i].setDrawBuffers();
+		}
+	}
+
+	void WorldLayer::setUpFboDefault()
+	{
+		fboDefault = FrameBuffer{};
+		fboDefault.attach2DTexture(GL_COLOR_ATTACHMENT0, fboSize.x, fboSize.y, TextureFormat::RGBA16F, TextureFormat::RGB, GL_FLOAT);
+		//fboPostProcessing.attach2DTexture(GL_COLOR_ATTACHMENT1, fboSize.x, fboSize.y, TextureFormat::RGBA16F, TextureFormat::RGB, GL_FLOAT);
+		fboDefault.attachRenderBuffer(GL_DEPTH_COMPONENT, fboSize.x, fboSize.y);
+		fboDefault.setDrawBuffers();
+	}
+
+	void WorldLayer::setUpFboHDR()
+	{
+		fboHDR = FrameBuffer{};
+		fboHDR.attach2DTexture(GL_COLOR_ATTACHMENT0, fboSize.x, fboSize.y, sRGB, TextureFormat::RGB, GL_UNSIGNED_BYTE);
+		fboHDR.attachRenderBuffer(GL_DEPTH_COMPONENT, fboSize.x, fboSize.y);
+		fboHDR.setDrawBuffers();
+	}
 
 	WorldLayer::WorldLayer() : r3d::Layer("World layer.")
 	{
@@ -98,7 +138,7 @@ namespace r3d
 			real  scaleFactor = (1.0 - 0.9 * i / float(numBoxes));
 			real3 scaleFactorVec = { scaleFactor, scaleFactor, scaleFactor };
 
-			auto ent = createBox(position + addPos, 45 * i, real3{ 0.0, 1.0, 0.0 }, scale * scaleFactorVec, -0.6, 1.0, { 0.0, 0.0, 0.0 },
+			auto ent = createBox<BrickTag>(position + addPos, 45 * i, real3{ 0.0, 1.0, 0.0 }, scale * scaleFactorVec, -0.6, 1.0, { 0.0, 0.0, 0.0 },
 				Palette::getInstance().blue);
 
 			if (i == numBoxes - 1)
@@ -113,14 +153,14 @@ namespace r3d
 
 		real3 wallscale = { 5.0, 3.0, 0.5 };
 		real3 wallscaleMini = { 5.0, 1.0, 0.5 };
-		createBox(real3{ +0.0, wallscale.y, -5.0 }, 0, real3{ 0.0, 1.0, 0.0 }, wallscale, -0.6, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red);
-		createBox(real3{ -5.5, wallscale.y, 0.0 }, 90, real3{ 0.0, 1.0, 0.0 }, wallscale, -0.6, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red);
-		createBox(real3{ +5.5, wallscale.y, 0.0 }, 90, real3{ 0.0, 1.0, 0.0 }, wallscale, -0.6, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red);
-		createBox(real3{ +0.0, wallscaleMini.y, +5.5 }, 0, real3{ 0.0, 1.0, 0.0 }, wallscaleMini, -0.6, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red);
+		createBox<WallTag>(real3{ +0.0, wallscale.y, -5.0 }, 0, real3{ 0.0, 1.0, 0.0 }, wallscale, -0.6, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red);
+		createBox<WallTag>(real3{ -5.5, wallscale.y, 0.0 }, 90, real3{ 0.0, 1.0, 0.0 }, wallscale, -0.6, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red);
+		createBox<WallTag>(real3{ +5.5, wallscale.y, 0.0 }, 90, real3{ 0.0, 1.0, 0.0 }, wallscale, -0.6, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red);
+		createBox<WallTag>(real3{ +0.0, wallscaleMini.y, +5.5 }, 0, real3{ 0.0, 1.0, 0.0 }, wallscaleMini, -0.6, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red);
 
 		real3 woodscale = { 0.2, 4.0, 1.0 };
-		createBox(real3{ +3.0, woodscale.y + 0.0, 0.0 }, +5.0, real3{ 0.0, 0.0, 1.0 }, woodscale, -0.6, 1.0, { 0.0, 0.0, 0.0 }, Palette::getInstance().orange);
-		createBox(real3{ -3.0, woodscale.y + 0.0, 0.0 }, -5.0, real3{ 0.0, 0.0, 1.0 }, woodscale, -0.6, 1.0, { 0.0, 0.0, 0.0 }, Palette::getInstance().orange);
+		createBox<WoodTag>(real3{ +3.0, woodscale.y + 0.0, 0.0 }, +5.0, real3{ 0.0, 0.0, 1.0 }, woodscale, -0.6, 1.0, { 0.0, 0.0, 0.0 }, Palette::getInstance().orange);
+		createBox<WoodTag>(real3{ -3.0, woodscale.y + 0.0, 0.0 }, -5.0, real3{ 0.0, 0.0, 1.0 }, woodscale, -0.6, 1.0, { 0.0, 0.0, 0.0 }, Palette::getInstance().orange);
 
 #else
 		physicsOn = false;
@@ -160,16 +200,16 @@ namespace r3d
 			up = float3{ 0.0f, 1.0f, 0.0f };
 
 #ifdef STACKING
-			initialPosition = float3{ -3.0f, 7.0f, 15.5f };
+			initialPosition = float3{ -6.0f, 9.0f, 13.5f };
 #else
 			initialPosition = float3{ 0.0f, 2.0f, 4.0f };
 #endif
-			centerPosition = float3{ 0.0 };
+			centerPosition = float3{ 0.0f, 1.0f, 0.0f };
 			camera = Camera{ initialPosition, centerPosition, up };
 
 			gun = Application::getEntityManager()->create();
 			real distanceFromCamera = 4.0;
-			float3 scale{ 0.2, 0.2, 1.0 };
+			float3 scale{ 0.5, 0.5, 1 };
 			am->setArchetype<Transform, Color, BoxPrimitive, float>(gun);
 			am->set<Color>(gun, Color{ Palette::getInstance().orange });
 			am->set<float>(gun, distanceFromCamera);
@@ -183,13 +223,19 @@ namespace r3d
 		show_demo_window = true;
 
 		// shaders
-		linesShader = Shader{ "C:/dev/R3D/R3D/res/shaders/lines.shader" };
-		solidShader = Shader{ "C:/dev/R3D/R3D/res/shaders/solid.shader" };
-		lampShader = Shader{ "C:/dev/R3D/R3D/res/shaders/lamp.shader" };
+		linesShader       = Shader{ "C:/dev/R3D/R3D/res/shaders/lines.shader" };
+		solidShader       = Shader{ "C:/dev/R3D/R3D/res/shaders/solid.shader" };
+		sunLightShader    = Shader{ "C:/dev/R3D/R3D/res/shaders/lamp_sun.shader" };
+		pointLightShader  = Shader{ "C:/dev/R3D/R3D/res/shaders/lamp_point.shader" };
+		hdrShader         = Shader{ "C:/dev/R3D/R3D/res/shaders/hdr.shader" };
+		blurShader        = Shader{ "C:/dev/R3D/R3D/res/shaders/blur.shader" };
+		bloomBrightShader = Shader{ "C:/dev/R3D/R3D/res/shaders/bloom_select.shader" };
+		bloomMixShader    = Shader{ "C:/dev/R3D/R3D/res/shaders/bloom_mix.shader" };
 
 		primitivesRenderer.setShader(&linesShader);
 		solidRenderer.setShader(&solidShader);
-		solidRenderer.setLampShader(&lampShader);
+		solidRenderer.setSunShader(&sunLightShader);
+		solidRenderer.setPointShader(&pointLightShader);
 
 		// Event listeners
 		pushBackLayerListener(MouseButtonPressedEvent::getStaticType(), this);
@@ -206,16 +252,17 @@ namespace r3d
 		cameraMode.fps = false;
 		cameraMode.lastSwitchedTime = 0.0f;
 		
-		fboSize = {100, 100};
+		fboSize = {Application::getWindow()->getWidth(), Application::getWindow()->getHeight() };
 		fboSizePrev = fboSize;
 		viewWindowCenter = { 0, 0 };
-		lastFboResize = 0;
-		fbo.attach2DTexture(GL_COLOR_ATTACHMENT0, fboSize.x, fboSize.y, TextureFormat::RGB, GL_UNSIGNED_BYTE);
-		fbo.attachRenderBuffer(GL_DEPTH_COMPONENT, fboSize.x, fboSize.y);
+		lastFboResize = 0.0f;
+		lastSpotSwitchedOn = 0.0f;
 
-		if (false == fbo.isComplete())
+		setUpFbos();
+
+		if (false == fboDefault.isComplete() || false == fboHDR.isComplete())
 		{
-			R3D_ASSERT(false, "Fbo not complete.");
+			R3D_ASSERT(false, "Fbos not complete.");
 		}
 
 #if defined(R3D_DEBUG) || defined(R3D_RELEASE)
@@ -354,6 +401,14 @@ namespace r3d
 			{
 				delta += +wasdSpeed * camera.getCameraX();
 			}
+			if (Input::getInstance().isKeyPressed(GLFW_KEY_F, *window))
+			{
+				if (t - lastSpotSwitchedOn > 0.5f)
+				{
+					solidRenderer.switchSpotLight();
+					lastSpotSwitchedOn = t;
+				}
+			}
 
 			camera.setCenter(camera.getCenter() + delta);
 			camera.setEye(camera.getEye() + delta);
@@ -402,15 +457,20 @@ namespace r3d
 		solidShader.setUniformMatrix("view", camera.getViewMatrix(), false);
 		solidShader.setUniformMatrix("projection", projectionMatrix, false);
 		solidShader.setUniformValue("cameraPos", camera.getEye());
+		solidShader.setUniformValue("invBloomThreshold", bloomSettings.invThreshold[0], bloomSettings.invThreshold[1], bloomSettings.invThreshold[2]);
 
-		lampShader.bind();
-		lampShader.setUniformMatrix("view", camera.getViewMatrix(), false);
-		lampShader.setUniformMatrix("projection", projectionMatrix, false);
+		sunLightShader.bind();
+		sunLightShader.setUniformMatrix("view", camera.getViewMatrix(), false);
+		sunLightShader.setUniformMatrix("projection", projectionMatrix, false);
 
+		pointLightShader.bind();
+		pointLightShader.setUniformMatrix("view", camera.getViewMatrix(), false);
+		pointLightShader.setUniformMatrix("projection", projectionMatrix, false);
+
+		// 1. Forward rendering to texture
 		window->setViewPort(fboSize.x, fboSize.y);
-		fbo.bind();
+		fboDefault.bind();
 		window->clearColorBufferBit();
-
 		if (wireframesOn)
 		{
 			primitivesRenderer.setShader(&linesShader);
@@ -421,12 +481,79 @@ namespace r3d
 		{
 			solidRenderer.setShader(&solidShader);
 			solidRenderer.update(*am, t, dt);
+			solidRenderer.drawLights(camera.getEye());
 		}
+		fboDefault.unbind();
 		
-		fboQuad.draw(fbo.getTextureID(0));
-		fbo.unbind();
+		if (bloomSettings.on)
+		{
+			// 2. Bloom: a) Render bright colors
+			fboBloom.bind();
+			window->clearColorBufferBit();
+			bloomBrightShader.bind();
+			bloomBrightShader.setUniformValue("screenTexture", 0);
+			bloomBrightShader.setUniformValue("invBloomThreshold", bloomSettings.invThreshold);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, fboDefault.getTextureID(0));
+			quadVao.draw();
+			bloomBrightShader.unbind();
+			fboBloom.unbind();
+
+			// 3. Bloom: b) Blur bright colors
+			blurShader.bind();
+			blurShader.setUniformValue("screenTexture", 0);
+
+			int axis = 0, firstIteration = true;
+			for (int i = 0; i < 4; ++i)
+			{
+				fboBlur[axis].bind();
+				window->clearColorBufferBit();
+
+				blurShader.setUniformValue("axis", axis);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, firstIteration ? fboBloom.getTextureID(1) : fboBlur[!axis].getTextureID(0));
+				quadVao.draw();
+				axis = !axis;
+				firstIteration = false;
+				fboBlur[axis].unbind();
+			}
+			blurShader.unbind();
+
+			// 4. Bloom: c) Add blurred bright colors to original image
+			fboBloom.bind();
+			window->clearColorBufferBit();
+
+			bloomMixShader.bind();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, fboDefault.getTextureID(0));
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, fboBlur[1].getTextureID(0));
+			bloomMixShader.setUniformValue("screenTexture", 0);
+			bloomMixShader.setUniformValue("brightColors", 1);
+			bloomMixShader.setUniformValue("bloom", bloomSettings.intensity);
+			quadVao.draw();
+			bloomMixShader.unbind();
+
+			fboBloom.unbind();
+		}
+
+		// 5. Gamma correction and tone mapping.
+		fboHDR.bind();
+		window->clearColorBufferBit();
+
+		hdrShader.bind();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, bloomSettings.on ? fboBloom.getTextureID(0) : fboDefault.getTextureID(0));
+		hdrShader.setUniformValue("screenTexture", 0);
+		hdrShader.setUniformValue("exposure", hdrSettings.exposure);
+		hdrShader.setUniformValue("gamma", hdrSettings.gamma);
+		quadVao.draw();
+		hdrShader.unbind();
+
+		fboHDR.unbind();
+
 		window->setViewPort(window->getWidth(), window->getHeight());
-		
+
 	}
 
 	bool WorldLayer::onEvent(r3d::Event& e)
@@ -440,11 +567,23 @@ namespace r3d
 
 #if 1
 
+	void WorldLayer::setUpFbos()
+	{
+		fboBloom = FrameBuffer{};
+		fboDefault = FrameBuffer{};
+		fboHDR = FrameBuffer{};
+		fboBlur[0] = FrameBuffer{};
+		fboBlur[1] = FrameBuffer{};
+
+		setUpFboBloom();
+		setUpFboDefault();
+		setUpFboHDR();
+		setUpFboBlur();
+	}
+
 	bool WorldLayer::onViewWindowResizeEvent(r3d::ViewWindowResizeEvent& e)
 	{
-		fbo = std::move(FrameBuffer{});
-		fbo.attach2DTexture(GL_COLOR_ATTACHMENT0, fboSize.x, fboSize.y, TextureFormat::RGB, GL_UNSIGNED_BYTE);
-		fbo.attachRenderBuffer(GL_DEPTH_COMPONENT, fboSize.x, fboSize.y);
+		setUpFbos();
 		return true;
 	}
 
@@ -460,7 +599,7 @@ namespace r3d
 			real3 bulletPos = am->get<Transform>(gun)->position;
 			real3 bulletVel = -real(25.0 + Random::randFloat() * 2.0 - 1.0) * camera.getCameraZ();
 			fquat bulletRot = glm::toQuat(real3x3{ camera.getCameraX(), camera.getCameraY(), camera.getCameraZ() });
-			createBox(bulletPos, bulletRot, v, -0.6, 10.0, bulletVel, { c.r, c.g, c.b, 1.0 }, 2.5);
+			createBox<BulletTag>(bulletPos, bulletRot, v, -0.6, 10.0, bulletVel, { c.r, c.g, c.b, 1.0 }, 2.5);
 		}
 
 		return false;

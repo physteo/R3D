@@ -15,6 +15,26 @@
 namespace r3d
 {
 
+	struct WallTag { };
+	struct BrickTag {};
+	struct WoodTag {};
+	struct BulletTag {};
+
+	struct BloomSettings
+	{
+		bool on{ true };
+		float intensity{ 0.275f };
+		float blurOffset{ 1.75f };
+		float blurFalloff[5]{ 0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f };
+		float3 invThreshold{ 0.5f * 0.2126f, 0.5f * 0.7152f, 0.5f * 0.0722f };
+	};
+
+	struct HDRSettings
+	{
+		float gamma{ 2.2f };
+		float exposure{ 1.0f };
+	};
+
 	struct ViewWindowResizeEvent : public Event
 	{
 		ViewWindowResizeEvent(const float2& newSize) : newSize(newSize) {}
@@ -32,9 +52,9 @@ namespace r3d
 		float2 newSize;
 	};
 
-	struct FboQuad
+	struct QuadVao
 	{
-		FboQuad() : vao{ {
+		QuadVao() : vao{ {
 			{
 				-1, -1, 0,
 				+1, -1,	0,
@@ -46,27 +66,20 @@ namespace r3d
 				1, 0,
 				1, 1,
 				0, 1,
-			} }, {3, 2}, {0, 1, 2, 0, 2, 3} }, 
-			shader{"C:/dev/R3D/R3D/res/shaders/fbo.shader"}
+			} }, {3, 2}, {0, 1, 2, 0, 2, 3} }
 		{
 		}
 
 
-		void draw(unsigned int textureID) const
+		void draw() const
 		{
-			shader.bind();
-			glActiveTexture(GL_TEXTURE0 + 0);
-			glBindTexture(GL_TEXTURE_2D, textureID);
-			shader.setUniformValue("screenTexture", 0);
 			vao.bind();
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 			vao.unbind();
-			shader.unbind();
 		}
 
 	public:
 		VertexArray vao;
-		Shader shader;
 	};
 
 	struct CameraMode
@@ -267,7 +280,13 @@ namespace r3d
 		// Shaders and renderers
 		r3d::Shader linesShader;
 		r3d::Shader solidShader;
-		r3d::Shader lampShader;
+		r3d::Shader sunLightShader;
+		r3d::Shader pointLightShader;
+		r3d::Shader hdrShader;
+		r3d::Shader blurShader;
+		r3d::Shader bloomBrightShader;
+		r3d::Shader bloomMixShader;
+
 		r3d::PrimitivesRenderer primitivesRenderer;
 		r3d::SolidPrimitivesRenderer solidRenderer;
 
@@ -275,21 +294,38 @@ namespace r3d
 		int frameCounter;
 		MouseStatus mouseStatus;
 		CameraMode cameraMode;
-		FrameBuffer fbo;
+		FrameBuffer fboBlur[2];
+		FrameBuffer fboBloom;
+		FrameBuffer fboBloomMix;
+		FrameBuffer fboDefault;
+		FrameBuffer fboHDR;
+
 		float2 fboSize;
 		float2 fboSizePrev;
 		float lastFboResize;
 		float2 viewWindowCenter;
-		FboQuad fboQuad;
+		QuadVao quadVao;
+		float lastSpotSwitchedOn;
+
+		BloomSettings bloomSettings;
+		HDRSettings hdrSettings;
 
 	public:
 		WorldLayer();
 
 	private:
 		r3d::Entity createSegment(r3d::float3 position, float angleDeg, r3d::float3 axis, float scale, r3d::float4 color);
+		template<class Tag> 
 		r3d::Entity createBox(r3d::real3 position, r3d::rquat quat, r3d::real3 scale, r3d::real gravity, r3d::real invMass, r3d::real3 velocity, r3d::float4 color, float timer);
+		template<class Tag>
 		r3d::Entity createBox(r3d::real3 position, r3d::real angle, r3d::real3 axis, r3d::real3 scale, r3d::real gravity, r3d::real invMass = 1.0, r3d::real3 velocity = r3d::real3{ 0.0 }, r3d::float4 color = r3d::float4{ 0.18, 0.4, 0.9, 1.0 }, float timer = -1);
 		
+		void setUpFbos();
+		void setUpFboBloom();
+		void setUpFboBlur();
+		void setUpFboDefault();
+		void setUpFboHDR();
+
 		void editProgram(ShaderEditor* toEdit);
 
 		virtual void onUpdate(r3d::Window* window) override;

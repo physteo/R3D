@@ -40,6 +40,7 @@ namespace r3d
 
 	void WorldLayer::onImGuiUpdate(r3d::Window* window)
 	{
+#if 1
 		using namespace r3d;
 		auto am = getArchetypeManager();
 	
@@ -227,14 +228,20 @@ namespace r3d
 			}
 			real3& position = am->get<Transform>(gun)->position;
 			position = camera.getEye() - (*am->get<float>(gun)) * camera.getCameraZ();
-			position += 1.0f * (camera.getCameraX() - camera.getCameraY());
+			position += 1.5f * camera.getCameraX() - 1.5f * camera.getCameraY();
 			am->get<Transform>(gun)->orientation = glm::toQuat(real3x3{ camera.getCameraX(), camera.getCameraY(), camera.getCameraZ() });
+
+			// move flashLight to camera
+			solidRenderer.getSpotLight().eye = am->get<Transform>(gun)->position;
+			solidRenderer.getSpotLight().direction = -camera.getCameraZ();
+
+
 			ImGui::End();
 		}
 
 		// Canvas
 		{
-			ImGui::Begin("Canvas", window->getFontscale());
+			ImGui::Begin("World", window->getFontscale());
 			ImGui::Text("Physics", window->getFontscale());
 
 			if (physicsOn ? ImGui::Button("On") : ImGui::Button("Off"))
@@ -283,12 +290,31 @@ namespace r3d
 			//}
 #endif 
 
-			ImGui::Text("SunLight");
-			real3 sunPosition = solidRenderer.getSunPosition();
-			ImGui::SliderFloat("sun x", &sunPosition.x, -10.0f, 10.0f);
-			ImGui::SliderFloat("sun y", &sunPosition.y, -10.0f, 10.0f);
-			ImGui::SliderFloat("sun z", &sunPosition.z, -10.0f, 10.0f);
-			solidRenderer.setSunPosition(sunPosition);
+			ImGui::Text("Sun Light");
+			SunLight& sun = solidRenderer.getSunLight();
+			static float sunIntensity[3] = {0.1f, 0.5f, 1.0f};
+			ImGui::SliderFloat3("Sun Intensity", sunIntensity, 0.0f, 10.0f);
+			sun.ambient  = sunIntensity[0] * Palette::getInstance().white;
+			sun.specular = sunIntensity[1] * Palette::getInstance().white;
+			sun.diffuse  = sunIntensity[2] * Palette::getInstance().white;
+
+			ImGui::Text("Point Light");
+			PointLight& point = solidRenderer.getPointLight();
+			static float pointIntensity[3] = { 0.1f, 0.5f, 6.0f };
+			ImGui::SliderFloat3("Point Intensity", pointIntensity, 0.0f, 10.0f);
+			point.ambient = pointIntensity[0] * Palette::getInstance().white;
+			point.specular = pointIntensity[1] * Palette::getInstance().white;
+			point.diffuse = pointIntensity[2] * Palette::getInstance().white;
+
+
+			ImGui::Text("Spot Light");
+			SpotLight& spot = solidRenderer.getSpotLight();
+			static float spotIntensity[3] = { 0.1f, 0.5f, 10.0f };
+			ImGui::SliderFloat3("Spot Intensity", spotIntensity, 0.0f, 20.0f);
+			spot.ambient = spotIntensity[0] * Palette::getInstance().white;
+			spot.specular = spotIntensity[1] * Palette::getInstance().white;
+			spot.diffuse = spotIntensity[2] * Palette::getInstance().white;
+
 
 			ImGui::Text("Ground");
 			float plane_x = am->get<Transform>(gridEnt)->orientation.x;
@@ -325,16 +351,98 @@ namespace r3d
 		{
 			ImGui::Begin("Misc", window->getFontscale());
 
-			ImGui::Checkbox("Demo Window", &show_demo_window);
+			ImGui::Checkbox("ImGui Demo Window", &show_demo_window);
 			
-			float clear_color[3] = { window->getColorR(), window->getColorG(), window->getColorB() };
-			ImGui::ColorEdit3("Bckg color", (float*)&clear_color);
-			window->setColor(clear_color[0], clear_color[1], clear_color[2]);
+			if (ImGui::TreeNode("HDR"))
+			{
+				ImGui::SliderFloat("Gamma", &hdrSettings.gamma, 0.0f, 3.0f);
+				ImGui::SliderFloat("Exposure", &hdrSettings.exposure, 0.0f, 5.0f);
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("Bloom"))
+			{
+				ImGui::Checkbox("On", &bloomSettings.on);
+				if (bloomSettings.on)
+				{
+					ImGui::SliderFloat("Intensity", &bloomSettings.intensity, 0.0f, 2.0f);
+					static float threshold[3] = { bloomSettings.invThreshold[0], bloomSettings.invThreshold[1], bloomSettings.invThreshold[2] };
+					static float multiplier = 1.0f;
+					ImGui::SliderFloat3("1/Threshold", threshold, 0.0f, 1.0f);
+					ImGui::SliderFloat("1/Threshold Multip.", &multiplier, 0.0f, 2.0f);
+					bloomSettings.invThreshold = multiplier * float3{ threshold[0], threshold[1], threshold[2] };
+				}
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("Color Palette"))
+			{
+				static float4 red = Palette::getInstance().red;
+				ImGui::ColorEdit4("Red", (float*)&red);
+				static float4 blue = Palette::getInstance().blue;
+				ImGui::ColorEdit4("Blue", (float*)&blue);
+				static float4 orange = Palette::getInstance().orange;
+				ImGui::ColorEdit4("Orange", (float*)&orange);
+				static float4 green = Palette::getInstance().green;
+				ImGui::ColorEdit4("Green", (float*)&green);
+
+				Palette::getInstance().setBlue(blue);
+				Palette::getInstance().setRed(red);
+				Palette::getInstance().setOrange(orange);
+				Palette::getInstance().setGreen(green);
+
+				// update colors of main objects
+				{
+					auto archetype = am->matchAtLeastWithout(ComponentList::buildList<WallTag>(), {});
+					for (auto arch : archetype)
+					{
+						auto colors = am->m_archetypeDataVector[arch].get<Color>()->getComponents<Color>();
+						auto size = am->m_archetypeDataVector[arch].get<Color>()->size();
+						for (size_t i = 0; i < size; ++i)
+						{
+							colors[i].vec = Palette::getInstance().red;
+						}
+					}
+				}
+
+				{
+					auto archetype = am->matchAtLeastWithout(ComponentList::buildList<WoodTag>(), {});
+					for (auto arch : archetype)
+					{
+						auto colors = am->m_archetypeDataVector[arch].get<Color>()->getComponents<Color>();
+						auto size = am->m_archetypeDataVector[arch].get<Color>()->size();
+						for (size_t i = 0; i < size; ++i)
+						{
+							colors[i].vec = Palette::getInstance().orange;
+						}
+					}
+				}
+
+				{
+					auto archetype = am->matchAtLeastWithout(ComponentList::buildList<BrickTag>(), {});
+					for (auto arch : archetype)
+					{
+						auto colors = am->m_archetypeDataVector[arch].get<Color>()->getComponents<Color>();
+						auto size = am->m_archetypeDataVector[arch].get<Color>()->size();
+						for (size_t i = 0; i < size; ++i)
+						{
+							colors[i].vec = Palette::getInstance().blue;
+						}
+					}
+				}
+
+				float clear_color[3] = { window->getColorR(), window->getColorG(), window->getColorB() };
+				ImGui::ColorEdit3("Bckg color", (float*)&clear_color);
+				window->setColor(clear_color[0], clear_color[1], clear_color[2]);
+
+				ImGui::TreePop();
+			}
+
 			
-			ImGui::Text("%.1f FPS (%.1f ms/frame)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
+			ImGui::Text("Profiling");
+			ImGui::Text(" - FPS: %.1f  (%.1f ms/frame)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
 			double avg = boxBoxContactDetector.measuredTime / double(boxBoxContactDetector.trials);
-			
-			ImGui::Text("%.3f BoxBox", avg);
+			ImGui::Text(" - BoxBox Contact Detection: %.3f microsec", avg);
 			
 			ImGui::End();
 		}
@@ -346,7 +454,7 @@ namespace r3d
 			ImVec2 pos = ImGui::GetCursorScreenPos();
 			ImVec2 windowSize = ImGui::GetWindowSize();
 			ImGui::GetWindowDrawList()->AddImage(
-				(void*)fbo.getTextureID(0),
+				(void*)fboHDR.getTextureID(0),
 				pos, ImVec2(pos.x + windowSize.x, pos.y + windowSize.y), 
 				ImVec2(0, 1), 
 				ImVec2(1, 0)
@@ -356,7 +464,7 @@ namespace r3d
 			viewWindowCenter = { pos.x + windowSize.x / 2.0 , pos.y + windowSize.y / 2.0 };
 			
 			float currentTime = window->getCurrentTime();
-			if (fboSize != fboSizePrev && currentTime - lastFboResize > 0.1)
+			if (fboSize != fboSizePrev && currentTime - lastFboResize > 0.5)
 			{
 				onEvent(ViewWindowResizeEvent{ fboSize });
 				fboSizePrev = fboSize;
@@ -432,8 +540,23 @@ namespace r3d
 					}
 					if (ImGui::MenuItem("PostProcessing"))
 					{
-						toEdit = &fboQuad.shader;
+						toEdit = &hdrShader;
 						assignedTo = "PostProcessing";
+					}
+					if (ImGui::MenuItem("Blur(Bloom)"))
+					{
+						toEdit = &blurShader;
+						assignedTo = "Blur(Bloom)";
+					}
+					if (ImGui::MenuItem("SunLight"))
+					{
+						toEdit = &sunLightShader;
+						assignedTo = "SunLight";
+					}
+					if (ImGui::MenuItem("PointLight"))
+					{
+						toEdit = &pointLightShader;
+						assignedTo = "PointLight";
 					}
 					ImGui::EndMenu();
 				}
@@ -525,6 +648,7 @@ namespace r3d
 
 			ImGui::End();
 		}
+#endif
 	}
 
 	void edit_multiline(const std::string& name, std::string& shaderText)

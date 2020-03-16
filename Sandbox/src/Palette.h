@@ -19,6 +19,11 @@ namespace r3d
 		float4 operator()(int id) const;
 		inline size_t size() const { return colorsVec.size(); }
 
+		inline void setRed(float4 color) { red = color; }
+		inline void setBlue(float4 color) { blue = color; }
+		inline void setOrange(float4 color) { orange = color; }
+		inline void setGreen(float4 color) { green = color; }
+
 	private:
 		Palette();
 

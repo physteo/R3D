@@ -47,19 +47,7 @@ namespace r3d
 		glBindFramebuffer(m_currentTarget, 0);
 	}
 
-	//void FrameBuffer::attach2DTexture(GLenum attachment, Texture&& texture)
-	//{
-	//	textureAttachments.push_back(std::move(texture));
-	//	textureAttachments.back().bind();
-	//
-	//	// attach to framebuffer
-	//	bind();
-	//	glFramebufferTexture2D(m_currentTarget, attachment, GL_TEXTURE_2D, textureAttachments.back().getID(), 0);
-	//	unbind();
-	//	textureAttachments.back().unbind();
-	//}
-
-	void FrameBuffer::attach2DTexture(GLenum attachment, int width, int height, TextureFormat internalFormat, GLenum dataFormat)
+	void FrameBuffer::attach2DTexture(GLenum attachment, int width, int height, TextureFormat internalFormat, TextureFormat format, GLenum dataFormat)
 	{
 		// create texture
 		unsigned int textureID = 0;
@@ -67,17 +55,17 @@ namespace r3d
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, internalFormat, dataFormat, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, dataFormat, nullptr);
 
-		// attach to framebuffer
 		bind();
-		//glFramebufferTexture2D(m_currentTarget, attachment, GL_TEXTURE_2D, textureID, 0);
+		// attach to framebuffer
 		glFramebufferTexture(m_currentTarget, attachment, textureID, 0);
-		GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-		glDrawBuffers(1, drawBuffers); // "1" is the size of DrawBuffers
 		unbind();
+
+		//drawBuffers.push_back(GL_COLOR_ATTACHMENT0 + int(textureAttachments.size()) );
+		drawBuffers.push_back(attachment);
 
 		// unbind texture and store id
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -99,6 +87,13 @@ namespace r3d
 		// unbind renderframebuffer
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		renderBuffersAttachments.push_back(renderBufferID);
+	}
+
+	void FrameBuffer::setDrawBuffers()
+	{
+		bind();
+		glDrawBuffers(drawBuffers.size(), &drawBuffers[0]);
+		unbind();
 	}
 
 	bool FrameBuffer::isComplete()
@@ -126,6 +121,8 @@ namespace r3d
 		}
 		textureAttachments.clear();
 
+		drawBuffers.clear();
+
 		// release FrameBuffer
 		glDeleteFramebuffers(1, &m_id);
 		m_id = 0;
@@ -136,15 +133,22 @@ namespace r3d
 		// move
 		m_id = other.m_id;
 		m_currentTarget = other.m_currentTarget;
-		for (auto it = other.textureAttachments.begin(); it != other.textureAttachments.end(); ++it)
+		for (auto otherIt = other.textureAttachments.begin(); otherIt != other.textureAttachments.end(); ++otherIt)
 		{
-			textureAttachments.emplace_back(std::move(*it));
+			textureAttachments.emplace_back(*otherIt);
+			*otherIt = 0;
 		}
-		for (auto it = other.renderBuffersAttachments.begin(); it != other.renderBuffersAttachments.end(); ++it)
+
+		for (auto otherIt = other.renderBuffersAttachments.begin(); otherIt != other.renderBuffersAttachments.end(); ++otherIt)
 		{
-			renderBuffersAttachments.push_back(*it);
-			// put other to default
-			*it = 0;
+			renderBuffersAttachments.push_back(*otherIt);
+			*otherIt = 0;
+		}
+
+		for (auto otherIt = other.drawBuffers.begin(); otherIt != other.drawBuffers.end(); ++otherIt)
+		{
+			drawBuffers.push_back(*otherIt);
+			*otherIt = 0;
 		}
 
 		other.m_id = 0;

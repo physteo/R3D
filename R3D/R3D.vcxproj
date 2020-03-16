@@ -141,6 +141,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="res\shaders\lamp_point.shader" />
     <ClInclude Include="src\R3D.h" />
     <ClInclude Include="src\R3D\Core\Application.h" />
     <ClInclude Include="src\R3D\Core\Core.h" />
@@ -249,7 +250,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\fbo.shader" />
-    <None Include="res\shaders\lamp.shader" />
+    <None Include="res\shaders\fbo_bloom.shader" />
+    <None Include="res\shaders\fbo_bloom_mix.shader" />
+    <None Include="res\shaders\fbo_blur.shader" />
+    <None Include="res\shaders\fbo_hdr.shader" />
+    <None Include="res\shaders\lamp_sun.shader" />
     <None Include="res\shaders\lines.shader" />
     <None Include="res\shaders\solid.shader" />
   </ItemGroup>
