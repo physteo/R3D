@@ -58,11 +58,13 @@ namespace r3d
 		inline SpotLight& getSpotLight() { return spotLight; }
 		inline void switchSpotLight() { spotLightOn = !spotLightOn; }
 		void drawLights(const float3& cameraPosition) const;
-		virtual void update(ArchetypeManager& am, double t, double dt) override;
 		
+		virtual void update(ArchetypeManager& am, double t, double dt) override;
+
 	private:
 
-		VertexArray m_vao;
+		VertexArray m_cubeVao;
+		VertexArray m_planeVao;
 		VertexArray m_pointLightVao;
 		VertexArray m_sunLightVao;
 

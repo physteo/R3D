@@ -273,39 +273,30 @@ namespace r3d
 				solidsOn = !solidsOn;
 			}
 
-#ifdef STACKING
-			//if (physicsOn && frameCounter % 50 == 0)//ImGui::Button("Shoot"))
-			//{
-			//	//float3 v{0.2*Random::randFloat(), 1.0 + 0.2*Random::randFloat(), 0.2*Random::randFloat()};
-			//	float3 v{ 0.2, 0.2, 0.2 };
-			//	//float3 c{Random::randFloat(), Random::randFloat(), Random::randFloat()};
-			//	float3 c = Palette::getInstance()->green;
-			//
-			//	float angle = 0;
-			//	real3 bulletPos = am->get<Transform>(gun)->position;
-			//	real3 bulletVel = -real(25.0 + Random::randFloat() * 2.0 - 1.0) * camera.getCameraZ();
-			//	fquat bulletRot = glm::toQuat(real3x3{ camera.getCameraX(), camera.getCameraY(), camera.getCameraZ() });
-			//
-			//	createBox(bulletPos, bulletRot, v, -0.6, 1.0, bulletVel, { c.r, c.g, c.b, 1.0 }, 2.5);
-			//}
-#endif 
-
 			ImGui::Text("Sun Light");
 			SunLight& sun = solidRenderer.getSunLight();
-			static float sunIntensity[3] = {0.1f, 0.5f, 1.0f};
+			static float sunIntensity[3] = {0.1f, 0.5f, 5.0f};
+			static float sunEye[3] = { 7.0f, 15.0f, 13.0f };
+			static float sunCenter[3] = { 0.0f, 0.0f, 0.0f };
 			ImGui::SliderFloat3("Sun Intensity", sunIntensity, 0.0f, 10.0f);
+			ImGui::SliderFloat3("Sun Eye", sunEye, -20.0f, 20.0f);
+			ImGui::SliderFloat3("Sun Center", sunCenter, -20.0f, 20.0f);
 			sun.ambient  = sunIntensity[0] * Palette::getInstance().white;
 			sun.specular = sunIntensity[1] * Palette::getInstance().white;
 			sun.diffuse  = sunIntensity[2] * Palette::getInstance().white;
+			sun.eye = { sunEye[0], sunEye[1], sunEye[2] };
+			sun.center = { sunCenter[0], sunCenter[1], sunCenter[2] };
 
 			ImGui::Text("Point Light");
 			PointLight& point = solidRenderer.getPointLight();
-			static float pointIntensity[3] = { 0.1f, 0.5f, 6.0f };
+			static float pointIntensity[3] = { 0.1f, 0.5f, 8.0f };
+			static float pointPosition[3] = { -9.0, 10.0, -10.0 };
 			ImGui::SliderFloat3("Point Intensity", pointIntensity, 0.0f, 10.0f);
+			ImGui::SliderFloat3("Point Position", pointPosition, -20.0f, 20.0f);
 			point.ambient = pointIntensity[0] * Palette::getInstance().white;
 			point.specular = pointIntensity[1] * Palette::getInstance().white;
 			point.diffuse = pointIntensity[2] * Palette::getInstance().white;
-
+			point.eye = { pointPosition[0], pointPosition[1], pointPosition[2] };
 
 			ImGui::Text("Spot Light");
 			SpotLight& spot = solidRenderer.getSpotLight();
@@ -314,7 +305,6 @@ namespace r3d
 			spot.ambient = spotIntensity[0] * Palette::getInstance().white;
 			spot.specular = spotIntensity[1] * Palette::getInstance().white;
 			spot.diffuse = spotIntensity[2] * Palette::getInstance().white;
-
 
 			ImGui::Text("Ground");
 			float plane_x = am->get<Transform>(gridEnt)->orientation.x;
@@ -353,10 +343,20 @@ namespace r3d
 
 			ImGui::Checkbox("ImGui Demo Window", &show_demo_window);
 			
+			if (ImGui::TreeNode("Shadows"))
+			{
+				ImGui::SliderFloat("lighNearPlane", &lighNearPlane, 0.01f, 1.0f);
+				ImGui::SliderFloat("lighFarPlane",  &lighFarPlane , 3.0f, 50.0f);
+				ImGui::SliderFloat4("LRBT", &lightLRBT[0], -30.0f, 30.0f);
+				ImGui::SliderUniformFloatOpenGL(solidShader.getID(), "maxShadowBias", "Max bias", &maxShadowBias, 0.0f, 0.05f);
+				ImGui::SliderUniformFloatOpenGL(solidShader.getID(), "minShadowBias", "Min bias", &minShadowBias, 0.0f, 0.05f);
+				ImGui::TreePop();
+			}
+
 			if (ImGui::TreeNode("HDR"))
 			{
-				ImGui::SliderFloat("Gamma", &hdrSettings.gamma, 0.0f, 3.0f);
-				ImGui::SliderFloat("Exposure", &hdrSettings.exposure, 0.0f, 5.0f);
+				ImGui::SliderUniformFloatOpenGL(hdrShader.getID(), "gamma", "Gamma", &hdrSettings.gamma, 0.0f, 3.0f);
+				ImGui::SliderUniformFloatOpenGL(hdrShader.getID(), "exposure", "Exposure", &hdrSettings.exposure, 0.0f, 5.0f);
 				ImGui::TreePop();
 			}
 
@@ -371,10 +371,13 @@ namespace r3d
 					ImGui::SliderFloat3("1/Threshold", threshold, 0.0f, 1.0f);
 					ImGui::SliderFloat("1/Threshold Multip.", &multiplier, 0.0f, 2.0f);
 					bloomSettings.invThreshold = multiplier * float3{ threshold[0], threshold[1], threshold[2] };
+					ImGui::SliderInt("Blur Passes", &bloomSettings.blurPasses, 2, 20);
+					if (bloomSettings.blurPasses % 2 == 1) { --bloomSettings.blurPasses; }
 				}
 				ImGui::TreePop();
 			}
 
+#if defined(R3D_DEBUG) || defined(R3D_RELEASE)
 			if (ImGui::TreeNode("Color Palette"))
 			{
 				static float4 red = Palette::getInstance().red;
@@ -385,13 +388,29 @@ namespace r3d
 				ImGui::ColorEdit4("Orange", (float*)&orange);
 				static float4 green = Palette::getInstance().green;
 				ImGui::ColorEdit4("Green", (float*)&green);
+				static float4 grey = Palette::getInstance().grey;
+				ImGui::ColorEdit4("Grey", (float*)&grey);
 
 				Palette::getInstance().setBlue(blue);
 				Palette::getInstance().setRed(red);
 				Palette::getInstance().setOrange(orange);
 				Palette::getInstance().setGreen(green);
+				Palette::getInstance().setGrey(grey);
 
 				// update colors of main objects
+				{
+					auto archetype = am->matchAtLeastWithout(ComponentList::buildList<GroundTag>(), {});
+					for (auto arch : archetype)
+					{
+						auto colors = am->m_archetypeDataVector[arch].get<Color>()->getComponents<Color>();
+						auto size = am->m_archetypeDataVector[arch].get<Color>()->size();
+						for (size_t i = 0; i < size; ++i)
+						{
+							colors[i].vec = Palette::getInstance().grey;
+						}
+					}
+				}
+
 				{
 					auto archetype = am->matchAtLeastWithout(ComponentList::buildList<WallTag>(), {});
 					for (auto arch : archetype)
@@ -437,7 +456,7 @@ namespace r3d
 
 				ImGui::TreePop();
 			}
-
+#endif
 			
 			ImGui::Text("Profiling");
 			ImGui::Text(" - FPS: %.1f  (%.1f ms/frame)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
@@ -445,6 +464,21 @@ namespace r3d
 			ImGui::Text(" - BoxBox Contact Detection: %.3f microsec", avg);
 			
 			ImGui::End();
+		}
+
+		// Debug View
+		{
+		ImGui::Begin("z-View(Debug)", window->getFontscale());
+
+		ImVec2 pos = ImGui::GetCursorScreenPos();
+		ImVec2 windowSize = ImGui::GetWindowSize();
+		ImGui::GetWindowDrawList()->AddImage(
+			(void*)fboShadowDebug.getTextureID(0),
+			pos, ImVec2(pos.x + windowSize.x, pos.y + windowSize.y),
+			ImVec2(0, 1),
+			ImVec2(1, 0)
+		);
+		ImGui::End();
 		}
 
 		// View
@@ -557,6 +591,11 @@ namespace r3d
 					{
 						toEdit = &pointLightShader;
 						assignedTo = "PointLight";
+					}
+					if (ImGui::MenuItem("ShadowDebug"))
+					{
+						toEdit = &shadowDebugShader;
+						assignedTo = "ShadowDebug";
 					}
 					ImGui::EndMenu();
 				}

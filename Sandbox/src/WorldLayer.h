@@ -15,10 +15,13 @@
 namespace r3d
 {
 
+	const float stdGravity{-10.0f};
+
 	struct WallTag { };
 	struct BrickTag {};
 	struct WoodTag {};
 	struct BulletTag {};
+	struct GroundTag {};
 
 	struct BloomSettings
 	{
@@ -26,6 +29,7 @@ namespace r3d
 		float intensity{ 0.275f };
 		float blurOffset{ 1.75f };
 		float blurFalloff[5]{ 0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f };
+		int   blurPasses{ 4 };
 		float3 invThreshold{ 0.5f * 0.2126f, 0.5f * 0.7152f, 0.5f * 0.0722f };
 	};
 
@@ -286,6 +290,8 @@ namespace r3d
 		r3d::Shader blurShader;
 		r3d::Shader bloomBrightShader;
 		r3d::Shader bloomMixShader;
+		r3d::Shader shadowShader;
+		r3d::Shader shadowDebugShader;
 
 		r3d::PrimitivesRenderer primitivesRenderer;
 		r3d::SolidPrimitivesRenderer solidRenderer;
@@ -299,13 +305,24 @@ namespace r3d
 		FrameBuffer fboBloomMix;
 		FrameBuffer fboDefault;
 		FrameBuffer fboHDR;
+		FrameBuffer fboShadow;
+		FrameBuffer fboShadowDebug;
 
 		float2 fboSize;
 		float2 fboSizePrev;
 		float lastFboResize;
+		float2 fboShadowSize;
 		float2 viewWindowCenter;
 		QuadVao quadVao;
 		float lastSpotSwitchedOn;
+		
+		// shadow settings
+		float lighNearPlane{ 2.0f };
+		float lighFarPlane{ 50.0f };
+		float4 lightLRBT{ -10.0f, 10.0f, -10.0f, 10.0f };
+		float minShadowBias{ 0.0001f };
+		float maxShadowBias{ 0.001f };
+
 
 		BloomSettings bloomSettings;
 		HDRSettings hdrSettings;
@@ -321,10 +338,13 @@ namespace r3d
 		r3d::Entity createBox(r3d::real3 position, r3d::real angle, r3d::real3 axis, r3d::real3 scale, r3d::real gravity, r3d::real invMass = 1.0, r3d::real3 velocity = r3d::real3{ 0.0 }, r3d::float4 color = r3d::float4{ 0.18, 0.4, 0.9, 1.0 }, float timer = -1);
 		
 		void setUpFbos();
+
 		void setUpFboBloom();
 		void setUpFboBlur();
 		void setUpFboDefault();
 		void setUpFboHDR();
+		void setUpFboShadow();
+		void setUpFboShadowDebug();
 
 		void editProgram(ShaderEditor* toEdit);
 

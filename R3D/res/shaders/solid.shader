@@ -4,7 +4,6 @@
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec3 aTangent;
-layout(location = 3) in vec4 aColor;
 
 // *************** Generic Lights
 struct LightAttenuation
@@ -64,8 +63,9 @@ SunLight transformSunLight(SunLight sl, mat3 m)
 
 //************** Sun Lights instances  **************
 uniform SunLight  sunLight;
-out     SunLight  outSunLight_tan;
-
+uniform mat4 sunLightSpaceMat; // shadow
+out SunLight  outSunLight_tan;
+out vec4 outFragPos_sl; // shadow
 
 //**************** Point Light ****************
 struct PointLight
@@ -90,7 +90,6 @@ PointLight transformPointLight(PointLight pl, mat3 m)
 //************** Point Lights instances  **************
 uniform PointLight  pointLight;
 out     PointLight  outPointLight_tan;
-//uniform mat4 lightSpaceMatrix; // shadow
 
 // Matrices
 uniform mat4 view;
@@ -102,18 +101,16 @@ uniform mat4 normalMat;
 uniform vec3 cameraPos;
 
 // Out
-out vec4 outColor;
 out vec3 outTangent;
-out vec3 outFragPos;
 out vec3 outFragPos_tan;
-//out vec3 outFragPos_ls; // shadow
 out vec3 outCameraPos_tan;
 
 void main()
 {
 	gl_Position = projection * view * model *  vec4(aPosition, 1.0f);
-	outFragPos = vec3(model * vec4(aPosition, 1.0));
-	
+	vec3 outFragPos = vec3(model * vec4(aPosition, 1.0));
+	outFragPos_sl = sunLightSpaceMat * vec4(outFragPos, 1.0); // shadow
+
 	// TBN matrix
 	vec3 normal =  normalize(vec3(normalMat * vec4(aNormal, 0.0f)));
 	vec3 tangent = normalize(vec3(normalMat * vec4(aTangent, 0.0f)));
@@ -125,7 +122,6 @@ void main()
 	outFragPos_tan = iTBN * outFragPos;
 	outCameraPos_tan = iTBN * cameraPos;
 	
-	outColor = aColor;
 	outTangent = tangent;
 
 	// ************ Point Light calculations (vs) ****************
@@ -239,16 +235,19 @@ struct SunLight
 };
 
 //**************** Sun Light functions (fs) ****************
-vec3 calcSunLight(SunLight light, vec3 viewDir, vec3 norm, Material material)//vec4 FragPosLightSpace, float shadowBias, sampler2D shadowTexture)
+ColorSet calcSunLight(SunLight light, vec3 viewDir, vec3 norm, Material material)//vec4 FragPosLightSpace, float shadowBias, sampler2D shadowTexture)
 {
 	vec3 lightDir = normalize(light.eye - light.center);
 	
-	ColorSet cs = calcPhongShading(viewDir, lightDir, light.ambient, light.diffuse, light.specular, norm, material);
-    return cs.ambient + cs.diffuse + cs.specular;
+	return calcPhongShading(viewDir, lightDir, light.ambient, light.diffuse, light.specular, norm, material);
 }
 
 //************** Sun Lights instances  **************
 in SunLight  outSunLight_tan;
+uniform sampler2D shadowMap; // shadow
+uniform float minShadowBias;
+uniform float maxShadowBias;
+in vec4 outFragPos_sl; // shadow
 
 //**************** Point Light ****************
 struct PointLight
@@ -277,10 +276,36 @@ vec3 calcPointLight(PointLight light, vec3 FragPos, vec3 viewDir, vec3 norm, Mat
 //************** Point Lights instances  **************
 in PointLight  outPointLight_tan;
 
+//************** Shadow functions
+float calcShadow(vec4 fragPos_lightSpace, vec3 normal, vec3 lightDir)
+{
+	vec3 projCoords = fragPos_lightSpace.xyz / fragPos_lightSpace.w; // for perspective
+	projCoords = projCoords * 0.5 + 0.5; // NDC
+	
+	float currentDepth = projCoords.z;
+
+	float bias = max(maxShadowBias * (1.0 - dot(normal, lightDir)), minShadowBias);
+
+	float shadow = 0.0;
+	vec2 texelSize = 1.5 / textureSize(shadowMap, 0);
+	for (int x = -1; x <= 1; ++x)
+	{
+		for (int y = -1; y <= 1; ++y)
+		{
+			float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+		}
+	}
+	shadow /= 9.0;
+
+	if (projCoords.z > 1.0)
+		shadow = 0.0;
+
+	return shadow;
+}
+
 // In
-in vec4 outColor;
 in vec3 outTangent;
-in vec3 outFragPos;
 in vec3 outFragPos_tan;
 in vec3 outCameraPos_tan;
 
@@ -291,18 +316,21 @@ void main()
 
 	vec3 viewDir_tan = normalize(outCameraPos_tan - outFragPos_tan);
 
-	//float shadowBias = max(0.002 * (1.0 - dot(outNormal, fs_in.sun_tan[i].direction)), 0.002);
-	
 	// ************ Point Light calculations (fs) ****************
 	result += calcPointLight(outPointLight_tan, outFragPos_tan, viewDir_tan, normal_tan, material);
 	
 	// ************ Sun Light calculations (fs) ****************
-	result += calcSunLight(outSunLight_tan, viewDir_tan, normal_tan, material);
+	ColorSet sunCs = calcSunLight(outSunLight_tan, viewDir_tan, normal_tan, material);
+	// ************ sun shadow calculations (fs) ************
+	vec3 lightDir_tan = normalize(outSunLight_tan.eye - outSunLight_tan.center);
+    float shadow = calcShadow(outFragPos_sl, normal_tan, lightDir_tan);
+    result += sunCs.ambient + (1.0 - shadow) * (sunCs.diffuse + sunCs.specular);
 
 	// ************ Spot Light calculations (fs) ****************
 	result += calcSpotLight(outSpotLight_tan, outFragPos_tan, viewDir_tan, normal_tan, material);
 
 	color = vec4(result.rgb, 1.0f);
+
 	// debug stuff
 	//vec3 temp = abs(outNormal + 1) / 2.0;
 	//color = vec4(temp.rgb, 1.0);// calc_sunlight(sun, );

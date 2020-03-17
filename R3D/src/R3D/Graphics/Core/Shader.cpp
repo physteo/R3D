@@ -261,12 +261,14 @@ namespace r3d
 		location = glGetUniformLocation(id, name.c_str());
 		glUniform1i(location, value);
 	}
-	void Shader::setUniformValue(unsigned int id, const std::string& name, double       value)
-	{
-		int location;
-		location = glGetUniformLocation(id, name.c_str());
-		glUniform1d(location, value);
-	}
+
+	//void Shader::setUniformValue(unsigned int id, const std::string& name, double       value)
+	//{
+	//	int location;
+	//	location = glGetUniformLocation(id, name.c_str());
+	//	glUniform1d(location, value);
+	//}
+
 	void Shader::setUniformValue(unsigned int id, const std::string& name, unsigned int value)
 	{
 		int location;
@@ -319,10 +321,10 @@ namespace r3d
 		setUniformValue(m_id, name, value);
 	}
 
-	void Shader::setUniformValue(const std::string& name, double value)const
-	{
-		setUniformValue(m_id, name, value);
-	}
+	//void Shader::setUniformValue(const std::string& name, double value)const
+	//{
+	//	setUniformValue(m_id, name, value);
+	//}
 
 	void Shader::setUniformValue(const std::string& name, unsigned int value)const
 	{

@@ -47,20 +47,25 @@ namespace r3d
 		glBindFramebuffer(m_currentTarget, 0);
 	}
 
-	void FrameBuffer::attach2DTexture(GLenum attachment, int width, int height, TextureFormat internalFormat, TextureFormat format, GLenum dataFormat)
+	void FrameBuffer::attach2DTexture(GLenum attachment, int width, int height, TextureFormat internalFormat,
+		TextureFormat format, GLenum dataFormat, GLint filter, GLint wrap)
 	{
 		// create texture
 		unsigned int textureID = 0;
 		glGenTextures(1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
+		if (wrap == GL_CLAMP_TO_BORDER)
+		{
+			float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+			glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+		}
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, dataFormat, nullptr);
 
 		bind();
-		// attach to framebuffer
 		glFramebufferTexture(m_currentTarget, attachment, textureID, 0);
 		unbind();
 
@@ -89,10 +94,18 @@ namespace r3d
 		renderBuffersAttachments.push_back(renderBufferID);
 	}
 
-	void FrameBuffer::setDrawBuffers()
+	void FrameBuffer::setDrawBuffers(bool set)
 	{
 		bind();
-		glDrawBuffers(drawBuffers.size(), &drawBuffers[0]);
+		if (set)
+		{
+			glDrawBuffers(drawBuffers.size(), &drawBuffers[0]);
+		}
+		else
+		{
+			glDrawBuffer(GL_NONE);
+			glReadBuffer(GL_NONE);
+		}
 		unbind();
 	}
 

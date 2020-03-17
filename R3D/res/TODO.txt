@@ -1,18 +1,21 @@
 
-*** read themachinery for dpi options
-*** Imgui docking changes fontscale of titles
-*** better managing input and camera modes
 
+Problems:
+*** read themachinery for dpi options
+*** Bug: ImGui docking changes the fontscale of titles
+*** Managing input (put keys in the Window class?)
+
+Features:
 1) Reimplement rendering
-	A) Simple renderer for colored, untextured basic shapes (box, sphere, plane) with
+	A) Forward renderer for colored, untextured basic shapes (box, sphere, plane) with
 	   lights(point, omni, torch), bloom, hdr, and shadows.
-	B) Simple renderer for any mesh, with material (textures [diffuse, normal, specular], shininess).
-		- keep shader at beginning (then, renderer should organize data first renderables according to their shader). 
-	C) Instanced renderer for basic shapes.
-	D) Organize renderables according to shader, material.
+	B) Deferred renderer (features as above).
+	C) Deferred renderer for any mesh, with material (textures [diffuse, normal, specular], shininess).
+		- Renderer should organize renderables according to their material (shader) first. 
+	D) Instanced renderer for basic shapes.
 	E) Acceleration (frustrum culling ...)
 
-2) Camera controls: pan, rotate, zoom (like in blender)
+2) Camera controls: pan, rotate, zoom (like in blender etc)
 
 3) Physics for spheres
 
@@ -20,5 +23,4 @@
 
 Future:
  - Forward Plus rendering
- - Deferred rendering
  - Physically Based rendering

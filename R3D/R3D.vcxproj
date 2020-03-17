@@ -177,6 +177,7 @@
     <ClInclude Include="src\R3D\Graphics\Core\Shader.h" />
     <ClInclude Include="src\R3D\Graphics\Core\VertexArray.h" />
     <ClInclude Include="src\R3D\Graphics\Systems\PrimitivesRenderer.h" />
+    <ClInclude Include="src\R3D\ImGui\ImGuiCustom.h" />
     <ClInclude Include="src\R3D\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\R3D\Physics\Core\Colliders.h" />
     <ClInclude Include="src\R3D\Physics\Core\Contact.h" />
@@ -214,6 +215,7 @@
     <ClCompile Include="src\R3D\Graphics\Core\Shader.cpp" />
     <ClCompile Include="src\R3D\Graphics\Core\VertexArray.cpp" />
     <ClCompile Include="src\R3D\Graphics\Systems\PrimitivesRenderer.cpp" />
+    <ClCompile Include="src\R3D\ImGui\ImGuiCustom.cpp" />
     <ClCompile Include="src\R3D\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\R3D\Physics\Core\BoxBox.cpp" />
     <ClCompile Include="src\R3D\Physics\Core\BoxPlane.cpp" />
@@ -249,13 +251,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\fbo.shader" />
-    <None Include="res\shaders\fbo_bloom.shader" />
-    <None Include="res\shaders\fbo_bloom_mix.shader" />
-    <None Include="res\shaders\fbo_blur.shader" />
-    <None Include="res\shaders\fbo_hdr.shader" />
+    <None Include="res\shaders\bloom_select.shader" />
+    <None Include="res\shaders\bloom_mix.shader" />
+    <None Include="res\shaders\blur.shader" />
+    <None Include="res\shaders\hdr.shader" />
     <None Include="res\shaders\lamp_sun.shader" />
     <None Include="res\shaders\lines.shader" />
+    <None Include="res\shaders\shadow.shader" />
+    <None Include="res\shaders\shadow_debug.shader" />
     <None Include="res\shaders\solid.shader" />
   </ItemGroup>
   <ItemGroup>

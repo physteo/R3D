@@ -12,6 +12,7 @@ namespace r3d
 		float4 orange;
 		float4 green;
 		float4 blue;
+		float4 grey;
 		float4 white;
 	
 	public:
@@ -23,6 +24,7 @@ namespace r3d
 		inline void setBlue(float4 color) { blue = color; }
 		inline void setOrange(float4 color) { orange = color; }
 		inline void setGreen(float4 color) { green = color; }
+		inline void setGrey(float4 color) { grey = color; }
 
 	private:
 		Palette();

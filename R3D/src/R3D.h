@@ -13,6 +13,7 @@
 #include <R3D/Ecs/ArchetypeManager.h>
 #include <R3D/Ecs/System.h>
 #include <R3D/Ecs/TransformComponent.h>
+#include <R3D/ImGui/ImGuiCustom.h>
 
 #include <R3D/Graphics/Core/Camera.h>
 #include <R3D/Graphics/Core/Shader.h>

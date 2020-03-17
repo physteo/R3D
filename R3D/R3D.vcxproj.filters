@@ -194,6 +194,7 @@
     <ClInclude Include="src\R3D\Graphics\Core\FrameBuffer.h" />
     <ClInclude Include="src\R3D\Core\Input.h" />
     <ClInclude Include="res\shaders\lamp_point.shader" />
+    <ClInclude Include="src\R3D\ImGui\ImGuiCustom.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\R3D\Core\Application.cpp">
@@ -301,16 +302,18 @@
     <ClCompile Include="src\R3Dpch.cpp" />
     <ClCompile Include="src\R3D\Graphics\Core\FrameBuffer.cpp" />
     <ClCompile Include="src\R3D\Core\Input.cpp" />
+    <ClCompile Include="src\R3D\ImGui\ImGuiCustom.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\fbo.shader" />
     <None Include="res\shaders\lines.shader" />
-    <None Include="res\shaders\fbo_bloom.shader" />
     <None Include="res\shaders\lamp_sun.shader" />
-    <None Include="res\shaders\fbo_bloom_mix.shader" />
-    <None Include="res\shaders\fbo_hdr.shader" />
-    <None Include="res\shaders\fbo_blur.shader" />
     <None Include="res\shaders\solid.shader" />
+    <None Include="res\shaders\bloom_mix.shader" />
+    <None Include="res\shaders\bloom_select.shader" />
+    <None Include="res\shaders\blur.shader" />
+    <None Include="res\shaders\hdr.shader" />
+    <None Include="res\shaders\shadow.shader" />
+    <None Include="res\shaders\shadow_debug.shader" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\TODO.txt" />

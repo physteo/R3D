@@ -61,7 +61,7 @@ namespace r3d
 		inline const ShaderProgramSource& getSource() const { return m_source; }
 
 		void setUniformValue(const std::string& name, int          value) const;
-		void setUniformValue(const std::string& name, double       value) const;
+		//void setUniformValue(const std::string& name, double       value) const;
 		void setUniformValue(const std::string& name, unsigned int value) const;
 		void setUniformValue(const std::string& name, float value) const;
 		void setUniformValue(const std::string& name, float v1, float v2) const;
@@ -72,7 +72,7 @@ namespace r3d
 		void setUniformMatrix(const std::string& name, const float4x4& matrix, bool transpose) const;
 
 		static void setUniformValue(unsigned int id, const std::string& name, int          value);
-		static void setUniformValue(unsigned int id, const std::string& name, double       value);
+		//static void setUniformValue(unsigned int id, const std::string& name, double       value);
 		static void setUniformValue(unsigned int id, const std::string& name, unsigned int value);
 		static void setUniformValue(unsigned int id, const std::string& name, float value);
 		static void setUniformValue(unsigned int id, const std::string& name, float v1, float v2);
