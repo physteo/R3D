@@ -1,7 +1,7 @@
 #pragma once
 
 //!< Fixes the framerate of the application
-#define R3D_FIXED_FRAMERATE 60.0
+//#define R3D_FIXED_FRAMERATE 60.0
 
 #if defined(R3D_DEBUG) || defined(R3D_RELEASE)
 	//!< If not defined, asserts are replaced with nothingness

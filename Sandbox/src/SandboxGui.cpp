@@ -191,11 +191,10 @@ namespace r3d
 		{
 			ImGui::Begin("Camera", window->getFontscale());
 			ImGui::SliderFloat("sens", &mouseStatus.sensibility, 0.001f, 0.05f);
-			ImGui::SliderFloat("px", &deltaPosition.x, -10.0f, 10.0f);
-			ImGui::SliderFloat("py", &deltaPosition.y, -10.0f, 10.0f);
-			ImGui::SliderFloat("pz", &deltaPosition.z, -10.0f, 10.0f);
+			ImGui::SliderFloat("near", &nearPlane, 0.1f, 5.0f);
+			ImGui::SliderFloat("far", &farPlane, 10.0f, 300.0f);
 
-			if (projection == Projection::ORTHO)
+			if (projectionType == ProjectionType::ORTHO)
 			{
 				deltaPosition = { 0.0 };
 				camera.getEye() = float3{ 0.0, 0.0, -5.0f } +deltaPosition;
@@ -204,21 +203,21 @@ namespace r3d
 			}
 
 			ImGui::Text("Projection");
-			if (projection == Projection::ORTHO)
+			if (projectionType == ProjectionType::ORTHO)
 			{
 				if (ImGui::Button("Ortho"))
 				{
-					projection = Projection::PERSP;
+					projectionType = ProjectionType::PERSP;
 				}
 				ImGui::SliderFloat("right", &right, -5.0f, 5.0f);
 				ImGui::SliderFloat("top", &top, -5.0f, 5.0f);
 				projectionMatrix = glm::ortho(-right, right, -top, top, nearPlane, farPlane);
 			}
-			else if (projection == Projection::PERSP)
+			else if (projectionType == ProjectionType::PERSP)
 			{
 				if (ImGui::Button("Persp"))
 				{
-					projection = Projection::ORTHO;
+					projectionType = ProjectionType::ORTHO;
 				}
 
 				ImGui::SliderAngle("fovy", &fovy, 0.0, 180);
@@ -239,7 +238,7 @@ namespace r3d
 			ImGui::End();
 		}
 
-		// Canvas
+		// World
 		{
 			ImGui::Begin("World", window->getFontscale());
 			ImGui::Text("Physics", window->getFontscale());
@@ -249,7 +248,6 @@ namespace r3d
 				if (physicsOn)
 				{
 					physicsOn = false;
-
 #ifndef STACKING
 					auto* rb = am->get<RigidBody>(newEntity);
 					rb->angVelocity = real3{ 0.0 };
@@ -276,27 +274,21 @@ namespace r3d
 			ImGui::Text("Sun Light");
 			SunLight& sun = solidRenderer.getSunLight();
 			static float sunIntensity[3] = {0.1f, 0.5f, 5.0f};
-			static float sunEye[3] = { 7.0f, 15.0f, 13.0f };
-			static float sunCenter[3] = { 0.0f, 0.0f, 0.0f };
 			ImGui::SliderFloat3("Sun Intensity", sunIntensity, 0.0f, 10.0f);
-			ImGui::SliderFloat3("Sun Eye", sunEye, -20.0f, 20.0f);
-			ImGui::SliderFloat3("Sun Center", sunCenter, -20.0f, 20.0f);
+			ImGui::SliderFloat3("Sun Eye",    &sun.eye[0], -20.0f, 20.0f);
+			ImGui::SliderFloat3("Sun Center", &sun.center[0], -20.0f, 20.0f);
 			sun.ambient  = sunIntensity[0] * Palette::getInstance().white;
 			sun.specular = sunIntensity[1] * Palette::getInstance().white;
 			sun.diffuse  = sunIntensity[2] * Palette::getInstance().white;
-			sun.eye = { sunEye[0], sunEye[1], sunEye[2] };
-			sun.center = { sunCenter[0], sunCenter[1], sunCenter[2] };
 
 			ImGui::Text("Point Light");
 			PointLight& point = solidRenderer.getPointLight();
-			static float pointIntensity[3] = { 0.1f, 0.5f, 8.0f };
-			static float pointPosition[3] = { -9.0, 10.0, -10.0 };
+			static float pointIntensity[3] = { 0.1f, 0.5f, 5.5f };
 			ImGui::SliderFloat3("Point Intensity", pointIntensity, 0.0f, 10.0f);
-			ImGui::SliderFloat3("Point Position", pointPosition, -20.0f, 20.0f);
+			ImGui::SliderFloat3("Point Position", &point.eye[0], -20.0f, 20.0f);
 			point.ambient = pointIntensity[0] * Palette::getInstance().white;
 			point.specular = pointIntensity[1] * Palette::getInstance().white;
-			point.diffuse = pointIntensity[2] * Palette::getInstance().white;
-			point.eye = { pointPosition[0], pointPosition[1], pointPosition[2] };
+			point.diffuse = pointIntensity[2] * Palette::getInstance().orange;
 
 			ImGui::Text("Spot Light");
 			SpotLight& spot = solidRenderer.getSpotLight();
@@ -321,28 +313,26 @@ namespace r3d
 			am->get<ColliderPlane>(gridEnt)->offset = plane_o;
 			am->get<ColliderPlane>(gridEnt)->normal = planeNormal;
 
-			ImGui::Text("Sphere Settings");
-			int circleResolution = primitivesRenderer.getCircleResolution();
-			int sphereResolution = primitivesRenderer.getSphereResolution();
-			int sphereMeridians = primitivesRenderer.getSphereMeridians();
-			int sphereParallels = primitivesRenderer.getSphereParallels();
-			ImGui::SliderInt("circ. res", &circleResolution, 1, 50);
-			ImGui::SliderInt("sph. res", &sphereResolution, 1, 50);
-			ImGui::SliderInt("sph. mer", &sphereMeridians, 1, 50);
-			ImGui::SliderInt("sph. par", &sphereParallels, 1, 50);
-			primitivesRenderer.setCircleResolution(circleResolution);
-			primitivesRenderer.setSphereResolution(sphereResolution);
-			primitivesRenderer.setSphereMeridians(sphereMeridians);
-			primitivesRenderer.setSphereParallels(sphereParallels);
+			//ImGui::Text("Sphere Settings");
+			//int circleResolution = primitivesRenderer.getCircleResolution();
+			//int sphereResolution = primitivesRenderer.getSphereResolution();
+			//int sphereMeridians = primitivesRenderer.getSphereMeridians();
+			//int sphereParallels = primitivesRenderer.getSphereParallels();
+			//ImGui::SliderInt("circ. res", &circleResolution, 1, 50);
+			//ImGui::SliderInt("sph. res", &sphereResolution, 1, 50);
+			//ImGui::SliderInt("sph. mer", &sphereMeridians, 1, 50);
+			//ImGui::SliderInt("sph. par", &sphereParallels, 1, 50);
+			//primitivesRenderer.setCircleResolution(circleResolution);
+			//primitivesRenderer.setSphereResolution(sphereResolution);
+			//primitivesRenderer.setSphereMeridians(sphereMeridians);
+			//primitivesRenderer.setSphereParallels(sphereParallels);
 			ImGui::End();
 		}
 
 		// Misc
 		{
-			ImGui::Begin("Misc", window->getFontscale());
-
+			ImGui::Begin("Settings", window->getFontscale());
 			ImGui::Checkbox("ImGui Demo Window", &show_demo_window);
-			
 			if (ImGui::TreeNode("Shadows"))
 			{
 				ImGui::SliderFloat("lighNearPlane", &lighNearPlane, 0.01f, 1.0f);
@@ -457,7 +447,6 @@ namespace r3d
 				ImGui::TreePop();
 			}
 #endif
-			
 			ImGui::Text("Profiling");
 			ImGui::Text(" - FPS: %.1f  (%.1f ms/frame)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
 			double avg = boxBoxContactDetector.measuredTime / double(boxBoxContactDetector.trials);
@@ -468,7 +457,7 @@ namespace r3d
 
 		// Debug View
 		{
-		ImGui::Begin("z-View(Debug)", window->getFontscale());
+		ImGui::Begin("Debug(Light)", window->getFontscale());
 
 		ImVec2 pos = ImGui::GetCursorScreenPos();
 		ImVec2 windowSize = ImGui::GetWindowSize();
@@ -596,6 +585,11 @@ namespace r3d
 					{
 						toEdit = &shadowDebugShader;
 						assignedTo = "ShadowDebug";
+					}
+					if (ImGui::MenuItem("Sky"))
+					{
+						toEdit = &skyShader;
+						assignedTo = "Sky";
 					}
 					ImGui::EndMenu();
 				}

@@ -162,11 +162,12 @@ namespace r3d
 		int numBoxes = 8;
 		for (int i = 0; i < numBoxes; ++i)
 		{
+			int turningAngle = 0;// 45;
 			real  scaleFactor = (1.0 - 0.9 * i / float(numBoxes));
 			real3 scaleFactorVec = { scaleFactor, scaleFactor, scaleFactor };
 			real3 addPos = { 0.0, 2.0 * scaleFactor * scale.y + i * 0.12, 0.0 };
 
-			auto ent = createBox<BrickTag>(position, 45 * i, real3{ 0.0, 1.0, 0.0 }, scale * scaleFactorVec, stdGravity, 1.0 / scaleFactor, { 0.0, 0.0, 0.0 },
+			auto ent = createBox<BrickTag>(position, turningAngle * i, real3{ 0.0, 1.0, 0.0 }, scale * scaleFactorVec, stdGravity, 1.0 / scaleFactor, { 0.0, 0.0, 0.0 },
 				Palette::getInstance().blue);
 
 			position += addPos;
@@ -211,10 +212,10 @@ namespace r3d
 		fovy = glm::radians(90.0f);
 		aspect = 1.0f;
 		nearPlane = 2.0f;
-		farPlane = 100.0f;
-		projection = Projection::PERSP;
+		farPlane = 160.0f;
+		projectionType = ProjectionType::PERSP;
 
-		if (projection == Projection::ORTHO)
+		if (projectionType == ProjectionType::ORTHO)
 		{
 			deltaPosition = r3d::float3{ 0.0f };
 			up = float3{ 0.0f, 1.0f, 0.0f };
@@ -249,7 +250,7 @@ namespace r3d
 		// options
 		wireframesOn = true;
 		solidsOn = true;
-		physicsOn = false;
+		physicsOn = true;
 		show_demo_window = true;
 
 		// shaders
@@ -263,6 +264,7 @@ namespace r3d
 		bloomMixShader    = Shader{ "C:/dev/R3D/R3D/res/shaders/bloom_mix.shader" };
 		shadowShader      = Shader{ "C:/dev/R3D/R3D/res/shaders/shadow.shader" };
 		shadowDebugShader = Shader{ "C:/dev/R3D/R3D/res/shaders/shadow_debug.shader" };
+		skyShader = Shader{ "C:/dev/R3D/R3D/res/shaders/sky.shader" };
 
 		primitivesRenderer.setShader(&linesShader);
 		solidRenderer.setShader(&solidShader);
@@ -339,7 +341,7 @@ namespace r3d
 			// solve contacts
 			collisionData.clearArbiters(em);
 			collisionData.preStep(am, dt);
-			static const int iterations = 40;
+			static const int iterations = 20;
 			collisionData.applyImpulses(am, iterations);
 
 			// update positions
@@ -547,40 +549,58 @@ namespace r3d
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, fboShadow.getTextureID(0));
 		shadowDebugShader.setUniformValue("screenTexture", 0);
-		quadVao.draw();
+		Vaos::get().quad.bind();
+		Vaos::get().quad.draw(GL_TRIANGLES);
+		Vaos::get().quad.unbind();
 		shadowDebugShader.unbind();
 		fboShadowDebug.unbind();
 
 		// 1. Forward rendering to texture
 		
-		// shadows
-		// pass the light matrices and shadow maps to all relevant shaders
+		// pass shadows uniforms
 		solidShader.bind();
 		solidShader.setUniformMatrix("sunLightSpaceMat", lightSpaceMat, false);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, fboShadow.getTextureID(0));
 		solidShader.setUniformValue("shadowMap", 0);
 
+		// render commands
 		window->setViewPort(fboSize.x, fboSize.y);
 		fboDefault.bind();
 		window->clearColorBufferBit();
+
+		// sky first
+		glDisable(GL_CULL_FACE);
+		glDepthMask(GL_FALSE);
+		skyShader.bind();
+		auto modelSky = compute_model_matrix(camera.getEye(), fquat{ 1.0, 0.0, 0.0, 0.0 }, float3{farPlane});
+		skyShader.setUniformMatrix("projection", projectionMatrix, false);
+		skyShader.setUniformMatrix("view", camera.getViewMatrix(), false);
+		skyShader.setUniformMatrix("model", modelSky, false);
+		skyShader.setUniformValue("sun_pos", solidRenderer.getSunLight().eye);
+		Vaos::get().skyDome.bind();
+		Vaos::get().skyDome.draw(GL_TRIANGLES);
+		Vaos::get().skyDome.unbind();
+		skyShader.unbind();
+		glDepthMask(GL_TRUE);
+		glEnable(GL_CULL_FACE);
+
+		// world
 		if (wireframesOn)
 		{
 			primitivesRenderer.setShader(&linesShader);
 			primitivesRenderer.update(*am, t, dt);
 		}
 
-		if (solidsOn)
-		{
-			solidRenderer.setShader(&solidShader);
-			solidRenderer.update(*am, t, dt);
-			solidRenderer.drawLights(camera.getEye());
-		}
+		 if (solidsOn)
+		 {
+		 	solidRenderer.setShader(&solidShader);
+		 	solidRenderer.update(*am, t, dt);
+		 	solidRenderer.drawLights(camera.getEye());
+		 }
+		
 		fboDefault.unbind();
 
-		// testing shadows ************************************************
-
-		// done shadows ************************************************
 
 		if (bloomSettings.on)
 		{
@@ -592,7 +612,9 @@ namespace r3d
 			bloomBrightShader.setUniformValue("invBloomThreshold", bloomSettings.invThreshold);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, fboDefault.getTextureID(0));
-			quadVao.draw();
+			Vaos::get().quad.bind();
+			Vaos::get().quad.draw(GL_TRIANGLES);
+			Vaos::get().quad.unbind();
 			bloomBrightShader.unbind();
 			fboBloom.unbind();
 
@@ -611,7 +633,9 @@ namespace r3d
 				blurShader.setUniformValue("axis", axis);
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, firstIteration ? fboBloom.getTextureID(1) : fboBlur[!axis].getTextureID(0));
-				quadVao.draw();
+				Vaos::get().quad.bind();
+				Vaos::get().quad.draw(GL_TRIANGLES);
+				Vaos::get().quad.unbind();
 				axis = !axis;
 				firstIteration = false;
 				fboBlur[axis].unbind();
@@ -630,7 +654,9 @@ namespace r3d
 			bloomMixShader.setUniformValue("screenTexture", 0);
 			bloomMixShader.setUniformValue("brightColors", 1);
 			bloomMixShader.setUniformValue("bloom", bloomSettings.intensity);
-			quadVao.draw();
+			Vaos::get().quad.bind();
+			Vaos::get().quad.draw(GL_TRIANGLES);
+			Vaos::get().quad.unbind();
 			bloomMixShader.unbind();
 
 			fboBloom.unbind();
@@ -644,8 +670,13 @@ namespace r3d
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, bloomSettings.on ? fboBloom.getTextureID(0) : fboDefault.getTextureID(0));
 		hdrShader.setUniformValue("screenTexture", 0);
-		quadVao.draw();
+		Vaos::get().quad.bind();
+		Vaos::get().quad.draw(GL_TRIANGLES);
+		Vaos::get().quad.unbind();
 		hdrShader.unbind();
+
+
+
 
 		fboHDR.unbind();
 

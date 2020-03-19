@@ -314,6 +314,7 @@
     <None Include="res\shaders\hdr.shader" />
     <None Include="res\shaders\shadow.shader" />
     <None Include="res\shaders\shadow_debug.shader" />
+    <None Include="res\shaders\sky.shader" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\TODO.txt" />

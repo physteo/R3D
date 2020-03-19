@@ -2,8 +2,6 @@
 #version 330 core
 
 layout(location = 0) in vec3 aPosition;
-layout(location = 1) in vec4 aColor;
-
 
 uniform mat4 view;
 uniform mat4 projection;
@@ -19,22 +17,11 @@ flat out vec4 gOffsetY;
 void main()
 {
 	float scale = cameraDistance / 10.0f;
-	gl_Position = projection * view * model * vec4(aPosition, 1.0f);
-	gDirection = projection * view * model * vec4(normalize(direction) * scale, 0.0f);
-    gOffsetX = projection * view * model * vec4(scale / 2.0f, 0.0f, 0.0f, 0.0f);
-    gOffsetY = projection * view * model * vec4(0.0f, 0.0f, scale / 2.0f, 0.0f);
-	//ourColor = aColor;
-};
-
-#shader fragment
-#version 330 core
-
-layout(location = 0) out vec4 color;
-//in vec4 gColor;
-
-void main()
-{
-	color = 20.0f * vec4(1.0f, 1.0f, 1.0f, 1.0f);//* gColor;
+	mat4 mvp = projection * view * model;
+	gl_Position =  mvp * vec4(aPosition, 1.0f);
+	gDirection = mvp * vec4(normalize(direction) * scale, 0.0f);
+    gOffsetX = mvp * vec4(scale / 2.0f, 0.0f, 0.0f, 0.0f);
+    gOffsetY = mvp * vec4(0.0f, 0.0f, scale / 2.0f, 0.0f);
 };
 
 #shader geometry
@@ -62,7 +49,6 @@ void main() {
 	   EndPrimitive();
     }
 
-
     for(int i = 0; i < 2; i++)
     {
        float sign = 2 * i - 1;
@@ -77,3 +63,15 @@ void main() {
     }
 
 }  
+
+#shader fragment
+#version 330 core
+
+out vec4 color;
+
+uniform vec3 lightColor;
+
+void main()
+{
+	color = vec4(10.0f * lightColor, 1.0f);
+};

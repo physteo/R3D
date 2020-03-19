@@ -56,36 +56,6 @@ namespace r3d
 		float2 newSize;
 	};
 
-	struct QuadVao
-	{
-		QuadVao() : vao{ {
-			{
-				-1, -1, 0,
-				+1, -1,	0,
-				+1, +1, 0,
-				-1, +1,	0,
-			},
-			{
-				0, 0,
-				1, 0,
-				1, 1,
-				0, 1,
-			} }, {3, 2}, {0, 1, 2, 0, 2, 3} }
-		{
-		}
-
-
-		void draw() const
-		{
-			vao.bind();
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-			vao.unbind();
-		}
-
-	public:
-		VertexArray vao;
-	};
-
 	struct CameraMode
 	{
 		bool fps;
@@ -275,11 +245,11 @@ namespace r3d
 		float aspect;
 		float nearPlane;
 		float farPlane;
-		enum class Projection
+		enum class ProjectionType
 		{
 			ORTHO,
 			PERSP
-		} projection;
+		} projectionType;
 
 		// Shaders and renderers
 		r3d::Shader linesShader;
@@ -292,6 +262,7 @@ namespace r3d
 		r3d::Shader bloomMixShader;
 		r3d::Shader shadowShader;
 		r3d::Shader shadowDebugShader;
+		r3d::Shader skyShader;
 
 		r3d::PrimitivesRenderer primitivesRenderer;
 		r3d::SolidPrimitivesRenderer solidRenderer;
@@ -313,16 +284,14 @@ namespace r3d
 		float lastFboResize;
 		float2 fboShadowSize;
 		float2 viewWindowCenter;
-		QuadVao quadVao;
 		float lastSpotSwitchedOn;
 		
 		// shadow settings
 		float lighNearPlane{ 2.0f };
 		float lighFarPlane{ 50.0f };
-		float4 lightLRBT{ -10.0f, 10.0f, -10.0f, 10.0f };
+		float4 lightLRBT{ -13.0f, 13.0f, -13.0f, 13.0f };
 		float minShadowBias{ 0.0001f };
 		float maxShadowBias{ 0.001f };
-
 
 		BloomSettings bloomSettings;
 		HDRSettings hdrSettings;

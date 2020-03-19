@@ -1,4 +1,7 @@
 #include <R3Dpch.h>
+
+#include <GLFW/glfw3.h>
+
 #include "ImGuiLayer.h"
 
 namespace r3d

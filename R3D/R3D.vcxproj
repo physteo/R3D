@@ -259,6 +259,7 @@
     <None Include="res\shaders\lines.shader" />
     <None Include="res\shaders\shadow.shader" />
     <None Include="res\shaders\shadow_debug.shader" />
+    <None Include="res\shaders\sky.shader" />
     <None Include="res\shaders\solid.shader" />
   </ItemGroup>
   <ItemGroup>

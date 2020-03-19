@@ -20,9 +20,10 @@ namespace r3d
 		Buffer m_vbo;
 		Buffer m_ibo;
 		unsigned int m_id;
+		unsigned int m_numIndices;
 
 	public:
-		VertexArray() : m_vbo{}, m_ibo{}, m_id(0) {}
+		VertexArray() : m_vbo{}, m_ibo{}, m_id(0), m_numIndices(0) {}
 		VertexArray(const std::vector<std::vector<float> >& attributes, const std::vector<unsigned int>& components, const std::vector<unsigned int>& indices);
 
 		~VertexArray();
@@ -38,6 +39,8 @@ namespace r3d
 		void bind()   const { glBindVertexArray(m_id); }
 		void unbind() const { glBindVertexArray(0); }
 
+		void draw(GLenum mode) const;
+
 	private:
 		void generate() { glGenVertexArrays(1, &m_id); }
 		void fillData(const std::vector<std::vector<float> >& attributes, const std::vector<unsigned int>& components);
@@ -45,6 +48,23 @@ namespace r3d
 
 		void swapData(VertexArray& other);
 		void release();
+	};
+
+	class Vaos
+	{
+
+	public:
+		static Vaos& get();
+	
+		const VertexArray point;
+		const VertexArray quad;
+		const VertexArray plane;
+		const VertexArray cube;
+		const VertexArray skyDome;
+
+	private:
+		Vaos();
+
 	};
 
 }

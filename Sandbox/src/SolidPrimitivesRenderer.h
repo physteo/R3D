@@ -62,19 +62,13 @@ namespace r3d
 		virtual void update(ArchetypeManager& am, double t, double dt) override;
 
 	private:
-
-		VertexArray m_cubeVao;
-		VertexArray m_planeVao;
-		VertexArray m_pointLightVao;
-		VertexArray m_sunLightVao;
-
 		Shader* m_shader;
 		Shader* m_sunLightShader;
 		Shader* m_pointLightShader;
 
 		PointLight pointLight;
-		SunLight sunLight;
 		SpotLight spotLight;
+		SunLight sunLight;
 		bool spotLightOn;
 
 		void drawPointLight(const float3& position, const float3& cameraPosition) const;

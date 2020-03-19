@@ -89,7 +89,8 @@ namespace r3d
 
 		unbind();
 		m_ibo.unbind(); // Note: need to first unbind the vao.
-
+		
+		m_numIndices = indices.size();
 	}
 
 	void VertexArray::swapData(VertexArray& other)
@@ -98,11 +99,317 @@ namespace r3d
 		other.m_id = 0;
 		m_ibo = std::move(other.m_ibo);
 		m_vbo = std::move(other.m_vbo);
+		m_numIndices = other.m_numIndices;
+		other.m_numIndices = 0;
 	}
 
 	void VertexArray::release()
 	{
 		glDeleteVertexArrays(1, &m_id);
+	}
+
+	void VertexArray::draw(GLenum mode) const
+	{
+		glDrawElements(mode, m_numIndices, GL_UNSIGNED_INT, 0);
+	}
+
+	static std::vector<unsigned int> quadIndices{ 0, 1, 2, 0, 2, 3 };
+
+	static std::vector<float> quadVertices =
+	{
+		-1, -1, 0,
+		+1, -1,	0,
+		+1, +1, 0,
+		-1, +1,	0,
+	};
+
+	static std::vector<float> quadUVs =
+	{
+		0, 0,
+		1, 0,
+		1, 1,
+		0, 1,
+	};
+
+	static std::vector<unsigned int> quadComponents{ 3, 2 };
+
+	static std::vector<unsigned int> planeIndices = { 0, 1, 2, 0, 2, 3 };
+
+	static std::vector<float> planeVertices = {
+					-1, -1, 0,
+					+1, -1,	0,
+					+1, +1, 0,
+					-1, +1,	0,
+	};
+
+	static std::vector<float> planeNormals = {
+					0, 0, 1,
+					0, 0, 1,
+					0, 0, 1,
+					0, 0, 1,
+	};
+
+	static std::vector<float> planeTangents = {
+					1, 0, 0,
+					1, 0, 0,
+					1, 0, 0,
+					1, 0, 0,
+	};
+
+	static std::vector<unsigned int> planeComponents{ 3, 3, 3 };
+
+	static std::vector<unsigned int> cubeIndices =
+	{
+		0, 1, 2, 0, 2, 3,       // front
+		4, 5, 6, 4, 6, 7,       // right
+		8, 9, 10, 8, 10, 11,    // back
+		12, 13, 14, 12, 14, 15, // left
+		16, 17, 18, 16, 18, 19, // up
+		20, 21, 22, 20, 22, 23  // down
+	};
+
+	static std::vector<float> cubeVertices =
+	{
+		// front
+		-0.5, -0.5, +0.5,  // 0
+		+0.5, -0.5, +0.5,	// 1
+		+0.5, +0.5, +0.5,	// 2
+		-0.5, +0.5, +0.5,	// 3
+		// right
+		+0.5, -0.5, +0.5,	// 4
+		+0.5, -0.5, -0.5,	// 5
+		+0.5, +0.5, -0.5,	// 6
+		+0.5, +0.5, +0.5,  // 7
+		// back
+		-0.5, -0.5, -0.5,  // 8
+		-0.5, +0.5, -0.5,	// 9
+		+0.5, +0.5, -0.5,	// 10
+		+0.5, -0.5, -0.5,	// 11
+		// left
+		-0.5, -0.5, -0.5, // 12
+		-0.5, -0.5, +0.5, // 13
+		-0.5, +0.5, +0.5, // 14
+		-0.5, +0.5, -0.5, // 15
+		// up
+		-0.5, +0.5, +0.5, // 16
+		+0.5, +0.5, +0.5, // 17
+		+0.5, +0.5, -0.5, // 18
+		-0.5, +0.5, -0.5, // 19
+		// down
+		-0.5, -0.5, -0.5, // 20
+		+0.5, -0.5, -0.5, // 21
+		+0.5, -0.5, +0.5, // 22
+		-0.5, -0.5, +0.5  // 23
+	};
+
+	static std::vector<float> cubeNormals =
+	{
+		// front
+		0., 0., 1.,
+		0., 0., 1.,
+		0., 0., 1.,
+		0., 0., 1.,
+		// right
+		1., 0., 0.,
+		1., 0., 0.,
+		1., 0., 0.,
+		1., 0., 0.,
+		// back
+		0., 0., -1.,
+		0., 0., -1.,
+		0., 0., -1.,
+		0., 0., -1.,
+		// left
+		-1., 0., 0.,
+		-1., 0., 0.,
+		-1., 0., 0.,
+		-1., 0., 0.,
+		// up
+		0., 1., 0.,
+		0., 1., 0.,
+		0., 1., 0.,
+		0., 1., 0.,
+		// down
+		0., -1., 0.,
+		0., -1., 0.,
+		0., -1., 0.,
+		0., -1., 0.
+	};
+
+	static std::vector<float> cubeTangents =
+	{
+		// front
+		1., 0., 0.,
+		1., 0., 0.,
+		1., 0., 0.,
+		1., 0., 0.,
+		// right
+		0., 0., -1.,
+		0., 0., -1.,
+		0., 0., -1.,
+		0., 0., -1.,
+		// back
+		-1., 0., 0.,
+		-1., 0., 0.,
+		-1., 0., 0.,
+		-1., 0., 0.,
+		// left
+		0., 0., 1.,
+		0., 0., 1.,
+		0., 0., 1.,
+		0., 0., 1.,
+		// up
+		1., 0., 0.,
+		1., 0., 0.,
+		1., 0., 0.,
+		1., 0., 0.,
+		// down
+		-1., 0., 0.,
+		-1., 0., 0.,
+		-1., 0., 0.,
+		-1., 0., 0.
+	};
+
+	static std::vector<unsigned int> cubeComponents{ 3, 3, 3 };
+
+	static VertexArray create_dome_mesh(float radius);
+
+	Vaos& Vaos::get()
+	{
+		static Vaos instance;
+		return instance;
+	}
+
+	Vaos::Vaos() :
+		point{ 
+				{{0,0,0}},
+				{3},
+				{0}
+			},
+		quad{
+				{ quadVertices, quadUVs },
+				quadComponents,
+				quadIndices
+			},
+		plane{ 
+				{ planeVertices, planeNormals, planeTangents },
+				planeComponents,
+				planeIndices },
+		cube{
+				{ cubeVertices, cubeNormals, cubeTangents },
+				cubeComponents,
+				cubeIndices
+			},
+		skyDome{create_dome_mesh(1.0f)}
+	{
+	}
+
+	static VertexArray create_dome_mesh(float radius)
+	{
+		int resolution = 32;
+		int latitude = resolution / 2;
+		int longitude = resolution;
+		int numVertices = longitude * latitude;
+		int numIndices = (longitude - 1) * (latitude - 1) * 2 * 3;
+		numVertices *= 2;
+		numIndices *= 2;
+
+		struct Vertex
+		{
+			float x, y, z, u, v;
+		};
+
+		std::vector<Vertex> vertices;
+		vertices.resize(numVertices);
+
+		int domeID = 0;
+		for (int i = 0; i < longitude; i++)
+		{
+			double angleXZ = 100.0f * (i / ((float)longitude - 1.0f)) * glm::pi<float>() / 180.0;
+
+			for (int j = 0; j < latitude; j++)
+			{
+				double angleY = glm::pi<float>() * j / (latitude - 1);
+
+				vertices[domeID].x = radius * (float)(sin(angleXZ) * cos(angleY));
+				vertices[domeID].y = radius * (float)cos(angleXZ);
+				vertices[domeID].z = radius * (float)(sin(angleXZ) * sin(angleY));
+
+				vertices[domeID].u = i / (float)longitude;
+				vertices[domeID].v = j / (float)latitude;
+
+				domeID++;
+			}
+		}
+
+		for (int i = 0; i < longitude; i++)
+		{
+			double angleXZ = 100.0f * (i / ((float)longitude - 1.0f)) * glm::pi<float>() / 180.0;
+
+			for (int j = 0; j < latitude; j++)
+			{
+				double angleY = (2 * glm::pi<float>()) - (glm::pi<float>() * j / (latitude - 1));
+
+				vertices[domeID].x = radius * (float)(sin(angleXZ) * cos(angleY));
+				vertices[domeID].y = radius * (float)cos(angleXZ);
+				vertices[domeID].z = radius * (float)(sin(angleXZ) * sin(angleY));
+
+				vertices[domeID].u = i / (float)longitude;
+				vertices[domeID].v = j / (float)latitude;
+
+				domeID++;
+			}
+		}
+
+		std::vector<unsigned int> indices;
+		indices.resize(numIndices);
+
+		int index = 0;
+		for (size_t i = 0; i < longitude - 1; i++)
+		{
+			for (size_t j = 0; j < latitude - 1; j++)
+			{
+				indices[index++] = (size_t)(i * latitude + j);
+				indices[index++] = (size_t)((i + 1) * latitude + j);
+				indices[index++] = (size_t)((i + 1) * latitude + j + 1);
+
+				indices[index++] = (size_t)((i + 1) * latitude + j + 1);
+				indices[index++] = (size_t)(i * latitude + j + 1);
+				indices[index++] = (size_t)(i * latitude + j);
+			}
+		}
+
+		unsigned short off = (unsigned short)(latitude * longitude);
+		for (unsigned short i = 0; i < longitude - 1; i++)
+		{
+			for (unsigned short j = 0; j < latitude - 1; j++)
+			{
+				indices[index++] = (unsigned short)(off + i * latitude + j);
+				indices[index++] = (unsigned short)(off + (i + 1) * latitude + j + 1);
+				indices[index++] = (unsigned short)(off + (i + 1) * latitude + j);
+
+				indices[index++] = (unsigned short)(off + i * latitude + j + 1);
+				indices[index++] = (unsigned short)(off + (i + 1) * latitude + j + 1);
+				indices[index++] = (unsigned short)(off + i * latitude + j);
+			}
+		}
+
+		std::vector<float> finalPos;
+		std::vector<float> finalUv;
+		finalPos.reserve(3 * numVertices);
+		finalUv.reserve(2 * numVertices);
+
+		for (size_t i = 0; i < numVertices; ++i)
+		{
+			finalPos.push_back(vertices[i].x);
+			finalPos.push_back(vertices[i].y);
+			finalPos.push_back(vertices[i].z);
+
+			finalUv.push_back(vertices[i].u);
+			finalUv.push_back(vertices[i].v);
+		}
+
+		return VertexArray{ {finalPos, finalUv}, {3, 2}, indices };
 	}
 
 }
