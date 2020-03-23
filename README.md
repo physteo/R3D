@@ -1,5 +1,5 @@
 # R3D
-<i>Rendara3D</i> (R3D) is a 3D graphics/physics engine that I wrote for learning purposes.
+R3D (<i>Rendara3D</i>) is a 3D graphics/physics engine that I am writing for learning purposes.
 It is written in C++ and OpenGL.
 
 <img src="/img/r3d_stack.gif?raw=true" width="300px"> <img src="/img/r3d_shoot.gif?raw=true" width="300px">
