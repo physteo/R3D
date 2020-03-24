@@ -11,7 +11,7 @@ namespace r3d
 {
 	void SphereSphereContactDetector::update(ArchetypeManager& am, double t, double dt)
 	{
-		auto archetypes = am.matchAtLeastWithout(ComponentList::buildList<ColliderSphere, Transform>(), {});
+		auto archetypes = am.matchAtLeast(ComponentList::buildList<ColliderSphere, Transform>(), {});
 
 		// same archetype
 		for (auto arch1 : archetypes)

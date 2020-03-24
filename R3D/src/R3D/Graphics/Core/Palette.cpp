@@ -1,3 +1,5 @@
+#include <R3Dpch.h>
+
 #include "Palette.h"
 
 namespace r3d

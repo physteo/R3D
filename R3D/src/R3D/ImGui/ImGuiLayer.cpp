@@ -1,8 +1,9 @@
 #include <R3Dpch.h>
 
-#include <GLFW/glfw3.h>
-
 #include "ImGuiLayer.h"
+
+#include <GLFW/glfw3.h>
+#include "../Core/Window.h"
 
 namespace r3d
 {
@@ -35,9 +36,9 @@ namespace r3d
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 		// Setup Dear ImGui style
@@ -47,7 +48,6 @@ namespace r3d
 		ImGui_ImplOpenGL3_Init("#version 410");
 		ImGui_ImplGlfw_InitForOpenGL(window->getGLFWwindow(), true);
 		ImGui::GetStyle().ScaleAllSizes(window->getFontscale());
-
 	}
 
 	void ImGuiLayer::shutdown()

@@ -2,7 +2,7 @@
 #include "Detection.h"
 #include "Geometry.h"
 
-#if defined(R3D_DEBUG) || defined(R3D_RELEASE)
+#if defined(R3D_DEBUG)
 #include <R3D/Core/Log.h>
 #include <R3D/Core/Application.h>
 #endif
@@ -269,7 +269,7 @@ namespace r3d
 			Facet* sideFace = half->twin->left;
 
 			// debug draw 
-#if defined(R3D_DEBUG) || defined(R3D_RELEASE)
+#if defined(R3D_DEBUG)
 			{
 				real3 faceCenter = referenceBox.position + referenceBox.orientation * sideFace->computeCenter();
 				real3 sideNormal = referenceBox.orientation * sideFace->computeNormal();
@@ -356,7 +356,7 @@ namespace r3d
 		// clip segments of the incident face against side planes
 		std::vector<PointQuery> clippedPointsOfIncidentFace = clip_face(incidentFace, incidentBox, referenceFace, referenceBox);
 		
-#if defined(R3D_DEBUG) || defined(R3D_RELEASE)
+#if defined(R3D_DEBUG)
 		// debug draw
 		{
 			real3 faceCenter = referenceBox.position + referenceBox.orientation * referenceBox.scale * referenceFace.computeCenter();
@@ -419,7 +419,7 @@ namespace r3d
 			++numContacts;
 		}
 
-#if defined(R3D_DEBUG) || defined(R3D_RELEASE)
+#if defined(R3D_DEBUG)
 		//Application::getDebugger()->draw_segment(manifoldCenter, manifold->normal, { 1.0, 1.0, 1.0 });
 		
 		if (numContacts > 8)
@@ -451,7 +451,7 @@ namespace r3d
 		c->penetration = -eq.separation;
 		c->position = real(0.5) * (c1 + c2);
 
-#if defined(R3D_DEBUG) || defined(R3D_RELEASE)
+#if defined(R3D_DEBUG)
 		Application::getDebugger()->draw_circle(c->position, 0.15, { 1.0, 0.64, 0.0 });
 #endif
 		return manifold->numContacts;

@@ -18,27 +18,11 @@ namespace r3d
 			return list;
 		}
 
-		void finish()
-		{
-			// sort the list
-			std::sort(m_metatypes.begin(), m_metatypes.end(), [](auto left, auto right)
-			{
-				return left.getHash() < right.getHash();
-			});
+		void finish();
 
-			// create ID
-			std::string id;
-			for (auto& elem : m_metatypes)
-			{
-				id.append(elem.getName());
-				id.append("-");
-			}
-			m_id = StringHash::computeHash(id);
-		}
-
-		inline       std::vector<Metatype>& getMetatypes() { return m_metatypes; }
+		inline std::vector<Metatype>& getMetatypes() { return m_metatypes; }
 		inline const std::vector<Metatype>& getMetatypes() const { return m_metatypes; }
-		inline unsigned long long           getListId()    const { return m_id; }
+		inline unsigned long long getListId() const { return m_id; }
 		inline bool empty() const { return m_metatypes.empty(); }
 
 	private:
@@ -56,7 +40,10 @@ namespace r3d
 		template<class C>
 		void addComponent()
 		{
-			if (hasComponent<C>()) return;
+			if (hasComponent<C>())
+			{
+				return;
+			}
 			else
 			{
 				Metatype m = Metatype::buildMetaType<C>();
@@ -89,44 +76,22 @@ namespace r3d
 		}
 
 		inline const ComponentList& getComponentList() const { return m_componentList; }
-
+	
+	private:
 		ComponentList m_componentList;
 
-	private:
 	};
 
 	class ArchetypeData
 	{
 	public:
-		std::unordered_map < size_t, RawPackedArray > componentDataMap;
+		ArchetypeData();
+		ArchetypeData(Archetype arch);
 
-		ArchetypeData() : m_archetype{} {}
-		ArchetypeData(Archetype arch) : m_archetype(arch)
-		{
-			for (auto meta : arch.m_componentList.getMetatypes())
-			{
-				//auto compName = meta.getName();
-				//componentDataMap.emplace(compName, RawPackedArray{ meta });
-				auto compHash = meta.getHash();
-				componentDataMap.emplace(compHash, RawPackedArray{ meta });
-			}
-		}
-
-		ArchetypeData(ArchetypeData& other) = default;
-		ArchetypeData& operator=(ArchetypeData& other) = default;
-
-		ArchetypeData(ArchetypeData&& other) = default;
-		ArchetypeData& operator=(ArchetypeData&& other) = default;
-
-		void assignDefault(Entity entity)
-		{
-			for (auto& string_packedArray_pair : componentDataMap)
-			{
-				string_packedArray_pair.second.assign(entity, nullptr); // TODO: change to default constructor
-				//componentDataMap.emplace(compName, RawPackedArray{ meta });
-				//componentDataMap[compName] = std::move(RawPackedArray{ meta });
-			}
-		}
+		void assignDefault(Entity entity);
+		void remove(Entity entity);
+		const Archetype& getArchetype() const;
+		const ComponentList& getComponentList() const;
 
 		template<class C>
 		RawPackedArray* get()
@@ -144,23 +109,7 @@ namespace r3d
 			return m_archetype.hasComponent<C>();
 		}
 
-		void remove(Entity entity)
-		{
-			for (auto& string_packedArray_pair : componentDataMap)
-			{
-				string_packedArray_pair.second.remove(entity);
-			}
-		}
-
-		const Archetype& getArchetype() const
-		{
-			return m_archetype;
-		}
-
-		const ComponentList& getComponentList() const
-		{
-			return m_archetype.m_componentList;
-		}
+		std::unordered_map < size_t, RawPackedArray > componentDataMap;
 
 	private:
 		Archetype m_archetype;

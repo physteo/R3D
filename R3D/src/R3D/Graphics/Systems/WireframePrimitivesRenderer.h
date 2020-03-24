@@ -1,18 +1,13 @@
 #pragma once
-
 #include <R3D/Ecs/System.h>
-#include <R3D/Ecs/TransformComponent.h>
-
-#include <R3D/Graphics/Core/VertexArray.h>
-#include <R3D/Graphics/Core/InstancesRenderer.h>
-#include <R3D/Graphics/Core/BasicMatrixOperations.h>
-#include <R3D/Graphics/Core/Shader.h>
-#include <R3D/Graphics/Components/BasicGraphicsComponents.h>
+#include "../Core/InstancesRenderer.h"
 
 namespace r3d
 {
 
-	class PrimitivesRenderer : public System
+	class Shader;
+
+	class WireframePrimitivesRenderer : public System
 	{
 		int circleResolution{ 10 };
 		int sphereResolution{ 15 };
@@ -40,7 +35,7 @@ namespace r3d
 		};
 
 	public:
-		PrimitivesRenderer();
+		WireframePrimitivesRenderer();
 
 		void buildPrimitive(size_t shapeId);
 		void prepareData(ArchetypeManager& am);

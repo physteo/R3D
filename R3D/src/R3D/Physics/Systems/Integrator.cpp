@@ -10,7 +10,7 @@ namespace r3d
 
 	void ForceIntegrator::update(ArchetypeManager & am, double t, double dt)
 	{
-		auto archetypesRigidBody = am.matchAtLeastWithout(ComponentList::buildList<Transform, RigidBody>(), {});
+		auto archetypesRigidBody = am.matchAtLeast(ComponentList::buildList<Transform, RigidBody>(), {});
 		for (auto arch : archetypesRigidBody)
 		{
 			auto transform = get<Transform>(am, arch);
@@ -29,7 +29,7 @@ namespace r3d
 
 	void VelocityIntegrator::update(ArchetypeManager & am, double t, double dt)
 	{
-		auto archetypesRigidBody = am.matchAtLeastWithout(ComponentList::buildList<Transform, RigidBody>(), {});
+		auto archetypesRigidBody = am.matchAtLeast(ComponentList::buildList<Transform, RigidBody>(), {});
 		for (auto arch : archetypesRigidBody)
 		{
 			auto transform = get<Transform>(am, arch);

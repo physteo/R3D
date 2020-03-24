@@ -1,9 +1,38 @@
-#include <R3D/Physics/Core/Colliders.h>
+
 #include "WorldLayer.h"
+#include <R3D/Physics/Core/Colliders.h>
+#include <R3D/Physics/Core/Colliders.h>
 
 namespace r3d
 {
 	
+	void SelfDestruction::update(ArchetypeManager& am, double t, double dt)
+	{
+		auto archetypes = am.matchAtLeast(ComponentList::buildList<SelfDestructionTimer>(), {});
+
+		std::vector<Entity> toRemove;
+		toRemove.reserve(10);
+
+		for (auto arch : archetypes)
+		{
+			size_t size = getSize<SelfDestructionTimer>(am, arch);
+			auto* selfDestr = get<SelfDestructionTimer>(am, arch);
+			auto& entities = getEntities(am, arch);
+
+			for (size_t i = 0; i < size; ++i)
+			{
+				if (t - selfDestr[i].birth > selfDestr[i].lifespan)
+				{
+					toRemove.push_back(entities[i]);
+				}
+			}
+		}
+
+		// remove
+		ManyEntitiesDestroyedEvent e{ std::move(toRemove) };
+		Application::dispatchEventStatic(e);
+	}
+
 	Entity WorldLayer::createSegment(r3d::float3 position, float angleDeg, r3d::float3 axis, float scale, r3d::float4 color)
 	{
 		using namespace r3d;
@@ -162,10 +191,10 @@ namespace r3d
 		int numBoxes = 8;
 		for (int i = 0; i < numBoxes; ++i)
 		{
-			int turningAngle = 0;// 45;
-			real  scaleFactor = (1.0 - 0.9 * i / float(numBoxes));
+			int turningAngle = 0;
+			real  scaleFactor = 1.0;// (1.0 - 0.9 * i / float(numBoxes));
 			real3 scaleFactorVec = { scaleFactor, scaleFactor, scaleFactor };
-			real3 addPos = { 0.0, 2.0 * scaleFactor * scale.y + i * 0.12, 0.0 };
+			real3 addPos = { 0.0, 2.0 * scaleFactor * scale.y + i * 0.1, 0.0 };
 
 			auto ent = createBox<BrickTag>(position, turningAngle * i, real3{ 0.0, 1.0, 0.0 }, scale * scaleFactorVec, stdGravity, 1.0 / scaleFactor, { 0.0, 0.0, 0.0 },
 				Palette::getInstance().blue);
@@ -188,7 +217,7 @@ namespace r3d
 		createBox<WallTag>(real3{ -5.5, wallscale.y, 0.0 }, 90, real3{ 0.0, 1.0, 0.0 }, wallscale, stdGravity, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red);
 		createBox<WallTag>(real3{ +5.5, wallscale.y, 0.0 }, 90, real3{ 0.0, 1.0, 0.0 }, wallscale, stdGravity, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red);
 		createBox<WallTag>(real3{ +0.0, wallscaleMini.y, +5.5 }, 0, real3{ 0.0, 1.0, 0.0 }, wallscaleMini, stdGravity, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red);
-
+		
 		real3 woodscale = { 0.2, 4.0, 1.0 };
 		createBox<WoodTag>(real3{ +3.0, woodscale.y + 0.0, 0.0 }, +5.0, real3{ 0.0, 0.0, 1.0 }, woodscale, stdGravity, 1.0, { 0.0, 0.0, 0.0 }, Palette::getInstance().orange);
 		createBox<WoodTag>(real3{ -3.0, woodscale.y + 0.0, 0.0 }, -5.0, real3{ 0.0, 0.0, 1.0 }, woodscale, stdGravity, 1.0, { 0.0, 0.0, 0.0 }, Palette::getInstance().orange);
@@ -241,7 +270,7 @@ namespace r3d
 			gun = Application::getEntityManager()->create();
 			real distanceFromCamera = 4.0;
 			float3 scale{ 0.5, 0.5, 1 };
-			am->setArchetype<Transform, Color, BoxPrimitive, float>(gun);
+			am->setArchetype<Transform, Color, float>(gun);
 			am->set<Color>(gun, Color{ Palette::getInstance().orange });
 			am->set<float>(gun, distanceFromCamera);
 			am->set<Transform>(gun, Transform{ {}, {}, scale });
@@ -250,7 +279,7 @@ namespace r3d
 		// options
 		wireframesOn = true;
 		solidsOn = true;
-		physicsOn = true;
+		physicsOn = false;
 		show_demo_window = true;
 
 		// shaders
@@ -264,9 +293,10 @@ namespace r3d
 		bloomMixShader    = Shader{ "C:/dev/R3D/R3D/res/shaders/bloom_mix.shader" };
 		shadowShader      = Shader{ "C:/dev/R3D/R3D/res/shaders/shadow.shader" };
 		shadowDebugShader = Shader{ "C:/dev/R3D/R3D/res/shaders/shadow_debug.shader" };
-		skyShader = Shader{ "C:/dev/R3D/R3D/res/shaders/sky.shader" };
+		skyShader         = Shader{ "C:/dev/R3D/R3D/res/shaders/sky.shader" };
+		contactsShader    = Shader{ "C:/dev/R3D/R3D/res/shaders/contacts.shader" };
 
-		primitivesRenderer.setShader(&linesShader);
+		wireframesRenderer.setShader(&linesShader);
 		solidRenderer.setShader(&solidShader);
 		solidRenderer.setSunShader(&sunLightShader);
 		solidRenderer.setPointShader(&pointLightShader);
@@ -281,17 +311,9 @@ namespace r3d
 		boxBoxContactDetector.setCollisionData(&collisionData);
 
 		frameCounter = 0;
-		mouseStatus.lastPressedTime = 0.0f;
-		mouseStatus.sensibility = 0.05f;
-		cameraMode.fps = false;
-		cameraMode.lastSwitchedTime = 0.0f;
 		
 		fboSize = {Application::getWindow()->getWidth(), Application::getWindow()->getHeight() };
 		fboSizePrev = fboSize;
-		fboShadowSize = { 1024, 1024 };
-		viewWindowCenter = { 0, 0 };
-		lastFboResize = 0.0f;
-		lastSpotSwitchedOn = 0.0f;
 
 		setUpFbos();
 		setUpFboShadow();
@@ -312,7 +334,7 @@ namespace r3d
 			R3D_ASSERT(false, "Fbos not complete.");
 		}
 
-#if defined(R3D_DEBUG) || defined(R3D_RELEASE)
+#if defined(R3D_DEBUG)
 		// Debugger 
 		Application::getDebugger()->setAm(getArchetypeManager());
 		Application::getDebugger()->setEm(Application::getEntityManager());
@@ -341,7 +363,7 @@ namespace r3d
 			// solve contacts
 			collisionData.clearArbiters(em);
 			collisionData.preStep(am, dt);
-			static const int iterations = 20;
+			static const int iterations = 10;
 			collisionData.applyImpulses(am, iterations);
 
 			// update positions
@@ -392,14 +414,6 @@ namespace r3d
 
 #endif
 		}
-
-#if defined(R3D_DEBUG) || defined(R3D_RELEASE)
-		// remove contact entities
-		contactEntityRemover.update(*am, t, dt);
-		// draw contacts
-		contactEntityGenerator.setContacts(&collisionData);
-		contactEntityGenerator.update(*am, t, dt);
-#endif
 
 		// inputs
 		if (cameraMode.fps)
@@ -467,17 +481,19 @@ namespace r3d
 			float current = window->getCurrentTime();
 			if (current - cameraMode.lastSwitchedTime > 0.5f) 
 			{
-				cameraMode.lastSwitchedTime = current;
-				cameraMode.fps = !cameraMode.fps;
 				if (cameraMode.fps)
 				{
-					window->setCursorDisabled();
-					window->setCursorPosition({ window->getWidth() / 2.0, window->getHeight() / 2.0 });
+					window->setCursorVisible();
+					am->remove<BoxPrimitive>(gun);
 				}
 				else
 				{
-					window->setCursorVisible();
+					window->setCursorDisabled();
+					window->setCursorPosition({ window->getWidth() / 2.0, window->getHeight() / 2.0 });
+					am->add<BoxPrimitive>(gun, BoxPrimitive{});
 				}
+				cameraMode.lastSwitchedTime = current;
+				cameraMode.fps = !cameraMode.fps;
 			}
 		}
 
@@ -515,6 +531,9 @@ namespace r3d
 		pointLightShader.setUniformMatrix("view", camera.getViewMatrix(), false);
 		pointLightShader.setUniformMatrix("projection", projectionMatrix, false);
 
+		contactsShader.bind();
+		contactsShader.setUniformMatrix("view", camera.getViewMatrix(), false);
+		contactsShader.setUniformMatrix("projection", projectionMatrix, false);
 
 		// 0. Shadow pass
 		// light space matrix
@@ -549,9 +568,9 @@ namespace r3d
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, fboShadow.getTextureID(0));
 		shadowDebugShader.setUniformValue("screenTexture", 0);
-		Vaos::get().quad.bind();
-		Vaos::get().quad.draw(GL_TRIANGLES);
-		Vaos::get().quad.unbind();
+		Vaos::getInstance().quad.bind();
+		Vaos::getInstance().quad.draw(GL_TRIANGLES);
+		Vaos::getInstance().quad.unbind();
 		shadowDebugShader.unbind();
 		fboShadowDebug.unbind();
 
@@ -578,9 +597,9 @@ namespace r3d
 		skyShader.setUniformMatrix("view", camera.getViewMatrix(), false);
 		skyShader.setUniformMatrix("model", modelSky, false);
 		skyShader.setUniformValue("sun_pos", solidRenderer.getSunLight().eye);
-		Vaos::get().skyDome.bind();
-		Vaos::get().skyDome.draw(GL_TRIANGLES);
-		Vaos::get().skyDome.unbind();
+		Vaos::getInstance().skyDome.bind();
+		Vaos::getInstance().skyDome.draw(GL_TRIANGLES);
+		Vaos::getInstance().skyDome.unbind();
 		skyShader.unbind();
 		glDepthMask(GL_TRUE);
 		glEnable(GL_CULL_FACE);
@@ -588,19 +607,28 @@ namespace r3d
 		// world
 		if (wireframesOn)
 		{
-			primitivesRenderer.setShader(&linesShader);
-			primitivesRenderer.update(*am, t, dt);
+			wireframesRenderer.setShader(&linesShader);
+			wireframesRenderer.update(*am, t, dt);
 		}
 
-		 if (solidsOn)
-		 {
-		 	solidRenderer.setShader(&solidShader);
-		 	solidRenderer.update(*am, t, dt);
-		 	solidRenderer.drawLights(camera.getEye());
-		 }
+		if (solidsOn)
+		{
+			solidRenderer.setShader(&solidShader);
+			solidRenderer.update(*am, t, dt);
+			solidRenderer.drawLights(camera.getEye());
+		}
 		
-		fboDefault.unbind();
+#if defined(R3D_DEBUG) || defined(R3D_RELEASE)
+		// remove contact entities
+		contactEntityRemover.update(*am, t, dt);
+		// draw contacts
+		contactEntityGenerator.setContacts(&collisionData);
+		contactEntityGenerator.setShader(&contactsShader);
+		contactEntityGenerator.setCamera(&camera);
+		contactEntityGenerator.update(*am, t, dt);
+#endif
 
+		fboDefault.unbind();
 
 		if (bloomSettings.on)
 		{
@@ -612,9 +640,9 @@ namespace r3d
 			bloomBrightShader.setUniformValue("invBloomThreshold", bloomSettings.invThreshold);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, fboDefault.getTextureID(0));
-			Vaos::get().quad.bind();
-			Vaos::get().quad.draw(GL_TRIANGLES);
-			Vaos::get().quad.unbind();
+			Vaos::getInstance().quad.bind();
+			Vaos::getInstance().quad.draw(GL_TRIANGLES);
+			Vaos::getInstance().quad.unbind();
 			bloomBrightShader.unbind();
 			fboBloom.unbind();
 
@@ -633,9 +661,9 @@ namespace r3d
 				blurShader.setUniformValue("axis", axis);
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, firstIteration ? fboBloom.getTextureID(1) : fboBlur[!axis].getTextureID(0));
-				Vaos::get().quad.bind();
-				Vaos::get().quad.draw(GL_TRIANGLES);
-				Vaos::get().quad.unbind();
+				Vaos::getInstance().quad.bind();
+				Vaos::getInstance().quad.draw(GL_TRIANGLES);
+				Vaos::getInstance().quad.unbind();
 				axis = !axis;
 				firstIteration = false;
 				fboBlur[axis].unbind();
@@ -654,9 +682,9 @@ namespace r3d
 			bloomMixShader.setUniformValue("screenTexture", 0);
 			bloomMixShader.setUniformValue("brightColors", 1);
 			bloomMixShader.setUniformValue("bloom", bloomSettings.intensity);
-			Vaos::get().quad.bind();
-			Vaos::get().quad.draw(GL_TRIANGLES);
-			Vaos::get().quad.unbind();
+			Vaos::getInstance().quad.bind();
+			Vaos::getInstance().quad.draw(GL_TRIANGLES);
+			Vaos::getInstance().quad.unbind();
 			bloomMixShader.unbind();
 
 			fboBloom.unbind();
@@ -670,13 +698,10 @@ namespace r3d
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, bloomSettings.on ? fboBloom.getTextureID(0) : fboDefault.getTextureID(0));
 		hdrShader.setUniformValue("screenTexture", 0);
-		Vaos::get().quad.bind();
-		Vaos::get().quad.draw(GL_TRIANGLES);
-		Vaos::get().quad.unbind();
+		Vaos::getInstance().quad.bind();
+		Vaos::getInstance().quad.draw(GL_TRIANGLES);
+		Vaos::getInstance().quad.unbind();
 		hdrShader.unbind();
-
-
-
 
 		fboHDR.unbind();
 
@@ -713,7 +738,7 @@ namespace r3d
 			real3 bulletPos = am->get<Transform>(gun)->position;
 			real3 bulletVel = -real(30.0 + Random::randFloat() * 2.0 - 1.0) * camera.getCameraZ();
 			fquat bulletRot = glm::toQuat(real3x3{ camera.getCameraX(), camera.getCameraY(), camera.getCameraZ() });
-			createBox<BulletTag>(bulletPos, bulletRot, v, stdGravity, 10.0, bulletVel, { c.r, c.g, c.b, 1.0 }, 2.5);
+			createBox<BulletTag>(bulletPos, bulletRot, v, stdGravity, 10.0, bulletVel, { c.r, c.g, c.b, 1.0 }, 1.0);
 		}
 
 		return false;

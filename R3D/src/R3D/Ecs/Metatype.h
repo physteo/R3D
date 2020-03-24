@@ -12,12 +12,6 @@ namespace r3d
 		//using CompareFn = bool(void*, void*);
 
 	public:
-		ConstructorFn* constructor;
-		DestructorFn*  destructor;
-		CopyAssignmentFn* copy;
-		MoveAssignmentFn* move;
-		//CompareFn* compare;
-
 		Metatype() : m_size(0), m_name(""), m_hash(0), constructor([](void* p) {}), destructor([](void* p) {}), copy([](void*, void*) {}), move([](void*, void*) {}) {}
 
 		template <class C>
@@ -59,6 +53,12 @@ namespace r3d
 		{
 			return c1.getHash() == c2.getHash();
 		}
+
+		ConstructorFn* constructor;
+		DestructorFn*  destructor;
+		CopyAssignmentFn* copy;
+		MoveAssignmentFn* move;
+		//CompareFn* compare;
 
 	private:
 		size_t      m_size;

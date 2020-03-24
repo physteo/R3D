@@ -12,7 +12,6 @@ namespace r3d
 	bool  is_point_below_plane   (const real3& point, const ColliderPlane& plane, real& distance, real tolerance = R3D_CONTACT_EPSILON);
 	real3 project_point_to_plane (const real3& point, const ColliderPlane& plane);
 	int get_deepest_point_id     (const Topology& top, const Transform& box, const ColliderPlane& plane, real& distance);
-	void  compute_basis          (const real3& normal, real3& tangent, real3& bitangent);
 	real  closest_points_edges   (const real3& origin1, const real3& end1, const real3& origin2, const real3& end2,
 		                          real3 &c1, real3 &c2);
 	//real3 get_support_point      (const CollisionBox& box, const real3& direction, int& pointID, real& projection);

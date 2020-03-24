@@ -1,6 +1,5 @@
 #pragma once
 #include <R3D/Core/MathUtils.h>
-#include <vector>
 
 namespace r3d
 {

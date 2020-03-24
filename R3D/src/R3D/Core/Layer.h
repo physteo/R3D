@@ -1,47 +1,35 @@
 #pragma once
 
-#include <R3D/Core/Window.h>
 #include <R3D/Events/EventsListener.h>
 #include <R3D/Ecs/ArchetypeManager.h>
 #include <R3D/Utils/RingBuffer.h>
 
-#include <unordered_map>
-
-#define SAVED_FRAMES 20
+#define SAVED_FRAMES 0
 
 namespace r3d
 {
+	
+	class Window;
 
 	class Layer : public EventsListener
 	{
 	public:
-		Layer() : m_savedFrames(SAVED_FRAMES)
-		{
-			static int layerCounter = 0;
-			layerCounter++;
-			m_name = "Layer_";
-			m_name.append(std::to_string(layerCounter));
-		}
-
-		Layer(const std::string& name) : m_name(name), m_savedFrames(SAVED_FRAMES)
-		{
-		}
-
+		Layer();
+		Layer(std::string name);
 		virtual ~Layer() = default;
 
-		void onSave(Window* window);
+		inline r3d::ArchetypeManager* getArchetypeManager() { return m_savedFrames.getCurrent(); }
+		inline const std::string& getName() const { return m_name; }
+		inline const EventsToListenersMap& getListeners() const { return m_eventsListeners; }
+		
+		inline void pushBackLayerListener(EventType et, EventsListener* el) { m_eventsListeners[et].push_back(el); }
+		inline void pushFrontLayerListener(EventType et, EventsListener* el) { m_eventsListeners[et].push_front(el); }
 
 		virtual void onUpdate(Window* window) = 0;
 		virtual void onRender(Window* window) = 0;
 		virtual bool onEvent(Event& e) override = 0;
 		virtual void onImGuiUpdate(Window* window) {};
-
-		inline r3d::ArchetypeManager* getArchetypeManager() { return m_savedFrames.getCurrent(); }
-		inline const std::string& getName() const { return m_name; }
-
-		inline const EventsToListenersMap& getListeners() const { return m_eventsListeners; }
-		inline void pushBackLayerListener(EventType et, EventsListener* el) { m_eventsListeners[et].push_back(el); }
-		inline void pushFrontLayerListener(EventType et, EventsListener* el) { m_eventsListeners[et].push_front(el); }
+		void onSave(Window* window);
 
 		void stepBack();
 		void stepForward();

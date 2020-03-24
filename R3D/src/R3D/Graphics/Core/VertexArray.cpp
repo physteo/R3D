@@ -273,8 +273,9 @@ namespace r3d
 	static std::vector<unsigned int> cubeComponents{ 3, 3, 3 };
 
 	static VertexArray create_dome_mesh(float radius);
+	static VertexArray create_circle_mesh();
 
-	Vaos& Vaos::get()
+	Vaos& Vaos::getInstance()
 	{
 		static Vaos instance;
 		return instance;
@@ -300,8 +301,36 @@ namespace r3d
 				cubeComponents,
 				cubeIndices
 			},
-		skyDome{create_dome_mesh(1.0f)}
+		skyDome{create_dome_mesh(1.0f)},
+		circle{create_circle_mesh()}
 	{
+	}
+
+	static VertexArray create_circle_mesh()
+	{
+		const int circleResolution = 20;
+		std::vector<float> positions;
+		std::vector<unsigned int> indices;
+
+		positions.push_back(0.0f);
+		positions.push_back(0.0f);
+		positions.push_back(0.0f);
+		for (int i = 0; i <= circleResolution; i++)
+		{
+			float theta = i * (2 * glm::pi<float>()) / (float)circleResolution;
+			positions.push_back(0.5f * cosf(theta)); // x1
+			positions.push_back(0.5f * sinf(theta)); // z1
+			positions.push_back(0.0f); // y1
+		}
+
+		for (int i = 0; i < (positions.size() / 3) - 1; ++i)
+		{
+			indices.push_back(0);
+			indices.push_back(i);
+			indices.push_back(i+1);
+		}
+
+		return VertexArray{ {positions}, {3}, indices };
 	}
 
 	static VertexArray create_dome_mesh(float radius)

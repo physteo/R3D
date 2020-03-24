@@ -21,126 +21,56 @@ namespace r3d
 		Application(std::string applicationName, double windowWidth, double windowHeight, int maxFramerate = 60, bool saveFrames = false);
 		~Application();
 
+		static EntityManager* getEntityManager();
+		static Window* getWindow();
+		static Debugger* getDebugger();
+		//!< Dispatches the event to all the layers and to the basic listeners.
+		static void dispatchEventStatic(Event& e);
 #ifdef R3D_DEBUG_APP
-		static bool isInDebugMode()
-		{
-			return s_instance->m_debugMode;
-		}
+		static bool isInDebugMode();
 #endif
-		static EntityManager* getEntityManager()
-		{
-			return &(s_instance->m_entityManager);
-		}
 
-		static Window* getWindow()
-		{
-			return &(s_instance->m_window);
-		}
-
-		static Debugger* getDebugger()
-		{
-			return &(s_instance->m_debugger);
-		}
-
-		static void dispatchEventStatic(Event& e)
-		{
-			s_instance->dispatchEvent(e);
-		}
-
-		//!< runs the application, updates the layers.
 		void run();
-
-		//!< pause the application.
-		static void pause()
-		{
-			s_instance->m_paused = true;
-			s_instance->m_stepping = false;
-
-			for (auto layer : s_instance->m_layers)
-			{
-				std::cout << "frame cnt modulo: " << layer->getFrameSlotIndex() << std::endl;
-				break;
-			}
-		}
+		static void pause();
 
 	protected:
-		void dispatchEvent(Event& e)
-		{
-			bool handled = false;
-
-			for (auto& l : m_layers)
-			{
-				handled = m_eventManager.dispatch(e, l->getListeners());
-				if (handled) break;
-			}
-
-			if (!handled)
-			{
-				handled = m_eventManager.dispatch(e, m_basicListeners);
-			}
-
-		}
-
-		//!< Sets the application input layer, used for controlling the application (pausing, stepping, exiting, ...)
-		//!< The layer is owned by the application.
-		void setApplicationInputLayer(Layer* layer)
-		{
-			m_applicationInputLayer = layer;
-		}
-
+		void dispatchEvent(Event& e);
 		//!< Adds a layer on the back. The layer is now owned by the application.
-		void pushBackLayer(Layer* layer)
-		{
-			m_layers.push_back(layer);
-			m_basicListeners[EntityDestroyedEvent::getStaticType()].push_back(layer->getArchetypeManager());
-			m_basicListeners[ManyEntitiesDestroyedEvent::getStaticType()].push_back(layer->getArchetypeManager());
-		}
-
+		void pushBackLayer(Layer* layer);
 		//!< Adds a layer on top. The layer is now owned by the application.
-		void pushFrontLayer(Layer* layer)
-		{
-			m_layers.push_front(layer);
-			m_basicListeners[EntityDestroyedEvent::getStaticType()].push_front(layer->getArchetypeManager());
-			m_basicListeners[ManyEntitiesDestroyedEvent::getStaticType()].push_front(layer->getArchetypeManager());
-		}
+		void pushFrontLayer(Layer* layer);
 
 		virtual bool onEvent(Event& e) override;
-
 #ifdef R3D_DEBUG_APP
 		//!< Set debug mode. If set to true, debug prints will be called, if DEBUG_APP is also defined.
 		void setDebugMode(bool debug) { m_debugMode = debug; }
+
+		bool m_debugMode;
 #endif
+
 	private:
 		bool onKeyPressedEvent(KeyPressedEvent e);
-
 		void stepBackLayers();
 		void stepForwardLayers();
 
-	protected:
-		Window		      m_window;
-		GLFWwindow*		  window;
-		EntityManager     m_entityManager;
-		EventManager      m_eventManager;
+		Window m_window;
+		EntityManager m_entityManager;
+		EventManager m_eventManager;
 		Debugger m_debugger;
 
-		Layer* m_applicationInputLayer;
 		std::list<Layer*>    m_layers;
 		ImGuiLayer m_imGuiLayer;
 
 		EventsToListenersMap m_basicListeners;
 
-		bool m_running;
-		bool m_paused;
-		bool m_stepping;
+		bool m_running{ true };
+		bool m_paused{ false };
+		bool m_stepping{ false };
 		bool m_saveFrames;
 
-#ifdef R3D_DEBUG_APP
-		bool m_debugMode;
-#endif
 		static Application* s_instance;
 
 	};
-
 
 	Application* createApplication();
 

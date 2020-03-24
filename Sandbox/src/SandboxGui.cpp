@@ -314,18 +314,18 @@ namespace r3d
 			am->get<ColliderPlane>(gridEnt)->normal = planeNormal;
 
 			//ImGui::Text("Sphere Settings");
-			//int circleResolution = primitivesRenderer.getCircleResolution();
-			//int sphereResolution = primitivesRenderer.getSphereResolution();
-			//int sphereMeridians = primitivesRenderer.getSphereMeridians();
-			//int sphereParallels = primitivesRenderer.getSphereParallels();
+			//int circleResolution = wireframesRenderer.getCircleResolution();
+			//int sphereResolution = wireframesRenderer.getSphereResolution();
+			//int sphereMeridians = wireframesRenderer.getSphereMeridians();
+			//int sphereParallels = wireframesRenderer.getSphereParallels();
 			//ImGui::SliderInt("circ. res", &circleResolution, 1, 50);
 			//ImGui::SliderInt("sph. res", &sphereResolution, 1, 50);
 			//ImGui::SliderInt("sph. mer", &sphereMeridians, 1, 50);
 			//ImGui::SliderInt("sph. par", &sphereParallels, 1, 50);
-			//primitivesRenderer.setCircleResolution(circleResolution);
-			//primitivesRenderer.setSphereResolution(sphereResolution);
-			//primitivesRenderer.setSphereMeridians(sphereMeridians);
-			//primitivesRenderer.setSphereParallels(sphereParallels);
+			//wireframesRenderer.setCircleResolution(circleResolution);
+			//wireframesRenderer.setSphereResolution(sphereResolution);
+			//wireframesRenderer.setSphereMeridians(sphereMeridians);
+			//wireframesRenderer.setSphereParallels(sphereParallels);
 			ImGui::End();
 		}
 
@@ -389,7 +389,7 @@ namespace r3d
 
 				// update colors of main objects
 				{
-					auto archetype = am->matchAtLeastWithout(ComponentList::buildList<GroundTag>(), {});
+					auto archetype = am->matchAtLeast(ComponentList::buildList<GroundTag>(), {});
 					for (auto arch : archetype)
 					{
 						auto colors = am->m_archetypeDataVector[arch].get<Color>()->getComponents<Color>();
@@ -402,7 +402,7 @@ namespace r3d
 				}
 
 				{
-					auto archetype = am->matchAtLeastWithout(ComponentList::buildList<WallTag>(), {});
+					auto archetype = am->matchAtLeast(ComponentList::buildList<WallTag>(), {});
 					for (auto arch : archetype)
 					{
 						auto colors = am->m_archetypeDataVector[arch].get<Color>()->getComponents<Color>();
@@ -415,7 +415,7 @@ namespace r3d
 				}
 
 				{
-					auto archetype = am->matchAtLeastWithout(ComponentList::buildList<WoodTag>(), {});
+					auto archetype = am->matchAtLeast(ComponentList::buildList<WoodTag>(), {});
 					for (auto arch : archetype)
 					{
 						auto colors = am->m_archetypeDataVector[arch].get<Color>()->getComponents<Color>();
@@ -428,7 +428,7 @@ namespace r3d
 				}
 
 				{
-					auto archetype = am->matchAtLeastWithout(ComponentList::buildList<BrickTag>(), {});
+					auto archetype = am->matchAtLeast(ComponentList::buildList<BrickTag>(), {});
 					for (auto arch : archetype)
 					{
 						auto colors = am->m_archetypeDataVector[arch].get<Color>()->getComponents<Color>();
@@ -655,8 +655,6 @@ namespace r3d
 				ImGui::SameLine();
 				ImGui::TextColored(textColor, "%s", assignedTo);
 
-				editProgram(&editor);
-
 				static std::string compilationResultMsg = "";
 				static ImVec4 compilationResultCol(1.0, 1.0, 1.0, 1.0);
 				if (ImGui::Button("Compile"))
@@ -677,6 +675,8 @@ namespace r3d
 				}
 				ImGui::SameLine();
 				ImGui::TextColored(compilationResultCol, compilationResultMsg.c_str());
+
+				editProgram(&editor);
 			}
 
 			ImGui::End();

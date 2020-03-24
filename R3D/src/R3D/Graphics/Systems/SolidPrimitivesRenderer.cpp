@@ -1,12 +1,13 @@
+#include <R3Dpch.h>
+
 #include "SolidPrimitivesRenderer.h"
+
 #include <R3D/Graphics/Core/Shader.h>
-#include <R3D/Graphics/Core/BasicMatrixOperations.h>
 #include <R3D/Graphics/Components/BasicGraphicsComponents.h>
 #include <R3D/Ecs/TransformComponent.h>
 
-#include <R3D/Physics/Core/Geometry.h>
-
-#include "Palette.h"
+#include "../Core/Palette.h"
+#include "../Core/VertexArray.h"
 
 namespace r3d
 {
@@ -69,9 +70,9 @@ namespace r3d
 		m_shader->setUniformValue("sunLight.specular", sunLight.specular);
 
 		// draw cubes
-		const VertexArray& cube = Vaos::get().cube;
+		const VertexArray& cube = Vaos::getInstance().cube;
 		cube.bind();
-		auto archetypes = am.matchAtLeastWithout(ComponentList::buildList<Transform, Color, BoxPrimitive>(), {});
+		auto archetypes = am.matchAtLeast(ComponentList::buildList<Transform, Color, BoxPrimitive>(), {});
 		for (auto archIt = archetypes.begin(); archIt != archetypes.end(); ++archIt)
 		{
 			auto transform = get<Transform>(am, *archIt);
@@ -90,9 +91,9 @@ namespace r3d
 		cube.unbind();
 
 		// draw planes
-		const VertexArray& plane = Vaos::get().plane;
+		const VertexArray& plane = Vaos::getInstance().plane;
 		plane.bind();
-		archetypes = am.matchAtLeastWithout(ComponentList::buildList<Transform, Color, PlanePrimitive>(), {});
+		archetypes = am.matchAtLeast(ComponentList::buildList<Transform, Color, PlanePrimitive>(), {});
 		for (auto archIt = archetypes.begin(); archIt != archetypes.end(); ++archIt)
 		{
 			auto transform = get<Transform>(am, *archIt);
@@ -125,7 +126,7 @@ namespace r3d
 	void SolidPrimitivesRenderer::drawLights(const float3& cameraPosition) const
 	{
 		drawPointLight(pointLight.eye, cameraPosition);
-		drawSunLight(sunLight.eye, sunLight.center, cameraPosition);
+		//drawSunLight(sunLight.eye, sunLight.center, cameraPosition);
 	}
 
 	void SolidPrimitivesRenderer::drawSunLight(const float3& position, const float3& center, const float3& cameraPosition) const
@@ -145,9 +146,9 @@ namespace r3d
 		m_sunLightShader->setUniformValue("cameraDistance", distanceFromCameraLen);
 		m_sunLightShader->setUniformValue("lightColor", sunLight.diffuse);
 
-		Vaos::get().point.bind();
-		Vaos::get().point.draw(GL_POINTS);
-		Vaos::get().point.unbind();
+		Vaos::getInstance().point.bind();
+		Vaos::getInstance().point.draw(GL_POINTS);
+		Vaos::getInstance().point.unbind();
 
 		m_sunLightShader->unbind();
 	}
@@ -169,9 +170,9 @@ namespace r3d
 		m_pointLightShader->setUniformValue("lightColor", pointLight.diffuse);
 
 		glDisable(GL_CULL_FACE);
-		Vaos::get().quad.bind();
-		Vaos::get().quad.draw(GL_TRIANGLES);
-		Vaos::get().quad.unbind();
+		Vaos::getInstance().quad.bind();
+		Vaos::getInstance().quad.draw(GL_TRIANGLES);
+		Vaos::getInstance().quad.unbind();
 		glEnable(GL_CULL_FACE);
 
 		m_pointLightShader->unbind();

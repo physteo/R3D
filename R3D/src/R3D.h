@@ -19,8 +19,10 @@
 #include <R3D/Graphics/Core/Shader.h>
 #include <R3D/Graphics/Core/FrameBuffer.h>
 #include <R3D/Graphics/Components/BasicGraphicsComponents.h>
-#include <R3D/Graphics/Systems/PrimitivesRenderer.h>
+#include <R3D/Graphics/Systems/WireframePrimitivesRenderer.h>
+#include <R3D/Graphics/Systems/SolidPrimitivesRenderer.h>
 
+#include <R3D/Physics/Core/World.h>
 #include <R3D/Physics/Core/Contact.h>
 #include <R3D/Physics/Core/RigidBody.h>
 #include <R3D/Physics/Systems/SphereSphereContactDetector.h>

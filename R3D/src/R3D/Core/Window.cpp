@@ -1,5 +1,8 @@
 #include <R3Dpch.h>
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include "Window.h"
 #include <R3D/Core/Log.h>
 
@@ -30,15 +33,8 @@ namespace r3d
 
 #endif
 
-	Window::Window(std::string title, double width, double height, int maxFramerate, float fontscale) : Window{ title, width, height, Monitor::G_NOTSPECIFIED, maxFramerate }
+	Window::Window(std::string title, double width, double height, int maxFramerate, float fontscale)
 	{
-		colorR = 0.05; colorG = 0.05; colorB = 0.05;
-		m_fontscale = fontscale;
-	}
-
-	Window::Window(std::string title, double width, double height, Monitor monitor, int maxFramerate, float fontscale)
-	{
-		colorR = 0.05; colorG = 0.05; colorB = 0.05;
 		m_fontscale = fontscale;
 		m_lastTime = getCurrentTime();
 		R3D_ASSERT(maxFramerate > 0, "MaxFramerate must be positive.");
@@ -54,10 +50,6 @@ namespace r3d
 			throw -1;
 		}
 
-		// get primary monitor
-		int numberOfMonitors;
-		GLFWmonitor** monitors = glfwGetMonitors(&numberOfMonitors);
-
 		// specify if core or compatibility mode 
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);// GLFW_OPENGL_CORE_PROFILE); 
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -65,14 +57,8 @@ namespace r3d
 		glfwWindowHint(GLFW_RESIZABLE, GL_FALSE); // TODO: make windows resizable
 
 		// Create a windowed mode window and its OpenGL context 
-		if (monitor == Monitor::G_NOTSPECIFIED)
-		{
-			m_window = glfwCreateWindow((int) width, (int) height, title.c_str(), NULL, NULL);
-		}
-		else
-		{
-			m_window = glfwCreateWindow((int) width, (int) height, title.c_str(), monitors[monitor], nullptr);
-		}
+		m_window = glfwCreateWindow((int) width, (int) height, title.c_str(), NULL, NULL);
+
 
 		if (!m_window)
 		{
@@ -93,16 +79,8 @@ namespace r3d
 
 		// configure global opengl state
 		glEnable(GL_DEPTH_TEST);
-		//stencil//glDepthFunc(GL_LESS);
-		//stencil//glEnable(GL_STENCIL_TEST);
-		//stencil//glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-		//stencil//glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-
 		glEnable(GL_CULL_FACE);
 		//glFrontFace(GL_CCW);
-
-		// To have hdr: comment this, and in the hdr shader do abilitate the calculations for the hdr
-		//glEnable(GL_FRAMEBUFFER_SRGB);
 
 		// set input mode for mouse
 		//glfwSetInputMode(m_window, GLFW_STICKY_MOUSE_BUTTONS, 1);
@@ -125,6 +103,7 @@ namespace r3d
 		R3D_CORE_ASSERT(versionMajor > 4 || (versionMajor == 4 && versionMinor >= 5), "R3D requires at least OpenGL version 4.5!");
 		
 		// Event callbacks
+		// TODO
 	}
 
 	void Window::setViewPort(float width, float height) const
@@ -137,11 +116,15 @@ namespace r3d
 		return glfwWindowShouldClose(m_window);
 	}
 
+	void Window::close() const
+	{ 
+		glfwSetWindowShouldClose(m_window, true);
+	}
+
 	void Window::clearColorBufferBit(float red, float green, float blue, float alpha) const
 	{
 		glClearColor(red, green, blue, alpha);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//stencil//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 	}
 
 	void Window::clearColorBufferBit() const

@@ -32,8 +32,9 @@ namespace r3d
 	typedef glm::mat4 float4x4;
 	typedef glm::quat fquat;
 
+	void  compute_basis(const real3& normal, real3& tangent, real3& bitangent);
 	real3x3 change_basis_of_matrix(const rquat& q, const real3x3& mat);
-
+	float4x4 compute_model_matrix(const float3& position, const fquat& orientation, const float3& scale);
 }
 
 #if 0

@@ -12,7 +12,7 @@ namespace r3d
 	{
 		auto start = std::chrono::system_clock::now();
 
-		auto archetypes = am.matchAtLeastWithout(ComponentList::buildList<ColliderBox, Transform>(), {});
+		auto archetypes = am.matchAtLeast(ComponentList::buildList<ColliderBox, Transform>(), {});
 
 		// same archetype
 		for (auto arch1 : archetypes)

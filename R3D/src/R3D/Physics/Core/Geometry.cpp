@@ -57,23 +57,6 @@ namespace r3d
 		return support;
 	}
 
-	// From : http://box2d.org/2014/02/computing-a-basis/
-	void compute_basis(const real3& normal, real3& tangent, real3& bitangent)
-	{
-		if (glm::abs(normal.x) >= 0.57735027) // TODO: put into a const sqrt(3)
-		{
-			tangent = { normal.y, -normal.x, 0.0 };
-		}
-		else
-		{
-			tangent = { 0.0, normal.z, -normal.y };
-		}
-
-		tangent = glm::normalize(tangent);
-		bitangent = glm::cross(normal, tangent);
-	}
-
-
 	// From Ericson (Real-Time Collision Detection):
 	// Computes closest points C1 and C2 of S1(s)=P1+s*(Q1-P1) and
 	// S2(t)=P2+t*(Q2-P2), returning s and t. Function result is squared

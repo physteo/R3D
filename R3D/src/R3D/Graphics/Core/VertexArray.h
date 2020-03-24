@@ -54,13 +54,14 @@ namespace r3d
 	{
 
 	public:
-		static Vaos& get();
+		static Vaos& getInstance();
 	
 		const VertexArray point;
 		const VertexArray quad;
 		const VertexArray plane;
 		const VertexArray cube;
 		const VertexArray skyDome;
+		const VertexArray circle;
 
 	private:
 		Vaos();

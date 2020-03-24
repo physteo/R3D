@@ -13,8 +13,6 @@ namespace r3d
 	class Event
 	{
 	public:
-		bool handled = false;
-
 		virtual EventType getEventType() const = 0;
 		virtual const char* getName()    const = 0;
 		virtual int getCategoryFlags()   const = 0;
@@ -25,6 +23,9 @@ namespace r3d
 		{
 			return getCategoryFlags() & category;
 		}
+
+		bool handled = false;
+
 	};
 
 	/*
@@ -39,8 +40,7 @@ namespace r3d
 		template<typename T>
 		using EventFn = std::function<bool(T&)>;
 	public:
-		EventDispatcher(Event& event)
-			: m_event(event)
+		EventDispatcher(Event& event) : m_event(event)
 		{
 		}
 

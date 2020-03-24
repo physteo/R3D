@@ -2,13 +2,43 @@
 #include "Application.h"
 #include <R3D/ImGui/ImGuiLayer.h>
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 namespace r3d
 {
 
 	Application* Application::s_instance = nullptr;
 
+	EntityManager* Application::getEntityManager()
+	{
+		return &(s_instance->m_entityManager);
+	}
+
+	Window* Application::getWindow()
+	{
+		return &(s_instance->m_window);
+	}
+
+	Debugger* Application::getDebugger()
+	{
+		return &(s_instance->m_debugger);
+	}
+
+	void Application::dispatchEventStatic(Event& e)
+	{
+		s_instance->dispatchEvent(e);
+	}
+
+#ifdef R3D_DEBUG_APP
+	bool Application::isInDebugMode()
+	{
+		return s_instance->m_debugMode;
+	}
+#endif
+
 	Application::Application(std::string applicationName, double windowWidth, double windowHeight, int maxFramerate, bool saveFrames)
-		: m_window{ applicationName, windowWidth, windowHeight },	m_running(true), m_paused(false)//m_dataRingBuffer(60)
+		: m_window{ applicationName, windowWidth, windowHeight, maxFramerate }//m_dataRingBuffer(60)
 	{
 		s_instance = this;
 		m_saveFrames = saveFrames;
@@ -19,8 +49,6 @@ namespace r3d
 
 		// The Application itself listens to some events.
 		m_basicListeners[KeyPressedEvent::getStaticType()].push_back(this);
-
-		m_applicationInputLayer = nullptr;
 
 #ifdef R3D_DEBUG_APP
 		m_debugMode = true;
@@ -44,6 +72,7 @@ namespace r3d
 			if (true) // TODO: reimplement pausing
 			{
 				// ******* initialize frame
+				auto start = std::chrono::high_resolution_clock::now();
 				m_window.updateTime();
 				m_window.clearColorBufferBit();
 
@@ -57,7 +86,7 @@ namespace r3d
 						layer->onSave(&m_window);
 					}
 				}
-
+				
 				// ****** imgui update and render
 				m_imGuiLayer.onUpdate(&m_window);
 				for (auto& layer : m_layers)
@@ -65,22 +94,27 @@ namespace r3d
 					layer->onImGuiUpdate(&m_window);
 				}
 				m_imGuiLayer.onRender(&m_window);
-
+				
 				// ******* last stuff to do
 				m_window.swapBuffers();
 				m_window.updateLastFrameTime();
 
 				// **********  fix maximum framerate
-				int frameTimeMicrosec = (int)(m_window.getLastFrameTime() * 1000000.0f);
-				int waitingTime = (int)(1000000.0f / m_window.getMaxframerate()) - frameTimeMicrosec;
+				auto end = std::chrono::high_resolution_clock::now();
+				long long durationNs = (end - start).count();
+				long long fixedDuration = (long long)(1000000000.0f / m_window.getMaxframerate());
+				long long waitingTime = fixedDuration - durationNs;
 				if (waitingTime > 0)
 				{
-					std::this_thread::sleep_for(std::chrono::microseconds(waitingTime));
+					std::this_thread::sleep_for(std::chrono::nanoseconds::duration(waitingTime));
 					m_window.updateLastFrameTime();
 				}
+				//R3D_CORE_INFO("duration: {0}", durationMs);
+				//R3D_CORE_INFO("waiting: {0}", waitingTime);
 			}
 			else
 			{
+				// perform only rendering during pause
 				m_window.clearColorBufferBit(0.5f, 0.5f, 0.5f, 1.0f);
 				for (auto& layer : m_layers)
 				{
@@ -89,19 +123,58 @@ namespace r3d
 				m_window.swapBuffers();
 			}
 
-
 			if (m_stepping)
 			{
 				m_paused = true;
 			}
 
-			// ********** always process application inputs...
-			if(m_applicationInputLayer) m_applicationInputLayer->onUpdate(&m_window);
-			// **********  ... and poll events.
 			m_window.pollEvents();
 		}
 
 		m_imGuiLayer.shutdown();
+	}
+
+	void Application::pause()
+	{
+		s_instance->m_paused = true;
+		s_instance->m_stepping = false;
+
+		for (auto layer : s_instance->m_layers)
+		{
+			std::cout << "frame cnt modulo: " << layer->getFrameSlotIndex() << std::endl;
+			break;
+		}
+	}
+
+	void Application::dispatchEvent(Event& e)
+	{
+		bool handled = false;
+
+		for (auto& l : m_layers)
+		{
+			handled = m_eventManager.dispatch(e, l->getListeners());
+			if (handled) break;
+		}
+
+		if (!handled)
+		{
+			handled = m_eventManager.dispatch(e, m_basicListeners);
+		}
+
+	}
+
+	void Application::pushBackLayer(Layer* layer)
+	{
+		m_layers.push_back(layer);
+		m_basicListeners[EntityDestroyedEvent::getStaticType()].push_back(layer->getArchetypeManager());
+		m_basicListeners[ManyEntitiesDestroyedEvent::getStaticType()].push_back(layer->getArchetypeManager());
+	}
+
+	void Application::pushFrontLayer(Layer* layer)
+	{
+		m_layers.push_front(layer);
+		m_basicListeners[EntityDestroyedEvent::getStaticType()].push_front(layer->getArchetypeManager());
+		m_basicListeners[ManyEntitiesDestroyedEvent::getStaticType()].push_front(layer->getArchetypeManager());
 	}
 
 	bool Application::onEvent(Event& e)
@@ -157,8 +230,7 @@ namespace r3d
 
 	void Application::stepBackLayers()
 	{
-		m_window.clearColorBufferBit(0.5f, 0.5f, 0.5f, 1.0f);
-		// step back all layers
+		m_window.clearColorBufferBit();
 		for (auto layer : m_layers)
 		{
 			layer->stepBack();
@@ -171,9 +243,7 @@ namespace r3d
 
 	void Application::stepForwardLayers()
 	{
-		m_window.clearColorBufferBit(0.5f, 0.5f, 0.5f, 1.0f);
-
-		// step back all layers
+		m_window.clearColorBufferBit();
 		for (auto layer : m_layers)
 		{
 			layer->stepForward();

@@ -1,18 +1,15 @@
 #pragma once
 
 //!< Fixes the framerate of the application
-//#define R3D_FIXED_FRAMERATE 60.0
+#define R3D_FIXED_FRAMERATE 60.0
 
 #if defined(R3D_DEBUG) || defined(R3D_RELEASE)
 	//!< If not defined, asserts are replaced with nothingness
 	#define R3D_ENABLE_ASSERTS
-#endif
-
-#if defined(R3D_DEBUG) || defined(R3D_RELEASE)
 	//!< Application will have a debugMode for extra log calls.
 	#define R3D_DEBUG_APP
+	//#define R3D_DEBUG_EVENTS
 #endif
-//#define R3D_DEBUG_EVENTS
 
 #ifdef R3D_ENABLE_ASSERTS
 	#ifdef R3D_PLATFORM_WIN

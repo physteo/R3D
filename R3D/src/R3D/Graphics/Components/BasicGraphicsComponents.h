@@ -23,6 +23,7 @@ namespace r3d
 		float4 vec;
 	};
 
+#if 0
 	struct ShaderComponent
 	{
 		ShaderComponent() : openglId(-1) {}
@@ -77,5 +78,6 @@ namespace r3d
 		bool reversed;
 		bool repeated;
 	};
+#endif
 
 }

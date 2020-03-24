@@ -1,12 +1,15 @@
 #include <R3Dpch.h>
-#include "PrimitivesRenderer.h"
-#include <R3D/Physics/Core/Colliders.h>
-#include <R3D/Physics/Core/Geometry.h>
+
+#include "WireframePrimitivesRenderer.h"
+#include <R3D/Graphics/Components/BasicGraphicsComponents.h>
+#include <R3D/Ecs/TransformComponent.h>
+#include "../Core/VertexArray.h"
+//#include <R3D/Physics/Core/Colliders.h>
 
 namespace r3d
 {
 
-	PrimitivesRenderer::PrimitivesRenderer()
+	WireframePrimitivesRenderer::WireframePrimitivesRenderer()
 	{
 		for (auto shapeId = m_shapesIds.begin(); shapeId != m_shapesIds.end(); ++shapeId)
 		{
@@ -15,7 +18,7 @@ namespace r3d
 		}
 	}
 
-	void PrimitivesRenderer::buildPrimitive(size_t shapeId)
+	void WireframePrimitivesRenderer::buildPrimitive(size_t shapeId)
 	{
 		ShapeData& shapeData = m_shapesData[shapeId];
 
@@ -51,7 +54,7 @@ namespace r3d
 		}
 
 		shapeData.vao = std::move(VertexArray{ { positions }, {3}, indices });
-		R3D_ASSERT(indices.size() < UINT_MAX, "[ PrimitivesRenderer ] Primitive has too many indices.");
+		R3D_ASSERT(indices.size() < UINT_MAX, "[ WireframePrimitivesRenderer ] Primitive has too many indices.");
 		shapeData.numberOfIndices = static_cast<unsigned int>(indices.size());
 
 		shapeData.databuffer.bind();
@@ -79,7 +82,7 @@ namespace r3d
 		shapeData.databuffer.unbind();
 	}
 
-	void PrimitivesRenderer::setCircleResolution(int circleResolution)
+	void WireframePrimitivesRenderer::setCircleResolution(int circleResolution)
 	{
 		if (this->circleResolution != circleResolution)
 		{
@@ -88,7 +91,7 @@ namespace r3d
 		}
 	}
 
-	void PrimitivesRenderer::setSphereResolution(int sphereResolution)
+	void WireframePrimitivesRenderer::setSphereResolution(int sphereResolution)
 	{ 
 		if (this->sphereResolution != sphereResolution)
 		{
@@ -97,7 +100,7 @@ namespace r3d
 		}
 	}
 
-	void PrimitivesRenderer::setSphereMeridians(int sphereMeridians)
+	void WireframePrimitivesRenderer::setSphereMeridians(int sphereMeridians)
 	{ 
 		if (this->sphereMeridians != sphereMeridians)
 		{
@@ -106,7 +109,7 @@ namespace r3d
 		}
 	}
 
-	void PrimitivesRenderer::setSphereParallels(int sphereParallels)
+	void WireframePrimitivesRenderer::setSphereParallels(int sphereParallels)
 	{ 
 		if (this->sphereParallels != sphereParallels)
 		{
@@ -115,9 +118,9 @@ namespace r3d
 		}
 	}
 
-	void PrimitivesRenderer::getInstancesData(ArchetypeManager& am, const ComponentList& componentList, std::vector<InstanceData>& outInstancesData)
+	void WireframePrimitivesRenderer::getInstancesData(ArchetypeManager& am, const ComponentList& componentList, std::vector<InstanceData>& outInstancesData)
 	{
-		auto archetypes = am.matchAtLeastWithout(componentList, {});
+		auto archetypes = am.matchAtLeast(componentList, {});
 		for (auto archIt = archetypes.begin(); archIt != archetypes.end(); ++archIt)
 		{
 			auto transform = get<Transform>(am, *archIt);
@@ -130,10 +133,10 @@ namespace r3d
 		}
 	}
 
-	void PrimitivesRenderer::getInstancesDataPlane(ArchetypeManager& am, std::vector<InstanceData>& outInstancesData)
+	void WireframePrimitivesRenderer::getInstancesDataPlane(ArchetypeManager& am, std::vector<InstanceData>& outInstancesData)
 	{
 		ComponentList componentList = ComponentList::buildList<Transform, PlanePrimitive, Color>();
-		auto archetypes = am.matchAtLeastWithout(componentList, {});
+		auto archetypes = am.matchAtLeast(componentList, {});
 
 		float3 scale{ 10.0f, 10.0f, 0.0f };
 
@@ -163,7 +166,7 @@ namespace r3d
 		}
 	}
 
-	void PrimitivesRenderer::prepareData(ArchetypeManager& am)
+	void WireframePrimitivesRenderer::prepareData(ArchetypeManager& am)
 	{
 		ComponentList requiredComponents;
 
@@ -192,7 +195,7 @@ namespace r3d
 
 	}
 
-	void PrimitivesRenderer::update(ArchetypeManager& am, double t, double dt)
+	void WireframePrimitivesRenderer::update(ArchetypeManager& am, double t, double dt)
 	{
 		prepareData(am);
 
@@ -216,7 +219,7 @@ namespace r3d
 		//}
 	}
 
-	void PrimitivesRenderer::buildCircle(std::vector<float>& positions, std::vector<unsigned int>& indices)
+	void WireframePrimitivesRenderer::buildCircle(std::vector<float>& positions, std::vector<unsigned int>& indices)
 	{
 		positions.clear();
 		indices.clear();
@@ -234,7 +237,7 @@ namespace r3d
 		positions.push_back(0.0f);
 	}
 
-	void PrimitivesRenderer::buildSquare(std::vector<float>& positions, std::vector<unsigned int>& indices)
+	void WireframePrimitivesRenderer::buildSquare(std::vector<float>& positions, std::vector<unsigned int>& indices)
 	{
 		positions.clear();
 		indices.clear();
@@ -258,7 +261,7 @@ namespace r3d
 		indices = { 0, 1, 2, 0, 2, 3 };
 	}
 
-	void PrimitivesRenderer::buildSegment(std::vector<float>& positions, std::vector<unsigned int>& indices)
+	void WireframePrimitivesRenderer::buildSegment(std::vector<float>& positions, std::vector<unsigned int>& indices)
 	{
 		positions.clear();
 		indices.clear();
@@ -274,7 +277,7 @@ namespace r3d
 		indices = { 0, 1 };
 	}
 
-	void PrimitivesRenderer::buildPlane(std::vector<float>& positions, std::vector<unsigned int>& indices)
+	void WireframePrimitivesRenderer::buildPlane(std::vector<float>& positions, std::vector<unsigned int>& indices)
 	{
 		const int resolution = 20;
 
@@ -343,7 +346,7 @@ namespace r3d
 
 	}
 
-	void PrimitivesRenderer::buildSphere(std::vector<float>& positions, std::vector<unsigned int>& indices)
+	void WireframePrimitivesRenderer::buildSphere(std::vector<float>& positions, std::vector<unsigned int>& indices)
 	{
 		positions.clear();
 		indices.clear();
@@ -386,7 +389,7 @@ namespace r3d
 		}
 	}
 
-	void PrimitivesRenderer::buildBox(std::vector<float>& positions, std::vector<unsigned int>& indices)
+	void WireframePrimitivesRenderer::buildBox(std::vector<float>& positions, std::vector<unsigned int>& indices)
 	{
 		positions.clear();
 		indices.clear();

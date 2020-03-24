@@ -10,8 +10,8 @@ namespace r3d
 {
 	void SpherePlaneContactDetector::update(ArchetypeManager& am, double t, double dt)
 	{
-		auto archetypesSphere = am.matchAtLeastWithout(ComponentList::buildList<ColliderSphere, Transform>(), {});
-		auto archetypesPlane = am.matchAtLeastWithout(ComponentList::buildList<ColliderPlane>(), {});
+		auto archetypesSphere = am.matchAtLeast(ComponentList::buildList<ColliderSphere, Transform>(), {});
+		auto archetypesPlane = am.matchAtLeast(ComponentList::buildList<ColliderPlane>(), {});
 
 		for (size_t arch1 : archetypesSphere)
 		{

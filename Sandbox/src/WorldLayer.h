@@ -1,14 +1,17 @@
 #pragma once
 #include <R3D.h>
 
+#include <R3D/Utils/Debugger.h>
+
 #include <R3D/Physics/Core/Colliders.h>
 #include <R3D/Physics/Core/Topology.h>
-#include <R3D/Utils/Debugger.h>
 #include <R3D/Physics/Core/World.h>
 #include <R3D/Physics/Systems/Integrator.h>
 
-#include "SolidPrimitivesRenderer.h"
-#include "Palette.h"
+#include <R3D/Graphics/Core/Palette.h>
+#include <R3D/Graphics/Systems/SolidPrimitivesRenderer.h>
+
+#include "ContactEntityGenerator.h"
 
 #define STACKING
 
@@ -17,7 +20,7 @@ namespace r3d
 
 	const float stdGravity{-10.0f};
 
-	struct WallTag { };
+	struct WallTag {};
 	struct BrickTag {};
 	struct WoodTag {};
 	struct BulletTag {};
@@ -58,14 +61,14 @@ namespace r3d
 
 	struct CameraMode
 	{
-		bool fps;
-		float lastSwitchedTime;
+		bool fps{ false };
+		float lastSwitchedTime{ 0.0f };
 	};
 
 	struct MouseStatus
 	{
-		float lastPressedTime;
-		float sensibility;
+		float lastPressedTime{ 0.0f };
+		float sensibility{ 0.05f };
 	};
 
 	struct SelfDestructionTimer
@@ -77,133 +80,17 @@ namespace r3d
 	class SelfDestruction : public System
 	{
 	public:
-		virtual void update(ArchetypeManager& am, double t, double dt) override
-		{
-			auto archetypes = am.matchAtLeastWithout(ComponentList::buildList<SelfDestructionTimer>(), {});
-
-			std::vector<Entity> toRemove;
-			toRemove.reserve(10);
-
-			for (auto arch : archetypes)
-			{
-				size_t size = getSize<SelfDestructionTimer>(am, arch);
-				auto* selfDestr = get<SelfDestructionTimer>(am, arch);
-				auto& entities = getEntities(am, arch);
-
-				for (size_t i = 0; i < size; ++i)
-				{
-					if (t - selfDestr[i].birth > selfDestr[i].lifespan)
-					{
-						toRemove.push_back(entities[i]);
-					}
-				}
-			}
-
-			// remove
-			ManyEntitiesDestroyedEvent e{ std::move(toRemove) };
-			Application::dispatchEventStatic(e);
-		}
-	};
-
-	class ContactPointEntityRemover : public System
-	{
-	public:
-		virtual void update(r3d::ArchetypeManager& am, double t, double dt) override
-		{
-			auto archetypes = am.matchAtLeastWithout(ComponentList::buildList<ContactEntityTag>(), {});
-			for (auto arch : archetypes)
-			{
-				auto& entities = getEntities(am, arch);
-				size_t numEntities = getSize<ContactEntityTag>(am, arch);
-				for (size_t i = 0; i < numEntities; ++i)
-				{
-					Entity e = entities[0];
-					Application::getEntityManager()->destroy(e);
-					am.removeEntity(e);
-				}
-			}
-		}
-	};
-
-	class ContactPointEntityGenerator : public System
-	{
-	public:
-		ContactPointEntityGenerator()
-		{
-			archetypeCollisionPoint = Archetype{ ComponentList::buildList<CirclePrimitive, Color, Transform, ContactEntityTag>() };
-			archetypeCollisionNormal = Archetype{ ComponentList::buildList<SegmentPrimitive, Color, Transform, ContactEntityTag>() };
-		}
-
-		void setContacts(const CollisionData* collData) { m_collData = collData; }
-
-		virtual void update(r3d::ArchetypeManager& am, double t, double dt) override
-		{
-			for (auto& arbiter : m_collData->arbiters)
-			{
-				for (size_t i = 0; i < arbiter.second.manifold.numContacts; ++i)
-				{
-					const Contact& contact = arbiter.second.manifold.contacts[i];
-					createContactEntity(am, arbiter.second.manifold, i);
-				}
-			}
-		}
-
-	private:
-		void createContactEntity(r3d::ArchetypeManager& am, const Manifold& manifold, int contactIndex)
-		{
-			const real3& positionE1 = am.get<Transform>(manifold.e1)->position;
-			const rquat& orientationE1 = am.get<Transform>(manifold.e1)->orientation;
-			const real3& contactPositionWorld = manifold.contacts[contactIndex].position;
-
-			fquat q{ 1.0, 0.0, 0.0, 0.0 };
-
-			float3 N1{ 1.0f,0.0f,0.0f };
-			float3 N2 = (float3)manifold.normal;
-
-			if (glm::length(glm::cross(N2, N1)) > R3D_EPSILON)
-			{
-				float3 M = glm::normalize(N1 + N2);
-				float3 axis = glm::normalize(glm::cross(M, N2));
-
-				float cos = glm::dot(M, N2);
-				float sin = glm::length(glm::cross(M, N2));
-				q.w = cos;
-				q.x = sin * axis.x;
-				q.y = sin * axis.y;
-				q.z = sin * axis.z;
-				q = glm::normalize(q);
-			}
-
-			float segLength = 0.333;
-			float3 displacement{ 1.0, 0.0, 0.0 };
-			float3 rotated_displacement = q * displacement;
-			rotated_displacement = segLength * rotated_displacement / glm::length(rotated_displacement);
-
-			auto entity_s = Application::getEntityManager()->create();
-			am.setArchetype(entity_s, archetypeCollisionNormal);
-			am.set<Color>(entity_s, Color{ float4{1.0, 0.0, 0.0, 1.0} });
-			am.set<Transform>(entity_s, Transform{ (float3)contactPositionWorld + rotated_displacement, q, float3{0.3} });
-
-			auto entity_c = Application::getEntityManager()->create();
-			am.setArchetype(entity_c, archetypeCollisionPoint);
-			am.set<Color>(entity_c, Color{ float4{1.0, 0.0, 0.0, 1.0} });
-			am.set<Transform>(entity_s, Transform{ contactPositionWorld, q, float3{0.1} });
-		}
-
-	private:
-		const CollisionData* m_collData;
-		Archetype archetypeCollisionPoint;
-		Archetype archetypeCollisionNormal;
+		virtual void update(ArchetypeManager& am, double t, double dt) override;
 	};
 
 	class ShaderEditor;
 
 	class WorldLayer : public r3d::Layer
 	{
-		// Gameplay
+		// Gameplay systems
 		r3d::SelfDestruction selfDestructionSystem;
 
-		// Physics
+		// Physics systems
 		r3d::ForceIntegrator forceIntegrator;
 		r3d::VelocityIntegrator velocityIntegrator;
 		r3d::SphereSphereContactDetector sphereSphereContactDetector;
@@ -213,6 +100,10 @@ namespace r3d
 		r3d::ContactPointEntityGenerator contactEntityGenerator;
 		r3d::ContactPointEntityRemover contactEntityRemover;
 		r3d::CollisionData collisionData;
+
+		// Rendering systems
+		r3d::WireframePrimitivesRenderer wireframesRenderer;
+		r3d::SolidPrimitivesRenderer solidRenderer;
 
 		// Special entities
 		r3d::Entity gun;
@@ -263,14 +154,9 @@ namespace r3d
 		r3d::Shader shadowShader;
 		r3d::Shader shadowDebugShader;
 		r3d::Shader skyShader;
+		r3d::Shader contactsShader;
 
-		r3d::PrimitivesRenderer primitivesRenderer;
-		r3d::SolidPrimitivesRenderer solidRenderer;
-
-		// Utils
-		int frameCounter;
-		MouseStatus mouseStatus;
-		CameraMode cameraMode;
+		// Framebuffers
 		FrameBuffer fboBlur[2];
 		FrameBuffer fboBloom;
 		FrameBuffer fboBloomMix;
@@ -278,14 +164,11 @@ namespace r3d
 		FrameBuffer fboHDR;
 		FrameBuffer fboShadow;
 		FrameBuffer fboShadowDebug;
-
 		float2 fboSize;
 		float2 fboSizePrev;
-		float lastFboResize;
-		float2 fboShadowSize;
-		float2 viewWindowCenter;
-		float lastSpotSwitchedOn;
-		
+		float lastFboResize{ 0.0f };
+		float2 fboShadowSize{ 1024, 1024 };
+
 		// shadow settings
 		float lighNearPlane{ 2.0f };
 		float lighFarPlane{ 50.0f };
@@ -293,8 +176,14 @@ namespace r3d
 		float minShadowBias{ 0.0001f };
 		float maxShadowBias{ 0.001f };
 
+		// Utils
+		int frameCounter{ 0 };
+		MouseStatus mouseStatus;
+		CameraMode cameraMode;
 		BloomSettings bloomSettings;
 		HDRSettings hdrSettings;
+		float2 viewWindowCenter{ 0.0f, 0.0f };
+		float lastSpotSwitchedOn{ 0.0f };
 
 	public:
 		WorldLayer();

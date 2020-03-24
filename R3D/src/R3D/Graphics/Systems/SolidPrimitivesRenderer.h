@@ -1,8 +1,6 @@
 #pragma once
-#include <R3D/Core/MathUtils.h>
 #include <R3D/Ecs/System.h>
-#include <R3D/Graphics/Core/VertexArray.h>
-#include <R3D/Graphics/Core/Shader.h>
+#include <R3D/Core/MathUtils.h>
 
 namespace r3d
 {

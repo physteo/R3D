@@ -3,9 +3,6 @@
 namespace r3d
 {
 
-	/*
-		Specifies the type of an event.
-	*/
 	enum class EventType
 	{
 		None = 0,
@@ -28,9 +25,6 @@ namespace r3d
 		Logic_ChangeColor,
 	};
 
-	/*
-		Bit field to specify multiple categories for an event.
-	*/
 	enum EventCategory
 	{
 		None = 0,
