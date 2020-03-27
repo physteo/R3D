@@ -61,36 +61,28 @@ namespace r3d
 		inline const ShaderProgramSource& getSource() const { return m_source; }
 
 		void setUniformValue(const std::string& name, int          value) const;
-		//void setUniformValue(const std::string& name, double       value) const;
 		void setUniformValue(const std::string& name, unsigned int value) const;
 		void setUniformValue(const std::string& name, float value) const;
 		void setUniformValue(const std::string& name, float v1, float v2) const;
 		void setUniformValue(const std::string& name, float v1, float v2, float v3) const;
 		void setUniformValue(const std::string& name, float v1, float v2, float v3, float v4) const;
-		void setUniformValue(const std::string& name, float3 value) const;
-		void setUniformValue(const std::string& name, float4 value) const;
+		void setUniformValue(const std::string& name, const float3& value) const;
+		void setUniformValue(const std::string& name, const float4& value) const;
 		void setUniformMatrix(const std::string& name, const float4x4& matrix, bool transpose) const;
-
-		static void setUniformValue(unsigned int id, const std::string& name, int          value);
-		//static void setUniformValue(unsigned int id, const std::string& name, double       value);
-		static void setUniformValue(unsigned int id, const std::string& name, unsigned int value);
-		static void setUniformValue(unsigned int id, const std::string& name, float value);
-		static void setUniformValue(unsigned int id, const std::string& name, float v1, float v2);
-		static void setUniformValue(unsigned int id, const std::string& name, float v1, float v2, float v3);
-		static void setUniformValue(unsigned int id, const std::string& name, float v1, float v2, float v3, float v4);
-		static void setUniformValue(unsigned int id, const std::string& name, float3);
-		static void setUniformMatrix(unsigned int id, const std::string& name, const float4x4& matrix, bool transpose);
 
 		void setTexture(GLenum target, const std::string& uniformName, unsigned int textureID);
 		inline unsigned int getID() const { return m_id; }
 
 	private:
+		int getUniformLocation(const std::string& name) const;
+
 		void release();
 		void swapData(Shader& other);
 
 		unsigned int m_id;
 		std::string  m_path;
 		std::vector<std::string> m_textureUnits;
+		mutable std::unordered_map<std::string, int> m_uniformLocations;
 		ShaderProgramSource m_source;
 
 	};

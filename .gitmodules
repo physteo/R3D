@@ -10,3 +10,6 @@
 [submodule "R3D/vendor/glm"]
 	path = R3D/vendor/glm
 	url = https://github.com/g-truc/glm
+[submodule "R3D/vendor/stb"]
+	path = R3D/vendor/stb
+	url = https://github.com/physteo/stb.git

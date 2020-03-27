@@ -1,4 +1,6 @@
 #include <R3Dpch.h>
+#include <R3D/Core/Log.h>
+
 #include "Shader.h"
 
 namespace r3d
@@ -181,8 +183,14 @@ namespace r3d
 		{
 			// new texture
 			textureUnit = m_textureUnits.size();
-			setUniformValue(uniformName, textureUnit);
+#if defined(R3D_DEBUG) || defined(R3D_RELEASE)
+			int maxTextureUnits = 0;
+			glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
+			R3D_CORE_ASSERT(textureUnit < maxTextureUnits, "[Shader]: maximum number of texture units {0} exceeded.",
+					maxTextureUnits);
+#endif
 			m_textureUnits.push_back(uniformName);
+			setUniformValue(uniformName, textureUnit);
 		}
 		else
 		{
@@ -233,18 +241,16 @@ namespace r3d
 		m_id = 0;
 		m_path = "";
 		m_textureUnits.clear();
+		m_uniformLocations.clear();
 	}
 
 	void Shader::swapData(Shader& other)
 	{
 		m_id = other.m_id;
 		m_path = other.m_path;
-		//m_textureUnits.clear(); should already be cleared during "release" in the move assignment
-		for (auto it = other.m_textureUnits.begin(); it != other.m_textureUnits.end(); ++it)
-		{
-			m_textureUnits.push_back(*it);
-		}
 		m_source = other.m_source;
+		m_textureUnits = std::move(other.m_textureUnits);
+		m_uniformLocations = std::move(other.m_uniformLocations);
 
 		other.m_id = 0;
 		other.m_path = "";
@@ -255,115 +261,66 @@ namespace r3d
 		other.m_source.ComputeShader = "";
 	}
 
-	void Shader::setUniformValue(unsigned int id, const std::string& name, int          value)
-	{
-		int location;
-		location = glGetUniformLocation(id, name.c_str());
-		glUniform1i(location, value);
-	}
-
-	//void Shader::setUniformValue(unsigned int id, const std::string& name, double       value)
-	//{
-	//	int location;
-	//	location = glGetUniformLocation(id, name.c_str());
-	//	glUniform1d(location, value);
-	//}
-
-	void Shader::setUniformValue(unsigned int id, const std::string& name, unsigned int value)
-	{
-		int location;
-		location = glGetUniformLocation(id, name.c_str());
-		glUniform1ui(location, value);
-	}
-
-	void Shader::setUniformValue(unsigned int id, const std::string& name, float        value)
-	{
-		int location;
-		location = glGetUniformLocation(id, name.c_str());
-		glUniform1f(location, value);
-	}
-
-	void Shader::setUniformValue(unsigned int id, const std::string & name, float v1, float v2)
-	{
-		int location;
-		location = glGetUniformLocation(id, name.c_str());
-		glUniform2f(location, v1, v2);
-	}
-
-	void Shader::setUniformValue(unsigned int id, const std::string & name, float v1, float v2, float v3)
-	{
-		int location;
-		location = glGetUniformLocation(id, name.c_str());
-		glUniform3f(location, v1, v2, v3);
-	}
-
-	void Shader::setUniformValue(unsigned int id, const std::string & name, float v1, float v2, float v3, float v4)
-	{
-		int location;
-		location = glGetUniformLocation(id, name.c_str());
-		glUniform4f(location, v1, v2, v3, v4);
-	}
-
-	void Shader::setUniformValue(unsigned int id, const std::string & name, float3 values)
-	{
-		setUniformValue(id, name, values.x, values.y, values.z);
-	}
-
-	void Shader::setUniformMatrix(unsigned int id, const std::string& name, const float4x4& matrix, bool transpose)
-	{
-		int location;
-		location = glGetUniformLocation(id, name.c_str());
-		glUniformMatrix4fv(location, 1, transpose, glm::value_ptr(matrix));
-	}
-
 	void Shader::setUniformValue(const std::string& name, int value) const
 	{
-		setUniformValue(m_id, name, value);
+		glUniform1i(getUniformLocation(name), value);
 	}
 
-	//void Shader::setUniformValue(const std::string& name, double value)const
-	//{
-	//	setUniformValue(m_id, name, value);
-	//}
-
-	void Shader::setUniformValue(const std::string& name, unsigned int value)const
+	void Shader::setUniformValue(const std::string& name, unsigned int value) const
 	{
-		setUniformValue(m_id, name, value);
+		glUniform1ui(getUniformLocation(name), value);
 	}
 
-	void Shader::setUniformValue(const std::string& name, float value)const
+	void Shader::setUniformValue(const std::string& name, float        value) const
 	{
-		setUniformValue(m_id, name, value);
+		glUniform1f(getUniformLocation(name), value);
 	}
 
-	void Shader::setUniformValue(const std::string& name, float v1, float v2)const
+	void Shader::setUniformValue(const std::string & name, float v1, float v2) const
 	{
-		setUniformValue(m_id, name, v1, v2);
+		glUniform2f(getUniformLocation(name), v1, v2);
 	}
 
-	void Shader::setUniformValue(const std::string& name, float v1, float v2, float v3)const
+	void Shader::setUniformValue(const std::string & name, float v1, float v2, float v3) const
 	{
-		setUniformValue(m_id, name, v1, v2, v3);
+		glUniform3f(getUniformLocation(name), v1, v2, v3);
 	}
 
-	void Shader::setUniformValue(const std::string& name, float v1, float v2, float v3, float v4)const
+	void Shader::setUniformValue(const std::string & name, float v1, float v2, float v3, float v4) const
 	{
-		setUniformValue(m_id, name, v1, v2, v3, v4);
+		glUniform4f(getUniformLocation(name), v1, v2, v3, v4);
 	}
 
-	void Shader::setUniformValue(const std::string& name, float3 value) const
+	void Shader::setUniformValue(const std::string& name, const float3& value) const
 	{
-		setUniformValue(m_id, name, value);
+		setUniformValue(name, value[0], value[1], value[2]);
 	}
 
-	void Shader::setUniformValue(const std::string& name, float4 value) const
+	void Shader::setUniformValue(const std::string& name, const float4& value) const
 	{
-		setUniformValue(m_id, name, value);
+		setUniformValue(name, value[0], value[1], value[2], value[3]);
 	}
 
 	void Shader::setUniformMatrix(const std::string& name, const float4x4& matrix, bool transpose) const
 	{
-		setUniformMatrix(m_id, name, matrix, transpose);
+		glUniformMatrix4fv(getUniformLocation(name), 1, transpose, glm::value_ptr(matrix));
+	}
+
+	int Shader::getUniformLocation(const std::string& name) const
+	{
+		auto found = m_uniformLocations.find(name);
+		if (found != m_uniformLocations.end())
+		{
+			return found->second;
+		}
+		else
+		{
+			int location;
+			location = glGetUniformLocation(m_id, name.c_str());
+			m_uniformLocations.insert({ name, location });
+
+			return location;
+		}
 	}
 
 }
