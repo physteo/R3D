@@ -283,8 +283,8 @@ namespace r3d
 			do
 			{
 				// clip this halfedge with sideface
-				real3& po = incidentBox.position + incidentBox.orientation * (incidentBox.scale * halfInc->origin->position);
-				real3& pe = incidentBox.position + incidentBox.orientation * (incidentBox.scale * halfInc->next->origin->position);
+				real3 po = incidentBox.position + incidentBox.orientation * (incidentBox.scale * halfInc->origin->position);
+				real3 pe = incidentBox.position + incidentBox.orientation * (incidentBox.scale * halfInc->next->origin->position);
 
 				auto result = clip_segment_to_face(po, pe, *sideFace, referenceBox);
 				if (result.first)
