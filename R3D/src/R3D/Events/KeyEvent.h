@@ -21,7 +21,7 @@ namespace r3d
 	public:
 		KeyPressedEvent(int keycode, int repeatCount) : KeyEvent(keycode), m_repeatCount(repeatCount) {}
 
-		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput);
+		EVENT_CLASS_CATEGORY(EventCategory::Keyboard | EventCategory::Input);
 		EVENT_CLASS_TYPE(EventType::KeyPressed)
 			inline int getRepeatCount() const { return m_repeatCount; }
 
@@ -41,7 +41,7 @@ namespace r3d
 	public:
 		KeyReleaseEvent(int keycode) : KeyEvent(keycode) {}
 
-		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput);
+		EVENT_CLASS_CATEGORY(EventCategory::Keyboard | EventCategory::Input);
 		EVENT_CLASS_TYPE(EventType::KeyReleased)
 
 
@@ -61,7 +61,7 @@ namespace r3d
 		MouseButtonPressedEvent(int keycode, int repeatCount, float x, float y) : KeyEvent(keycode), m_repeatCount(repeatCount), m_x(x), m_y(y) {}
 		MouseButtonPressedEvent(int keycode, int repeatCount, std::pair<float, float> position) : KeyEvent(keycode), m_repeatCount(repeatCount), m_x(position.first), m_y(position.second) {}
 
-		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput);
+		EVENT_CLASS_CATEGORY(EventCategory::Mouse | EventCategory::Input);
 		EVENT_CLASS_TYPE(EventType::MouseButtonPressed)
 
 		inline std::pair<float, float> getMousePosition() const { return { m_x, m_y }; }
@@ -87,7 +87,7 @@ namespace r3d
 		MouseButtonReleasedEvent(int keycode, float x, float y) : KeyEvent(keycode), m_x(x), m_y(y) {}
 		MouseButtonReleasedEvent(int keycode, std::pair<float, float> position) : KeyEvent(keycode), m_x(position.first), m_y(position.second) {}
 
-		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput);
+		EVENT_CLASS_CATEGORY(EventCategory::Mouse | EventCategory::Input);
 		EVENT_CLASS_TYPE(EventType::MouseButtonReleased);
 
 		inline std::pair<float, float> getMousePosition() const { return { m_x, m_y }; }

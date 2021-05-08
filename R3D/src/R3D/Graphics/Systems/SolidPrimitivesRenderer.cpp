@@ -12,120 +12,137 @@
 namespace r3d
 {
 
+	struct SolidRendererData
+	{
+		// Textures/Materials
+
+		// Meshes
+		std::unordered_map<MeshID, VertexArray, MeshIDHasher> meshDatabase;
+
+		// Lights
+		PointLight pointLight{};
+		SpotLight spotLight{};
+		SunLight sunLight{};
+		bool spotLightOn{ false };
+	};
+
+	static SolidRendererData s_data;
+
 	SolidPrimitivesRenderer::SolidPrimitivesRenderer()
 	{
-		pointLight.eye = float3{ -9.0, 10.0, -10.0 };
-		pointLight.ambient =  Palette::getInstance().white;
-		pointLight.diffuse =  Palette::getInstance().orange;
-		pointLight.specular = Palette::getInstance().white;
-		pointLight.attenuation.constant = 1.0f;
-		pointLight.attenuation.linear = 0.0f;
-		pointLight.attenuation.quadratic = 0.007f;
-
-		sunLight.eye     = float3{ 13.0f, 6.0f, -10.0f };
-		sunLight.center  = float3{ 0.0, 0.0, 0.0 };
-		sunLight.ambient =  0.5f * Palette::getInstance().white;
-		sunLight.diffuse =  Palette::getInstance().white;
-		sunLight.specular = Palette::getInstance().white;
-
-		spotLight.cutOff = 0.9f;
-		spotLight.eye = float3{ -10.0, 10.0, 0.0 };
-		spotLight.direction = -spotLight.eye;
-		spotLight.ambient = 0.5f * Palette::getInstance().white;
-		spotLight.diffuse = Palette::getInstance().white;
-		spotLight.specular = Palette::getInstance().white;
-		spotLight.attenuation.constant = 1.0f;
-		spotLight.attenuation.linear = 0.0f;//0.015f;
-		spotLight.attenuation.quadratic = 0.007f;
-		spotLightOn = true;
+		init();
 	}
 	
+	void SolidPrimitivesRenderer::init()
+	{
+		// load meshes
+		s_data.meshDatabase.insert({ MeshID("cube"), Vaos::createCubeVNTUMesh() });
+		s_data.meshDatabase.insert({ MeshID("skydome"), Vaos::createSkyDomeMesh(1.0f) });
+
+		s_data.pointLight.eye = float3{ -9.0, 10.0, -10.0 };
+		s_data.pointLight.ambient = Palette::getInstance().white;
+		s_data.pointLight.diffuse = Palette::getInstance().white;
+		s_data.pointLight.specular = Palette::getInstance().white;
+		s_data.pointLight.attenuation.constant = 1.0f;
+		s_data.pointLight.attenuation.linear = 0.0f;
+		s_data.pointLight.attenuation.quadratic = 0.007f;
+
+		s_data.sunLight.eye = float3{ 13.0f, 6.0f, -10.0f };
+		s_data.sunLight.center = float3{ 0.0, 0.0, 0.0 };
+		s_data.sunLight.ambient = 0.5f * Palette::getInstance().white;
+		s_data.sunLight.diffuse = Palette::getInstance().white;
+		s_data.sunLight.specular = Palette::getInstance().white;
+
+		s_data.spotLight.cutOff = 0.9f;
+		s_data.spotLight.eye = float3{ -10.0, 10.0, 0.0 };
+		s_data.spotLight.direction = -s_data.spotLight.eye;
+		s_data.spotLight.ambient = 0.5f * Palette::getInstance().white;
+		s_data.spotLight.diffuse = Palette::getInstance().white;
+		s_data.spotLight.specular = Palette::getInstance().white;
+		s_data.spotLight.attenuation.constant = 1.0f;
+		s_data.spotLight.attenuation.linear = 0.0f;//0.015f;
+		s_data.spotLight.attenuation.quadratic = 0.007f;
+		s_data.spotLightOn = true;
+	}
+
 	void SolidPrimitivesRenderer::update(ArchetypeManager& am, double t, double dt)
 	{
-		m_shader->bind();
-
-		// pass lights
-		m_shader->setUniformValue("pointLight.eye",       pointLight.eye );
-		m_shader->setUniformValue("pointLight.ambient",   pointLight.ambient);
-		m_shader->setUniformValue("pointLight.diffuse",   pointLight.diffuse);
-		m_shader->setUniformValue("pointLight.specular",  pointLight.specular);
-		m_shader->setUniformValue("pointLight.attenuation.constant",  pointLight.attenuation.constant);
-		m_shader->setUniformValue("pointLight.attenuation.linear",    pointLight.attenuation.linear);
-		m_shader->setUniformValue("pointLight.attenuation.quadratic", pointLight.attenuation.quadratic);
-
-		m_shader->setUniformValue("spotLight.eye",      spotLight.eye);
-		m_shader->setUniformValue("spotLight.direction",   spotLight.direction);
-		m_shader->setUniformValue("spotLight.ambient",  float(spotLightOn) * spotLight.ambient);
-		m_shader->setUniformValue("spotLight.diffuse",  float(spotLightOn) * spotLight.diffuse);
-		m_shader->setUniformValue("spotLight.specular", float(spotLightOn) * spotLight.specular);
-		m_shader->setUniformValue("spotLight.cutOff", spotLight.cutOff);
-		m_shader->setUniformValue("spotLight.attenuation.constant", spotLight.attenuation.constant);
-		m_shader->setUniformValue("spotLight.attenuation.linear", spotLight.attenuation.linear);
-		m_shader->setUniformValue("spotLight.attenuation.quadratic", spotLight.attenuation.quadratic);
-
-		m_shader->setUniformValue("sunLight.eye", sunLight.eye);
-		m_shader->setUniformValue("sunLight.center", sunLight.center);
-		m_shader->setUniformValue("sunLight.ambient", sunLight.ambient);
-		m_shader->setUniformValue("sunLight.diffuse", sunLight.diffuse);
-		m_shader->setUniformValue("sunLight.specular", sunLight.specular);
-
-		// draw cubes
-		const VertexArray& cube = Vaos::getInstance().cube;
-		cube.bind();
-		auto archetypes = am.matchAtLeast(ComponentList::buildList<Transform, Color, BoxPrimitive>(), {});
-		for (auto archIt = archetypes.begin(); archIt != archetypes.end(); ++archIt)
-		{
-			auto transform = get<Transform>(am, *archIt);
-			auto color = get<Color>(am, *archIt);
-			size_t numElements = getSize<Transform>(am, *archIt);
-			for (size_t j = 0; j < numElements; j++)
-			{
-				auto model = compute_model_matrix(transform[j].position, transform[j].orientation, real(2.0) * transform[j].scale);
-				m_shader->setUniformMatrix("model", model, false);
-				m_shader->setUniformMatrix("normalMat", glm::transpose(glm::inverse(model)), false);
-				m_shader->setUniformValue("material.color", float3{ color[j].vec.r, color[j].vec.g, color[j].vec.b });
-				m_shader->setUniformValue("material.shininess", 128.0f);
-				cube.draw(GL_TRIANGLES);
-			}
-		}
-		cube.unbind();
+		// pass all textures to the shader.
+		m_currentShader->bind();
 
 		// draw planes
 		const VertexArray& plane = Vaos::getInstance().plane;
 		plane.bind();
-		archetypes = am.matchAtLeast(ComponentList::buildList<Transform, Color, PlanePrimitive>(), {});
+		auto archetypes = am.matchAtLeast(ComponentList::buildList<Transform, Color, PlanePrimitive, MaterialComp>(), {});
 		for (auto archIt = archetypes.begin(); archIt != archetypes.end(); ++archIt)
 		{
 			auto transform = get<Transform>(am, *archIt);
 			auto color = get<Color>(am, *archIt);
+			auto materials = get<MaterialComp>(am, *archIt);
 			size_t numElements = getSize<Transform>(am, *archIt);
-			auto& entities = getEntities(am, *archIt);
+			std::vector<Entity>* entities = getEntities(am, *archIt);
 
 			for (size_t j = 0; j < numElements; ++j)
 			{
-				const float3& n = -glm::normalize(float3{ transform[j].orientation.x, transform[j].orientation.y, transform[j].orientation.z });
+				const float3& n = glm::normalize(float3{ transform[j].orientation.x, transform[j].orientation.y, transform[j].orientation.z });
 				const float& off = transform[j].position.x;
 
 				float3 tangent[2];
 				compute_basis(n, tangent[0], tangent[1]);
-				fquat q = glm::quat_cast(glm::transpose(real3x3{ n, tangent[0], tangent[1] }));
-
+				fquat q = glm::toQuat(glm::transpose(real3x3{ n, tangent[0], tangent[1] }));
+				
 				auto model = compute_model_matrix((float3)(off * n), q, real(2.0) * transform[j].scale);
-				m_shader->setUniformMatrix("model", model, false);
-				m_shader->setUniformMatrix("normalMat", glm::transpose(glm::inverse(model)), false);
-				m_shader->setUniformValue("material.color", float3{ color[j].vec.r, color[j].vec.g, color[j].vec.b });
-				m_shader->setUniformValue("material.shininess", 128.0f);
+				m_currentShader->setUniformMatrix("model", model, false);
+				m_currentShader->setUniformMatrix("normalMat", glm::transpose(glm::inverse(model)), false);
+				materialsDatabase[materials[j].name].passUniforms(*m_currentShader);
+				// m_currentShader->setUniformValue("material.color", float3{ color[j].vec.r, color[j].vec.g, color[j].vec.b });
+				// m_currentShader->setUniformValue("material.shininess", 128.0f);
 				plane.draw(GL_TRIANGLES);
 			}
 		}
 		plane.unbind();
 
-		m_shader->unbind();
+		archetypes = am.matchAtLeast(ComponentList::buildList<Transform, Color, BoxPrimitive, MaterialComp, MeshID>(), {});
+		for (auto archIt = archetypes.begin(); archIt != archetypes.end(); ++archIt)
+		{
+			auto transform = get<Transform>(am, *archIt);
+			auto color = get<Color>(am, *archIt);
+			auto materials = get<MaterialComp>(am, *archIt);
+			auto meshes = get<MeshID>(am, *archIt);
+			size_t numElements = getSize<Transform>(am, *archIt);
+
+			for (size_t j = 0; j < numElements; j++)
+			{
+				auto model = compute_model_matrix(transform[j].position, transform[j].orientation, real(2.0) * transform[j].scale);
+				m_currentShader->setUniformMatrix("model", model, false);
+				m_currentShader->setUniformMatrix("normalMat", glm::transpose(glm::inverse(model)), false);
+				materialsDatabase[materials[j].name].passUniforms(*m_currentShader);
+				auto mesh = s_data.meshDatabase.find(meshes[j]);
+				if (mesh != s_data.meshDatabase.end())
+				{
+					mesh->second.bind();
+					mesh->second.draw(GL_TRIANGLES);
+					mesh->second.unbind();
+				}
+				else
+				{
+					R3D_CORE_ERROR("Mesh (ID: {0})does not exist.", meshes[j].getID());
+				}
+			}
+		}
+
+		m_currentShader->unbind();
 	}
+
+	PointLight& SolidPrimitivesRenderer::getPointLight() { return s_data.pointLight; }
+	SunLight& SolidPrimitivesRenderer::getSunLight() { return s_data.sunLight; }
+	SpotLight& SolidPrimitivesRenderer::getSpotLight() { return s_data.spotLight; }
+	bool SolidPrimitivesRenderer::isSpotLightOn() { return s_data.spotLightOn; }
+	void SolidPrimitivesRenderer::switchSpotLight() { s_data.spotLightOn = !s_data.spotLightOn; }
 
 	void SolidPrimitivesRenderer::drawLights(const float3& cameraPosition) const
 	{
-		drawPointLight(pointLight.eye, cameraPosition);
+		drawPointLight(s_data.pointLight.eye, cameraPosition);
 		//drawSunLight(sunLight.eye, sunLight.center, cameraPosition);
 	}
 
@@ -144,7 +161,7 @@ namespace r3d
 		float3 direction = center - position;
 		m_sunLightShader->setUniformValue("direction", direction.x, direction.y, direction.z);
 		m_sunLightShader->setUniformValue("cameraDistance", distanceFromCameraLen);
-		m_sunLightShader->setUniformValue("lightColor", sunLight.diffuse);
+		m_sunLightShader->setUniformValue("lightColor", s_data.sunLight.diffuse);
 
 		Vaos::getInstance().point.bind();
 		Vaos::getInstance().point.draw(GL_POINTS);
@@ -167,7 +184,7 @@ namespace r3d
 		lamprot = glm::normalize(fquat{ distanceFromCameraLen + glm::dot({0,0,1}, distanceFromCameraVec), axis.x, axis.y, axis.z });
 		float4x4 lampmodel = compute_model_matrix(lamppos, lamprot, lampsca);
 		m_pointLightShader->setUniformMatrix("model", lampmodel, false);
-		m_pointLightShader->setUniformValue("lightColor", pointLight.diffuse);
+		m_pointLightShader->setUniformValue("lightColor", s_data.pointLight.diffuse);
 
 		glDisable(GL_CULL_FACE);
 		Vaos::getInstance().quad.bind();
@@ -177,5 +194,6 @@ namespace r3d
 
 		m_pointLightShader->unbind();
 	}
+
 
 }

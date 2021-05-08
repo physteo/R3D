@@ -10,13 +10,19 @@ namespace r3d
 		if (found != m_entity_to_archetypeData.end())
 		{
 			size_t archetypeIndex = found->second;
-			auto archetype = &m_archetypeDataVector[archetypeIndex];
-			return &archetype->getArchetype();
+			const ArchetypeData* archetypeData = &m_archetypeDataVector[archetypeIndex];
+			return &archetypeData->getArchetype();
 		}
 		else
 		{
 			return nullptr;
 		}
+	}
+
+	void ArchetypeManager::addArchetype(const Archetype& archetype)
+	{
+		ComponentList list = archetype.getComponentList();
+		m_archetypeDataVector.emplace_back(list);
 	}
 
 	void ArchetypeManager::setArchetype(Entity entity, const Archetype& archetype)
@@ -38,17 +44,14 @@ namespace r3d
 			{
 				// yes: assign entity to that one
 				m_entity_to_archetypeData[entity] = archIndex;
-				ArchetypeData* destinationArchetypeData = &m_archetypeDataVector[archIndex];
-				destinationArchetypeData->assignDefault(entity);
+				m_archetypeDataVector[archIndex].assignDefault(entity);
 			}
 			else
 			{
 				// no: create one and assign entity there
-				Archetype wantedArchetype{ list };
-				m_archetypeDataVector.emplace_back(wantedArchetype);
+				m_archetypeDataVector.emplace_back(list);
 				m_entity_to_archetypeData[entity] = m_archetypeDataVector.size() - 1;
-				ArchetypeData* destinationArchetypeData = &m_archetypeDataVector[m_archetypeDataVector.size() - 1];
-				destinationArchetypeData->assignDefault(entity);
+				m_archetypeDataVector[m_archetypeDataVector.size() - 1].assignDefault(entity);
 			}
 		}
 	}
@@ -61,7 +64,7 @@ namespace r3d
 		auto typesE = excluded.getMetatypes();
 		for (auto it = m_archetypeDataVector.begin(); it != m_archetypeDataVector.end(); ++it, ++cnt)
 		{
-			auto typesB = it->getComponentList().getMetatypes();
+			const std::vector<Metatype>& typesB = it->getComponentList().getMetatypes();
 			std::vector<Metatype> intersection;
 			std::set_intersection(typesE.begin(), typesE.end(),
 				typesB.begin(), typesB.end(), std::back_inserter(intersection));

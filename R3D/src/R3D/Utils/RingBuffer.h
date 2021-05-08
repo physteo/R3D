@@ -38,6 +38,7 @@ namespace r3d
 			m_deprecated.resize(size, true);
 			m_index = 0;
 			m_latestSlotId = 0;
+			m_current = T{};
 		}
 
 		//!< Saves current object to active slot in the ring, and advances to next slot.

@@ -18,7 +18,8 @@ namespace r3d
 		{
 			auto transforms1 = get<Transform>(am, arch1);
 			auto spheres1 = get<ColliderSphere>(am, arch1);
-			auto& entities1 = getEntities(am, arch1);
+			std::vector<Entity>* entities1 = getEntities(am, arch1);
+
 			size_t size1 = getSize<ColliderSphere>(am, arch1);
 
 			for (size_t i = 0; i < size1; ++i)
@@ -43,7 +44,8 @@ namespace r3d
 		{
 			auto transforms1 = get<Transform>(am, arch1);
 			auto spheres1 = get<ColliderSphere>(am, arch1);
-			auto& entities1 = getEntities(am, arch1);
+			std::vector<Entity>* entities1 = getEntities(am, arch1);
+
 			size_t size1 = getSize<ColliderSphere>(am, arch1);
 
 			for (size_t arch2 : archetypes)
@@ -52,7 +54,8 @@ namespace r3d
 
 				auto transforms2 = get<Transform>(am, arch2);
 				auto spheres2 = get<ColliderSphere>(am, arch2);
-				auto& entities2 = getEntities(am, arch2);
+				std::vector<Entity>* entities2 = getEntities(am, arch2);
+
 				size_t size2 = getSize<ColliderSphere>(am, arch2);
 				
 				for (size_t i = 0; i < size1; ++i)

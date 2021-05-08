@@ -18,6 +18,13 @@ namespace r3d
 		m_active = 0;
 		m_meta = meta;
 		m_data = (char*)malloc(MAX_ELEMENTS * meta.getSize());
+		if (nullptr == m_data)
+		{
+			R3D_CORE_ERROR("[ ECS ] RawPackedArray ctor (with Metatype): failed to allocate memory.");
+			// TODO: handle this error
+			return;
+		}
+
 		for (size_t i = 0; i < MAX_ELEMENTS; i++)
 		{
 			meta.constructor(m_data + i * meta.getSize());
@@ -40,6 +47,13 @@ namespace r3d
 
 		// deep copy of data
 		m_data = (char*)malloc(MAX_ELEMENTS * m_meta.getSize());
+		if (nullptr == m_data)
+		{
+			R3D_CORE_ERROR("[ ECS ] RawPackedArray copy ctor: failed to allocate memory.");
+			// TODO: handle this error
+			return;
+		}
+
 		for (size_t i = 0; i < MAX_ELEMENTS; i++)
 		{
 			void* destination = (void*)(m_data + i * m_meta.getSize());
@@ -71,12 +85,19 @@ namespace r3d
 		{
 			// need to deallocate and reallocate
 			release();
+			m_data = (char*)malloc(MAX_ELEMENTS * m_meta.getSize());
+			if (nullptr == m_data)
+			{
+				R3D_CORE_ERROR("[ ECS ] RawPackedArray copy assign: failed to allocate memory.");
+				// TODO: handle this error
+				return *this;
+			}
+
 			m_map = other.m_map;
 			m_dataEntities = other.m_dataEntities;
 			m_active = other.m_active;
 			m_meta = other.m_meta;
 
-			m_data = (char*)malloc(MAX_ELEMENTS * m_meta.getSize());
 			for (size_t i = 0; i < MAX_ELEMENTS; i++)
 			{
 				void* destination = (void*)(m_data + i * m_meta.getSize());
@@ -88,12 +109,12 @@ namespace r3d
 		return *this;
 	}
 
-	RawPackedArray::RawPackedArray(RawPackedArray&& other)
+	RawPackedArray::RawPackedArray(RawPackedArray&& other) noexcept
 	{ 
 		swapData(other);
 	}
 
-	RawPackedArray& RawPackedArray::operator=(RawPackedArray&& other)
+	RawPackedArray& RawPackedArray::operator=(RawPackedArray&& other) noexcept
 	{
 		// check for self-assignment.
 		if (this != &other)
@@ -161,7 +182,7 @@ namespace r3d
 		m_meta.move((void*)destinLocation, (void*)sourceLocation);
 
 		m_dataEntities[i] = std::move(m_dataEntities[m_active - 1]);
-		m_dataEntities[m_active - 1] = Entity{ 29790, 0 };
+		m_dataEntities[m_active - 1] = Entity{ ecs::ENTITY_NULL, 0 };
 
 		if (m_active > 1)
 			m_map[m_dataEntities[i]] = i;
@@ -191,7 +212,7 @@ namespace r3d
 		free(m_data);
 	}
 
-	void RawPackedArray::swapData(RawPackedArray& other)
+	void RawPackedArray::swapData(RawPackedArray& other) noexcept
 	{
 		m_map = other.m_map;
 		m_dataEntities = other.m_dataEntities;

@@ -2,7 +2,7 @@
 
 #include <R3D/Core/Core.h>
 
-class GLFWwindow;
+struct GLFWwindow;
 
 namespace r3d {
 
@@ -13,7 +13,7 @@ namespace r3d {
 
 		bool isClosed() const;
 		void close() const;
-		void setViewPort(float width, float height) const;
+		void setViewPort(double width, double height) const;
 		void clearColorBufferBit(float red, float blue, float green, float alpha) const;
 		void clearColorBufferBit() const;
 		void swapBuffers() const;
@@ -57,8 +57,8 @@ namespace r3d {
 		float        m_fontscale;
 
 		float colorR{ 0.05f }, colorG{ 0.05f }, colorB{ 0.05f };
-		float m_lastTime;
-		float m_lastFrameTime;
+		double m_lastTime;
+		double m_lastFrameTime;
 		int   m_maxFramerate;
 
 	};

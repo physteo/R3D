@@ -8,11 +8,11 @@ namespace r3d
 		auto archetypes = am.matchAtLeast(ComponentList::buildList<ContactEntityTag>(), {});
 		for (auto arch : archetypes)
 		{
-			std::vector<Entity> entities = getEntities(am, arch);
+			std::vector<Entity>* entities = getEntities(am, arch);
 			size_t numEntities = getSize<ContactEntityTag>(am, arch);
 			for (size_t i = 0; i < numEntities; ++i)
 			{
-				Entity e = entities[i];
+				Entity e = (*entities)[i];
 				Application::getEntityManager()->destroy(e);
 				am.removeEntity(e);
 			}

@@ -18,6 +18,7 @@
 #include <R3D/Graphics/Core/Camera.h>
 #include <R3D/Graphics/Core/Shader.h>
 #include <R3D/Graphics/Core/FrameBuffer.h>
+#include <R3D/Graphics/Core/Material.h>
 #include <R3D/Graphics/Components/BasicGraphicsComponents.h>
 #include <R3D/Graphics/Systems/WireframePrimitivesRenderer.h>
 #include <R3D/Graphics/Systems/SolidPrimitivesRenderer.h>

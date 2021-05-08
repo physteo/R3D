@@ -7,8 +7,8 @@ namespace r3d
 
 	Entity EntityManager::create()
 	{
-		unsigned index;
-		unsigned generation;
+		ecs::Index index;
+		ecs::Gen generation;
 		if (m_free_indices.size() > ecs::MIN_FREE_IDS)
 		{
 			// take from the queue
@@ -19,7 +19,7 @@ namespace r3d
 		else
 		{
 			//create new
-			index = m_generation.size();
+			index = static_cast<ecs::Index>(m_generation.size());
 			m_generation.push_back(0);
 			generation = 0;
 			assert(index < (1 << ecs::ENTITY_INDEX_BITS));
@@ -30,6 +30,8 @@ namespace r3d
 
 	bool EntityManager::alive(Entity e) const
 	{
+		if (e.id == ecs::ENTITY_NULL)
+			return false;
 		return m_generation[e.index()] == e.generation();
 	}
 
@@ -37,7 +39,7 @@ namespace r3d
 	{
 		if (alive(e))
 		{
-			const unsigned index = e.index();
+			const ecs::Index index = e.index();
 			++m_generation[index];
 			m_free_indices.push(index);
 		}

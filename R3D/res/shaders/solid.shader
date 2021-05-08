@@ -4,6 +4,7 @@
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec3 aTangent;
+layout(location = 3) in vec2 aUVs;
 
 // *************** Generic Lights
 struct LightAttenuation
@@ -104,12 +105,14 @@ uniform vec3 cameraPos;
 out vec3 outTangent;
 out vec3 outFragPos_tan;
 out vec3 outCameraPos_tan;
+out vec2 outUVs;
 
 void main()
 {
 	gl_Position = projection * view * model *  vec4(aPosition, 1.0f);
 	vec3 outFragPos = vec3(model * vec4(aPosition, 1.0));
 	outFragPos_sl = sunLightSpaceMat * vec4(outFragPos, 1.0); // shadow
+	outUVs = aUVs;
 
 	// TBN matrix
 	vec3 normal =  normalize(vec3(normalMat * vec4(aNormal, 0.0f)));
@@ -140,7 +143,7 @@ void main()
 
 layout (location = 0) out vec4 color;
 
-struct ColorSet
+struct ColorSet 
 {
    vec3 ambient;
    vec3 diffuse;
@@ -150,7 +153,9 @@ struct ColorSet
 //************** Materials *************
 struct Material
 {
-	vec3 color;
+	sampler2D diffuse;
+	sampler2D specular;
+	sampler2D normal;
 	float shininess;
 };
 uniform Material material;
@@ -163,29 +168,27 @@ struct LightAttenuation
 	float quadratic;
 };
 
-ColorSet calcPhongShading(vec3 viewDir, vec3 lightDir, vec3 ambient, vec3 diffuse, vec3 specular, vec3 norm, Material material)
+ColorSet calcPhongShading(vec3 viewDir, vec3 lightDir, vec3 ambient, vec3 diffuse, vec3 specular, vec3 norm, Material material, vec2 UV)
 {
 	// diffuse
 	float diff = max(dot(norm, lightDir), 0.0);
 
 	// specular
 	//vec3 halfwayDir = normalize(lightDir + viewDir);
-	//float spec = pow(max(dot(halfwayDir, norm), 0.0), shininess);//material.shininess);
+	//float spec = pow(max(dot(halfwayDir, norm), 0.0), 1 + 0 * material.shininess);
 	vec3 reflectDir = reflect(-lightDir, norm);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 
 	// combine
-	vec3 ambientCol = ambient  * material.color;          //vec3(texture(material.diffuse, TexCoords));
-	vec3 diffuseCol = diffuse  * (diff * material.color); //vec3(texture(material.diffuse, TexCoords)));
-	vec3 specularCol = specular * (spec * material.color);//vec3(texture(material.specular, TexCoords)));
-
-	float shadow = 0.0;// ShadowCalculation(FragPosLightSpace, shadowBias, shadowTexture);
+	vec3 ambientCol  =         ambient * texture(material.diffuse, UV).rgb;
+	vec3 diffuseCol  = diff * diffuse  * texture(material.diffuse, UV).rgb;
+	vec3 specularCol = spec * specular * texture(material.specular, UV).rgb;
 	
     ColorSet colorSet;
     colorSet.ambient = ambientCol;
-    colorSet.diffuse = (1.0 - shadow) * diffuseCol;
-    colorSet.specular = (1.0 - shadow) * specularCol;
-    
+    colorSet.diffuse = diffuseCol;
+    colorSet.specular = specularCol;
+
     return colorSet;
 }
 
@@ -202,11 +205,11 @@ struct SpotLight
 };
 
 //**************** Spot Light functions (fs) ****************
-vec3 calcSpotLight(SpotLight light, vec3 FragPos, vec3 viewDir, vec3 norm, Material material)//vec4 FragPosLightSpace, float shadowBias, sampler2D shadowTexture)
+vec3 calcSpotLight(SpotLight light, vec3 FragPos, vec3 viewDir, vec3 norm, Material material, vec2 UV)//vec4 FragPosLightSpace, float shadowBias, sampler2D shadowTexture)
 {
 	vec3 lightDir = normalize(light.eye - FragPos);
 
-	ColorSet cs = calcPhongShading(viewDir, lightDir, light.ambient, light.diffuse, light.specular, norm, material);
+	ColorSet cs = calcPhongShading(viewDir, lightDir, light.ambient, light.diffuse, light.specular, norm, material, UV);
     
     float cosTheta = -dot(normalize(lightDir), normalize(light.direction));
 
@@ -235,11 +238,11 @@ struct SunLight
 };
 
 //**************** Sun Light functions (fs) ****************
-ColorSet calcSunLight(SunLight light, vec3 viewDir, vec3 norm, Material material)//vec4 FragPosLightSpace, float shadowBias, sampler2D shadowTexture)
+ColorSet calcSunLight(SunLight light, vec3 viewDir, vec3 norm, Material material, vec2 UV)//vec4 FragPosLightSpace, float shadowBias, sampler2D shadowTexture)
 {
 	vec3 lightDir = normalize(light.eye - light.center);
 	
-	return calcPhongShading(viewDir, lightDir, light.ambient, light.diffuse, light.specular, norm, material);
+	return calcPhongShading(viewDir, lightDir, light.ambient, light.diffuse, light.specular, norm, material, UV);
 }
 
 //************** Sun Lights instances  **************
@@ -260,11 +263,11 @@ struct PointLight
 };
 
 //**************** Point Light functions (fs) ****************
-vec3 calcPointLight(PointLight light, vec3 FragPos, vec3 viewDir, vec3 norm, Material material)//vec4 FragPosLightSpace, float shadowBias, sampler2D shadowTexture)
+vec3 calcPointLight(PointLight light, vec3 FragPos, vec3 viewDir, vec3 norm, Material material, vec2 UV)//vec4 FragPosLightSpace, float shadowBias, sampler2D shadowTexture)
 {
 	vec3 lightDir = normalize(light.eye - FragPos);
 
-	ColorSet cs = calcPhongShading(viewDir, lightDir, light.ambient, light.diffuse, light.specular, norm, material);
+	ColorSet cs = calcPhongShading(viewDir, lightDir, light.ambient, light.diffuse, light.specular, norm, material, UV);
 
     float fragDistance = length(light.eye - FragPos);
 
@@ -308,28 +311,30 @@ float calcShadow(vec4 fragPos_lightSpace, vec3 normal, vec3 lightDir)
 in vec3 outTangent;
 in vec3 outFragPos_tan;
 in vec3 outCameraPos_tan;
+in vec2 outUVs;
 
 void main()
 {
 	vec3 result = vec3(0.0);
-	vec3 normal_tan = vec3(0.0, 0.0, 1.0);
 
+	vec3 normal_tan = normalize(2.0 * vec3(texture(material.normal, outUVs)) - 1.0);
 	vec3 viewDir_tan = normalize(outCameraPos_tan - outFragPos_tan);
 
 	// ************ Point Light calculations (fs) ****************
-	result += calcPointLight(outPointLight_tan, outFragPos_tan, viewDir_tan, normal_tan, material);
+	result += calcPointLight(outPointLight_tan, outFragPos_tan, viewDir_tan, normal_tan, material, outUVs);
 	
 	// ************ Sun Light calculations (fs) ****************
-	ColorSet sunCs = calcSunLight(outSunLight_tan, viewDir_tan, normal_tan, material);
+	ColorSet sunCs = calcSunLight(outSunLight_tan, viewDir_tan, normal_tan, material, outUVs);
 	// ************ sun shadow calculations (fs) ************
 	vec3 lightDir_tan = normalize(outSunLight_tan.eye - outSunLight_tan.center);
     float shadow = calcShadow(outFragPos_sl, normal_tan, lightDir_tan);
     result += sunCs.ambient + (1.0 - shadow) * (sunCs.diffuse + sunCs.specular);
-
+	
 	// ************ Spot Light calculations (fs) ****************
-	result += calcSpotLight(outSpotLight_tan, outFragPos_tan, viewDir_tan, normal_tan, material);
-
+	result += calcSpotLight(outSpotLight_tan, outFragPos_tan, viewDir_tan, normal_tan, material, outUVs);
 	color = vec4(result.rgb, 1.0f);
+	//color = vec4(outUVs, 0.0f, 1.0f);
+	//color = vec4(vec3(texture(material.normal, outUVs)), 1.0f);
 
 	// debug stuff
 	//vec3 temp = abs(outNormal + 1) / 2.0;

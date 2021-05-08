@@ -23,7 +23,6 @@ namespace r3d
 		ShapeData& shapeData = m_shapesData[shapeId];
 
 		shapeData.databuffer.generate();
-		shapeData.databuffer.bind();
 
 		std::vector<float> positions;
 		std::vector<unsigned int> indices;
@@ -54,9 +53,6 @@ namespace r3d
 		}
 
 		shapeData.vao = std::move(VertexArray{ { positions }, {3}, indices });
-		R3D_ASSERT(indices.size() < UINT_MAX, "[ WireframePrimitivesRenderer ] Primitive has too many indices.");
-		shapeData.numberOfIndices = static_cast<unsigned int>(indices.size());
-
 		shapeData.databuffer.bind();
 		shapeData.vao.bind();
 
@@ -80,6 +76,7 @@ namespace r3d
 		glVertexAttribDivisor(5, 1);
 		shapeData.vao.unbind();
 		shapeData.databuffer.unbind();
+		//shapeData.numInstances = 0;
 	}
 
 	void WireframePrimitivesRenderer::setCircleResolution(int circleResolution)
@@ -142,10 +139,17 @@ namespace r3d
 
 		for (auto archIt = archetypes.begin(); archIt != archetypes.end(); ++archIt)
 		{
-			auto transform = get<Transform>(am, *archIt);
-			auto plane = get<PlanePrimitive>(am, *archIt);
-			auto color = get<Color>(am, *archIt);
-			auto& entities = getEntities(am, *archIt);
+			Transform* transform = get<Transform>(am, *archIt);
+			PlanePrimitive* plane = get<PlanePrimitive>(am, *archIt);
+			Color* color = get<Color>(am, *archIt);
+			std::vector<Entity>* entities = getEntities(am, *archIt);
+
+			if (!transform || !plane || !color || !entities)
+			{
+				R3D_CORE_WARN("Could not fetch data for archetype id = {0}. Components:", *archIt);
+				return;
+			}
+
 			size_t numElements = getSize<PlanePrimitive>(am, *archIt);
 
 			for (size_t j = 0; j < numElements; j++)
@@ -157,7 +161,7 @@ namespace r3d
 				compute_basis(n, tangent[0], tangent[1]);
 				fquat q = glm::quat_cast(glm::transpose(real3x3{ n, tangent[0], tangent[1] }));
 
-				if (am.has<Transform>(entities[j])) scale = am.get<Transform>(entities[j])->scale;
+				if (am.has<Transform>((*entities)[j])) scale = am.get<Transform>((*entities)[j])->scale;
 
 				outInstancesData.push_back(InstanceData{});
 				outInstancesData.back().modelMatrix = std::move(compute_model_matrix((float3)(off * n), q, 2.0f * scale));
@@ -205,9 +209,25 @@ namespace r3d
 
 		m_shader->bind();
 
+		static unsigned long long cumulative = 0;
+		static unsigned long long trials = 0;
+		size_t totInstances = 0;
+		auto start = std::chrono::high_resolution_clock::now();
 		for (size_t group = 0; group < m_instancesData.size(); ++group)
 		{
+			totInstances += m_instancesData[group].size();
 			InstancesRenderer::render<InstanceData>(m_instancesData[group], m_shapesData[group], GL_LINE_LOOP);
+		}
+		auto end = std::chrono::high_resolution_clock::now();
+		auto duration = end - start;
+		cumulative += duration / std::chrono::microseconds(1);
+		trials++;
+		if (trials % 60 == 0)
+		{
+			R3D_CORE_INFO("instances({0}), duration instanced rend: {1}ns", totInstances, cumulative / double(trials) );
+
+			cumulative = 0;
+			trials = 0;
 		}
 
 		m_shader->unbind();
@@ -223,15 +243,15 @@ namespace r3d
 	{
 		positions.clear();
 		indices.clear();
-		for (int i = 0; i <= circleResolution; i++)
+		for (size_t i = 0; i <= circleResolution; i++)
 		{
-			float theta = i * (2 * glm::pi<float>()) / (float)circleResolution;
+			float theta = static_cast<float>(i) * (2 * glm::pi<float>()) / (float)circleResolution;
 			positions.push_back(0.5f * cosf(theta)); // x1
 			positions.push_back(0.5f * sinf(theta)); // z1
 			positions.push_back(0.0f); // y1
-			indices.push_back(i);
+			indices.push_back(static_cast<unsigned int>(i));
 		}
-		indices.push_back(indices.size());
+		indices.push_back(static_cast<unsigned int>(indices.size()));
 		positions.push_back(0.0f);
 		positions.push_back(0.0f);
 		positions.push_back(0.0f);
@@ -285,7 +305,7 @@ namespace r3d
 		indices.clear();
 
 		unsigned int cnt = 0;
-		float step = 1.0 / float(resolution);
+		float step = 1.0f / float(resolution);
 		for (size_t i = 0; i < resolution; i += 2)
 		{
 			positions.push_back(-0.5f);
@@ -339,7 +359,7 @@ namespace r3d
 		positions.push_back(0.0f);
 		indices.push_back(cnt);
 
-		indices.push_back(checkpoint);
+		indices.push_back(static_cast<unsigned int>(checkpoint));
 		indices.push_back(cnt);
 		indices.push_back(1);
 		indices.push_back(0);
@@ -354,13 +374,13 @@ namespace r3d
 		unsigned int cnt = 0;
 		for (size_t i = 0; i < sphereMeridians; ++i)
 		{
-			float phi = glm::radians(180.0 * i / float(sphereMeridians));
+			float phi = glm::radians(180.0f * i / float(sphereMeridians));
 			float cos_phi = glm::cos(phi);
 			float sin_phi = glm::sin(phi);
 
 			for (int j = 0; j <= sphereResolution; j++)
 			{
-				float theta = glm::radians(360.0 * j / float(sphereResolution) + 90);
+				float theta = glm::radians(360.0f * j / float(sphereResolution) + 90);
 				float cos_theta = glm::cos(theta);
 				float sin_theta = glm::sin(theta);
 				positions.push_back(0.5f * cos_theta * cos_phi); // x1
@@ -372,13 +392,13 @@ namespace r3d
 		
 		for (size_t i = 0; i < sphereParallels; ++i)
 		{
-			float phi = glm::radians(180.0 * i / float(sphereParallels) - 90.0f);
+			float phi = glm::radians(180.0f * i / float(sphereParallels) - 90.0f);
 			float cos_phi = glm::cos(phi);
 			float sin_phi = glm::sin(phi);
 
 			for (int j = 0; j <= sphereResolution; j++)
 			{
-				float theta = glm::radians(360.0 * j / float(sphereResolution) + 90);
+				float theta = glm::radians(360.0f * j / float(sphereResolution) + 90);
 				float cos_theta = glm::cos(theta);
 				float sin_theta = glm::sin(theta);
 				positions.push_back(0.5f * cos_theta * cos_phi); // x1

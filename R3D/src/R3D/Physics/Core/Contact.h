@@ -8,16 +8,20 @@ namespace r3d
 
 	typedef std::pair<short, short> FeaturePair;
 
-	enum ContactType
+	enum class ContactType
 	{
 		BOXBOX__EDGE_EDGE,
 		BOXBOX__POINT_FACE,
-		BOXPLANE__POINT_FACE
+		BOXPLANE__POINT_FACE,
+		NULL_CONTACT
 	};
 
 	struct Contact
 	{
-		Contact() : impulseNormal(0.0f), impulseTangent{ 0.0, 0.0 }, massNormal(0.0), massTangent{ 0.0 ,0.0 } {}
+		Contact() : position(0.0f), penetration(0.0f), 
+			impulseNormal(0.0f), impulseTangent{ 0.0f, 0.0f },
+			massNormal(0.0f), massTangent{ 0.0f ,0.0f },
+			bias(0.0f), type(ContactType::NULL_CONTACT), fp{} {}
 
 		real3 position;          //!< Contact point in world coordinates
 		real  penetration;       //!< Penetration along the contact normal passing through the contact point.

@@ -17,13 +17,14 @@ namespace r3d
 		{
 			auto transforms1 = get<Transform>(am, arch1);
 			auto spheres1 = get<ColliderSphere>(am, arch1);
-			auto& entities1 = getEntities(am, arch1);
+			std::vector<Entity>* entities1 = getEntities(am, arch1);
+
 			size_t size1 = getSize<ColliderSphere>(am, arch1);
 
 			for (size_t arch2 : archetypesPlane)
 			{
 				auto planes2 = get<ColliderPlane>(am, arch2);
-				auto& entities2 = getEntities(am, arch2);
+				std::vector<Entity>* entities2 = getEntities(am, arch2);
 				size_t size2 = getSize<ColliderPlane>(am, arch2);
 
 				for (size_t i = 0; i < size1; ++i)

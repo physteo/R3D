@@ -27,7 +27,7 @@ namespace r3d
 
 	private:
 		std::vector<Metatype> m_metatypes;
-		unsigned long long m_id;
+		unsigned long long m_id = 0;
 	};
 
 
@@ -98,7 +98,13 @@ namespace r3d
 		{
 			if (m_archetype.hasComponent<C>())
 			{
-				return &componentDataMap[typeid(C).hash_code()];
+				auto hash = typeid(C).hash_code();
+				auto found = componentDataMap.find(hash);
+				if (found != componentDataMap.end())
+				{
+					RawPackedArray* retrieved = &componentDataMap[hash];
+					return retrieved;
+				}
 			}
 			return nullptr;
 		}

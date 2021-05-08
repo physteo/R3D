@@ -23,6 +23,7 @@ namespace r3d
 			meta.m_hash = typeid(C).hash_code();
 
 			meta.constructor = [](void* p) {
+#pragma warning( suppress: 6011) // dereferencing nullptr warning in the meta.constructor. We guarantee to pass always a non nullptr from outside
 				new(p) C{};
 			};
 			meta.destructor = [](void* p) {

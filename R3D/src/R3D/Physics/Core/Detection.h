@@ -8,7 +8,7 @@
 namespace r3d
 {
 
-	struct CollisionData;
+	class CollisionData;
 
 	class SphereSphere
 	{

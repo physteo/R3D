@@ -10,7 +10,7 @@ namespace r3d
 	class Debugger
 	{
 	public:
-		void setAm(ArchetypeManager* am){ m_am = am;}
+		void setAm(ArchetypeManager* am);
 		void setEm(EntityManager* em)	{ m_em = em;}
 		
 		void draw_segment(const real3& position, const float3& vec, const float3& color);

@@ -52,6 +52,9 @@
     <ClInclude Include="src\R3D\Core\EntryPoint.h">
       <Filter>R3D\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\R3D\Core\Input.h">
+      <Filter>R3D\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\R3D\Core\Layer.h">
       <Filter>R3D\Core</Filter>
     </ClInclude>
@@ -121,7 +124,16 @@
     <ClInclude Include="src\R3D\Graphics\Core\Camera.h">
       <Filter>R3D\Graphics\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\R3D\Graphics\Core\FrameBuffer.h">
+      <Filter>R3D\Graphics\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\R3D\Graphics\Core\InstancesRenderer.h">
+      <Filter>R3D\Graphics\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Graphics\Core\Material.h">
+      <Filter>R3D\Graphics\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Graphics\Core\Palette.h">
       <Filter>R3D\Graphics\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\R3D\Graphics\Core\Shader.h">
@@ -129,6 +141,18 @@
     </ClInclude>
     <ClInclude Include="src\R3D\Graphics\Core\VertexArray.h">
       <Filter>R3D\Graphics\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Graphics\Core\load_image.h">
+      <Filter>R3D\Graphics\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Graphics\Systems\SolidPrimitivesRenderer.h">
+      <Filter>R3D\Graphics\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\Graphics\Systems\WireframePrimitivesRenderer.h">
+      <Filter>R3D\Graphics\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\R3D\ImGui\ImGuiCustom.h">
+      <Filter>R3D\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="src\R3D\ImGui\ImGuiLayer.h">
       <Filter>R3D\ImGui</Filter>
@@ -182,18 +206,12 @@
       <Filter>R3D\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\R3Dpch.h" />
-    <ClInclude Include="src\R3D\Graphics\Core\FrameBuffer.h" />
-    <ClInclude Include="src\R3D\Core\Input.h" />
-    <ClInclude Include="res\shaders\lamp_point.shader" />
-    <ClInclude Include="src\R3D\ImGui\ImGuiCustom.h" />
-    <ClInclude Include="src\R3D\Graphics\Core\Palette.h" />
-    <ClInclude Include="src\R3D\Graphics\Systems\WireframePrimitivesRenderer.h">
-      <Filter>R3D\Graphics\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="src\R3D\Graphics\Systems\SolidPrimitivesRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\R3D\Core\Application.cpp">
+      <Filter>R3D\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\R3D\Core\Input.cpp">
       <Filter>R3D\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\R3D\Core\Layer.cpp">
@@ -207,6 +225,9 @@
     </ClCompile>
     <ClCompile Include="src\R3D\Core\Window.cpp">
       <Filter>R3D\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\R3D\Ecs\Archetype.cpp">
+      <Filter>R3D\Ecs</Filter>
     </ClCompile>
     <ClCompile Include="src\R3D\Ecs\ArchetypeManager.cpp">
       <Filter>R3D\Ecs</Filter>
@@ -226,11 +247,32 @@
     <ClCompile Include="src\R3D\Graphics\Core\Camera.cpp">
       <Filter>R3D\Graphics\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\R3D\Graphics\Core\FrameBuffer.cpp">
+      <Filter>R3D\Graphics\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\R3D\Graphics\Core\Material.cpp">
+      <Filter>R3D\Graphics\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\R3D\Graphics\Core\Palette.cpp">
+      <Filter>R3D\Graphics\Core</Filter>
+    </ClCompile>
     <ClCompile Include="src\R3D\Graphics\Core\Shader.cpp">
       <Filter>R3D\Graphics\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\R3D\Graphics\Core\VertexArray.cpp">
       <Filter>R3D\Graphics\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\R3D\Graphics\Core\load_image.cpp">
+      <Filter>R3D\Graphics\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\R3D\Graphics\Systems\SolidPrimitivesRenderer.cpp">
+      <Filter>R3D\Graphics\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\R3D\Graphics\Systems\WireframePrimitivesRenderer.cpp">
+      <Filter>R3D\Graphics\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\R3D\ImGui\ImGuiCustom.cpp">
+      <Filter>R3D\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="src\R3D\ImGui\ImGuiLayer.cpp">
       <Filter>R3D\ImGui</Filter>
@@ -290,28 +332,20 @@
       <Filter>R3D\Utils</Filter>
     </ClCompile>
     <ClCompile Include="src\R3Dpch.cpp" />
-    <ClCompile Include="src\R3D\Graphics\Core\FrameBuffer.cpp" />
-    <ClCompile Include="src\R3D\Core\Input.cpp" />
-    <ClCompile Include="src\R3D\ImGui\ImGuiCustom.cpp" />
-    <ClCompile Include="src\R3D\Ecs\Archetype.cpp" />
-    <ClCompile Include="src\R3D\Graphics\Systems\SolidPrimitivesRenderer.cpp" />
-    <ClCompile Include="src\R3D\Graphics\Core\Palette.cpp" />
-    <ClCompile Include="src\R3D\Graphics\Systems\WireframePrimitivesRenderer.cpp">
-      <Filter>R3D\Graphics\Systems</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\lines.shader" />
-    <None Include="res\shaders\lamp_sun.shader" />
     <None Include="res\shaders\solid.shader" />
     <None Include="res\shaders\bloom_mix.shader" />
     <None Include="res\shaders\bloom_select.shader" />
     <None Include="res\shaders\blur.shader" />
+    <None Include="res\shaders\contacts.shader" />
     <None Include="res\shaders\hdr.shader" />
+    <None Include="res\shaders\lamp_point.shader" />
+    <None Include="res\shaders\lamp_sun.shader" />
+    <None Include="res\shaders\lines.shader" />
     <None Include="res\shaders\shadow.shader" />
     <None Include="res\shaders\shadow_debug.shader" />
     <None Include="res\shaders\sky.shader" />
-    <None Include="res\shaders\contacts.shader" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\TODO.txt" />

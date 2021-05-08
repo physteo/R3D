@@ -16,6 +16,7 @@ IncludeDir["GLFW"] = "R3D/vendor/GLFW/include"
 IncludeDir["glad"] = "R3D/vendor/glad/include"
 IncludeDir["imgui"] = "R3D/vendor/imgui"
 IncludeDir["glm"] = "R3D/vendor/glm/glm"
+IncludeDir["stb"] = "R3D/vendor/stb"
 
 group "Dependencies"
    include "R3D/vendor/GLFW"
@@ -54,7 +55,8 @@ project "R3D"
       "%{IncludeDir.GLFW}",
       "%{IncludeDir.glad}",
       "%{IncludeDir.imgui}",
-      "%{IncludeDir.glm}"
+      "%{IncludeDir.glm}",
+      "%{IncludeDir.stb}"
    }
    
 
@@ -140,7 +142,8 @@ project "Sandbox"
       "%{IncludeDir.GLFW}",
       "%{IncludeDir.glad}",
       "%{IncludeDir.imgui}",
-      "%{IncludeDir.glm}"
+      "%{IncludeDir.glm}",
+      "%{IncludeDir.stb}"
    }
    
 

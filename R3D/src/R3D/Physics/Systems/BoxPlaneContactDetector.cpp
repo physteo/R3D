@@ -16,13 +16,14 @@ namespace r3d
 		for (size_t arch1 : archetypesBox)
 		{
 			auto transform1 = get<Transform>(am, arch1);
-			auto& entities1 = getEntities(am, arch1);
+			std::vector<Entity>* entities1 = getEntities(am, arch1);
+
 			size_t size1 = getSize<Transform>(am, arch1);
 
 			for (size_t arch2 : archetypesPlane)
 			{
 				auto planes2 = get<ColliderPlane>(am, arch2);
-				auto& entities2 = getEntities(am, arch2);
+				std::vector<Entity>* entities2 = getEntities(am, arch2);
 				size_t size2 = getSize<ColliderPlane>(am, arch2);
 
 				for (size_t i = 0; i < size1; ++i)
@@ -30,9 +31,9 @@ namespace r3d
 					for (size_t j = 0; j < size2; ++j)
 					{
 						Manifold newManifold;
-						int numNewContacts = BoxPlane::detect(transform1[i], entities1[i], planes2[j], entities2[j], &newManifold);
+						int numNewContacts = BoxPlane::detect(transform1[i], (*entities1)[i], planes2[j], (*entities2)[j], &newManifold);
 
-						ArbiterKey key{ entities2[j], entities1[i] };
+						ArbiterKey key{ (*entities2)[j], (*entities1)[i] };
 						if (numNewContacts > 0)
 						{
 							ArbIter iter = m_collisionData->arbiters.find(key);

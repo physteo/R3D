@@ -196,7 +196,7 @@ namespace r3d
 
 			if (projectionType == ProjectionType::ORTHO)
 			{
-				deltaPosition = { 0.0 };
+				deltaPosition = float3{ 0.0 };
 				camera.getEye() = float3{ 0.0, 0.0, -5.0f } +deltaPosition;
 				camera.getCenter() = deltaPosition;
 
@@ -233,7 +233,6 @@ namespace r3d
 			// move flashLight to camera
 			solidRenderer.getSpotLight().eye = am->get<Transform>(gun)->position;
 			solidRenderer.getSpotLight().direction = -camera.getCameraZ();
-
 
 			ImGui::End();
 		}
@@ -273,7 +272,7 @@ namespace r3d
 
 			ImGui::Text("Sun Light");
 			SunLight& sun = solidRenderer.getSunLight();
-			static float sunIntensity[3] = {0.1f, 0.5f, 5.0f};
+			static float sunIntensity[3] = {0.1f, 0.5f, 3.0f};
 			ImGui::SliderFloat3("Sun Intensity", sunIntensity, 0.0f, 10.0f);
 			ImGui::SliderFloat3("Sun Eye",    &sun.eye[0], -20.0f, 20.0f);
 			ImGui::SliderFloat3("Sun Center", &sun.center[0], -20.0f, 20.0f);
@@ -283,16 +282,16 @@ namespace r3d
 
 			ImGui::Text("Point Light");
 			PointLight& point = solidRenderer.getPointLight();
-			static float pointIntensity[3] = { 0.1f, 0.5f, 5.5f };
+			static float pointIntensity[3] = { 0.1f, 0.5f, 1.2f };
 			ImGui::SliderFloat3("Point Intensity", pointIntensity, 0.0f, 10.0f);
 			ImGui::SliderFloat3("Point Position", &point.eye[0], -20.0f, 20.0f);
 			point.ambient = pointIntensity[0] * Palette::getInstance().white;
 			point.specular = pointIntensity[1] * Palette::getInstance().white;
-			point.diffuse = pointIntensity[2] * Palette::getInstance().orange;
+			point.diffuse = pointIntensity[2] * Palette::getInstance().white;
 
 			ImGui::Text("Spot Light");
 			SpotLight& spot = solidRenderer.getSpotLight();
-			static float spotIntensity[3] = { 0.1f, 0.5f, 10.0f };
+			static float spotIntensity[3] = { 0.1f, 0.5f, 5.0f };
 			ImGui::SliderFloat3("Spot Intensity", spotIntensity, 0.0f, 20.0f);
 			spot.ambient = spotIntensity[0] * Palette::getInstance().white;
 			spot.specular = spotIntensity[1] * Palette::getInstance().white;
@@ -329,6 +328,44 @@ namespace r3d
 			ImGui::End();
 		}
 
+		static float border[2] = { 0.982f, 0.938f };
+		static int selectTexture = 0;
+		static std::string name = "";
+#if 0
+		// Texture View
+		{
+			const char* winName = "Texture View";
+			void* textureIDPtr = (void*)material.getDiffuse();
+
+			if (selectTexture == 0)
+			{
+				textureIDPtr = (void*)material.getDiffuse();
+			}
+			else if (selectTexture == 1)
+			{
+				textureIDPtr = (void*)material.getSpecular();
+			}
+			else if (selectTexture == 2)
+			{
+				textureIDPtr = (void*)material.getNormal();
+			}
+			else
+			{
+				R3D_ERROR("[{0}] Invalid texture selected.", winName);
+			}
+
+			ImGui::Begin(winName, window->getFontscale());
+			ImVec2 pos = ImGui::GetCursorScreenPos();
+			ImVec2 windowSize = ImGui::GetWindowSize();
+			ImGui::GetWindowDrawList()->AddImage(
+				textureIDPtr,
+				pos, ImVec2(pos.x + border[0] * windowSize.x, pos.y + border[1] * windowSize.y),
+				ImVec2(0, 1),
+				ImVec2(1, 0)
+			);
+			ImGui::End(); 
+		}
+#endif
 		// Misc
 		{
 			ImGui::Begin("Settings", window->getFontscale());
@@ -367,6 +404,13 @@ namespace r3d
 				ImGui::TreePop();
 			}
 
+			if (ImGui::TreeNode("Texture view"))
+			{
+				ImGui::SliderInt("Texture", &selectTexture, 0, 2);
+				ImGui::SliderFloat2("Border", border, 0.1f, 2.0f);
+				ImGui::TreePop();
+			}
+
 #if defined(R3D_DEBUG) || defined(R3D_RELEASE)
 			if (ImGui::TreeNode("Color Palette"))
 			{
@@ -392,8 +436,8 @@ namespace r3d
 					auto archetype = am->matchAtLeast(ComponentList::buildList<GroundTag>(), {});
 					for (auto arch : archetype)
 					{
-						auto colors = am->m_archetypeDataVector[arch].get<Color>()->getComponents<Color>();
-						auto size = am->m_archetypeDataVector[arch].get<Color>()->size();
+						auto colors = am->getComponents<Color>(arch);
+						auto size = am->getNbComponents<Color>(arch);
 						for (size_t i = 0; i < size; ++i)
 						{
 							colors[i].vec = Palette::getInstance().grey;
@@ -405,8 +449,8 @@ namespace r3d
 					auto archetype = am->matchAtLeast(ComponentList::buildList<WallTag>(), {});
 					for (auto arch : archetype)
 					{
-						auto colors = am->m_archetypeDataVector[arch].get<Color>()->getComponents<Color>();
-						auto size = am->m_archetypeDataVector[arch].get<Color>()->size();
+						auto colors = am->getComponents<Color>(arch);
+						auto size = am->getNbComponents<Color>(arch);
 						for (size_t i = 0; i < size; ++i)
 						{
 							colors[i].vec = Palette::getInstance().red;
@@ -418,8 +462,8 @@ namespace r3d
 					auto archetype = am->matchAtLeast(ComponentList::buildList<WoodTag>(), {});
 					for (auto arch : archetype)
 					{
-						auto colors = am->m_archetypeDataVector[arch].get<Color>()->getComponents<Color>();
-						auto size = am->m_archetypeDataVector[arch].get<Color>()->size();
+						auto colors = am->getComponents<Color>(arch);
+						auto size = am->getNbComponents<Color>(arch);
 						for (size_t i = 0; i < size; ++i)
 						{
 							colors[i].vec = Palette::getInstance().orange;
@@ -431,8 +475,8 @@ namespace r3d
 					auto archetype = am->matchAtLeast(ComponentList::buildList<BrickTag>(), {});
 					for (auto arch : archetype)
 					{
-						auto colors = am->m_archetypeDataVector[arch].get<Color>()->getComponents<Color>();
-						auto size = am->m_archetypeDataVector[arch].get<Color>()->size();
+						auto colors = am->getComponents<Color>(arch);
+						auto size = am->getNbComponents<Color>(arch);
 						for (size_t i = 0; i < size; ++i)
 						{
 							colors[i].vec = Palette::getInstance().blue;
@@ -453,21 +497,6 @@ namespace r3d
 			ImGui::Text(" - BoxBox Contact Detection: %.3f microsec", avg);
 			
 			ImGui::End();
-		}
-
-		// Debug View
-		{
-		ImGui::Begin("Debug(Light)", window->getFontscale());
-
-		ImVec2 pos = ImGui::GetCursorScreenPos();
-		ImVec2 windowSize = ImGui::GetWindowSize();
-		ImGui::GetWindowDrawList()->AddImage(
-			(void*)fboShadowDebug.getTextureID(0),
-			pos, ImVec2(pos.x + windowSize.x, pos.y + windowSize.y),
-			ImVec2(0, 1),
-			ImVec2(1, 0)
-		);
-		ImGui::End();
 		}
 
 		// View
@@ -494,6 +523,20 @@ namespace r3d
 				lastFboResize = currentTime;
 			}
 
+			ImGui::End();
+		}
+
+		// Debug View
+		{
+			ImGui::Begin("Debug(Light)", window->getFontscale());
+			ImVec2 pos = ImGui::GetCursorScreenPos();
+			ImVec2 windowSize = ImGui::GetWindowSize();
+			ImGui::GetWindowDrawList()->AddImage(
+				(void*)fboShadowDebug.getTextureID(0),
+				pos, ImVec2(pos.x + border[0] * windowSize.x, pos.y + border[1] * windowSize.y),
+				ImVec2(0, 1),
+				ImVec2(1, 0)
+			);
 			ImGui::End();
 		}
 
@@ -550,11 +593,21 @@ namespace r3d
 
 				if (ImGui::BeginMenu("Assign to.."))
 				{
-					// TODO: loop over database of shaders
+					// loop over database of shaders
 					if (ImGui::MenuItem("Solids"))
 					{
 						toEdit = &solidShader;
 						assignedTo = "Solids";
+					}
+					if (ImGui::MenuItem("SunLight"))
+					{
+						toEdit = &sunLightShader;
+						assignedTo = "SunLight";
+					}
+					if (ImGui::MenuItem("PointLight"))
+					{
+						toEdit = &pointLightShader;
+						assignedTo = "PointLight";
 					}
 					if (ImGui::MenuItem("Wireframes"))
 					{
@@ -570,16 +623,6 @@ namespace r3d
 					{
 						toEdit = &blurShader;
 						assignedTo = "Blur(Bloom)";
-					}
-					if (ImGui::MenuItem("SunLight"))
-					{
-						toEdit = &sunLightShader;
-						assignedTo = "SunLight";
-					}
-					if (ImGui::MenuItem("PointLight"))
-					{
-						toEdit = &pointLightShader;
-						assignedTo = "PointLight";
 					}
 					if (ImGui::MenuItem("ShadowDebug"))
 					{
@@ -665,6 +708,7 @@ namespace r3d
 						if (toEdit != nullptr)
 						{
 							*toEdit = std::move(Shader{ id, editor.source, editor.filename });
+							setShadersSettings();
 						}
 					}
 					else

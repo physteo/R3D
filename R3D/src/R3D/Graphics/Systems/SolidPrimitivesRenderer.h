@@ -1,9 +1,55 @@
 #pragma once
 #include <R3D/Ecs/System.h>
 #include <R3D/Core/MathUtils.h>
+#include "../Core/VertexArray.h"
+#include "../Core/Material.h"
 
 namespace r3d
 {
+
+	struct MeshIDHasher;
+
+	class MeshID
+	{
+		friend struct MeshIDHasher;
+
+	public:
+		MeshID()
+		{
+			m_id = StringHash::computeHash("");
+		}
+
+		MeshID(const std::string& name)
+		{
+			m_id = StringHash::computeHash(name);
+		}
+
+		inline unsigned long long getID() const { return m_id; }
+
+		bool operator==(const MeshID &other) const
+		{
+			return (m_id == other.m_id);
+		}
+
+		bool operator<(const MeshID &other) const
+		{
+			return (m_id < other.m_id);
+		}
+
+	private:
+		unsigned long long m_id;
+	};
+
+	struct MeshIDHasher
+	{
+		using argument_type = MeshID;
+		using result_type = unsigned long long;
+
+		result_type operator()(const argument_type& f) const
+		{
+			return std::hash<unsigned long long>()(f.m_id);
+		}
+	};
 
 	struct LightAttenuation
 	{
@@ -47,30 +93,29 @@ namespace r3d
 	{
 	public:
 		SolidPrimitivesRenderer();
-		inline float3 getSunPosition() const { return pointLight.eye; }
-		inline void setShader(Shader* shader) { m_shader = shader; }
+		
+		void init();
+		virtual void update(ArchetypeManager& am, double t, double dt) override;
+		void drawLights(const float3& cameraPosition) const;
+
+		inline void setShader(Shader* shader) { m_currentShader = shader; }
 		inline void setSunShader(Shader* shader) { m_sunLightShader = shader; }
 		inline void setPointShader(Shader* shader) { m_pointLightShader = shader; }
-		inline PointLight& getPointLight() { return pointLight; }
-		inline SunLight& getSunLight() { return sunLight; }
-		inline SpotLight& getSpotLight() { return spotLight; }
-		inline void switchSpotLight() { spotLightOn = !spotLightOn; }
-		void drawLights(const float3& cameraPosition) const;
+		PointLight& getPointLight();
+		SunLight& getSunLight();
+		SpotLight& getSpotLight();
+		bool isSpotLightOn();
+		void switchSpotLight();
 		
-		virtual void update(ArchetypeManager& am, double t, double dt) override;
+		std::unordered_map<std::string, Material> materialsDatabase;
 
 	private:
-		Shader* m_shader;
-		Shader* m_sunLightShader;
-		Shader* m_pointLightShader;
-
-		PointLight pointLight;
-		SpotLight spotLight;
-		SunLight sunLight;
-		bool spotLightOn;
-
 		void drawPointLight(const float3& position, const float3& cameraPosition) const;
 		void drawSunLight(const float3& position, const float3& center, const float3& cameraPosition) const;
+
+		Shader* m_currentShader;
+		Shader* m_sunLightShader;
+		Shader* m_pointLightShader;
 	};
 
 }

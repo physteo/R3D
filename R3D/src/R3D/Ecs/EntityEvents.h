@@ -15,7 +15,7 @@ namespace r3d
 		EntityDestroyedEvent() : m_entity() {}
 		EntityDestroyedEvent(Entity entity) : m_entity(entity) {}
 
-		EVENT_CLASS_CATEGORY(EventCategoryEntity);
+		EVENT_CLASS_CATEGORY(EventCategory::Entity);
 		EVENT_CLASS_TYPE(EventType::Entities_EntityDestroyed)
 
 			inline Entity getEntity() const { return m_entity; }
@@ -36,7 +36,7 @@ namespace r3d
 	public:
 		ManyEntitiesDestroyedEvent(std::vector<Entity> entitiesIn) : entities(std::move(entitiesIn)) {}
 
-		EVENT_CLASS_CATEGORY(EventCategoryEntity);
+		EVENT_CLASS_CATEGORY(EventCategory::Entity);
 		EVENT_CLASS_TYPE(EventType::Entities_ManyEntitiesDestroyedEvent)
 
 			//inline Entity getEntity() const { return m_entity; }
@@ -58,7 +58,7 @@ namespace r3d
 		EntityDestroyRequestEvent() : m_entity() {}
 		EntityDestroyRequestEvent(Entity entity) : m_entity(entity) {}
 
-		EVENT_CLASS_CATEGORY(EventCategoryEntity);
+		EVENT_CLASS_CATEGORY(EventCategory::Entity);
 		EVENT_CLASS_TYPE(EventType::Entities_EntityDestroyRequest)
 
 			inline Entity getEntity() const { return m_entity; }
@@ -79,7 +79,7 @@ namespace r3d
 	public:
 		ManyEntitiesDestroyRequestEvent(std::vector<Entity>* entitiesIn) : entities(entitiesIn) {}
 
-		EVENT_CLASS_CATEGORY(EventCategoryEntity);
+		EVENT_CLASS_CATEGORY(EventCategory::Entity);
 		EVENT_CLASS_TYPE(EventType::Entities_ManyEntitiesDestroyRequest)
 
 			//inline Entity getEntity() const { return m_entity; }

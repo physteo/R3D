@@ -30,9 +30,8 @@ namespace r3d
 			{
 				//yes
 				size_t archetypeIndex = found->second;
-				auto archetype = &m_archetypeDataVector[archetypeIndex];
 				// does the archetype of entity have C?
-				if (archetype->has<C>())
+				if (m_archetypeDataVector[archetypeIndex].has<C>())
 				{
 					return true;
 				}
@@ -49,7 +48,7 @@ namespace r3d
 			{
 				// yes
 				size_t archetypeIndex = found->second;
-				auto archetype = &m_archetypeDataVector[archetypeIndex];
+				ArchetypeData* archetype = &m_archetypeDataVector[archetypeIndex];
 				// does the archetype of entity have C?
 				if (archetype->has<C>())
 				{
@@ -59,15 +58,13 @@ namespace r3d
 				}
 				else
 				{
-					R3D_CORE_ERROR("[ ECS ] entity {0} does not have component {1}.", entity.id, typeid(C).name());
-					R3D_CORE_ASSERT(false, "");
+					R3D_CORE_ASSERT(false, "[ ECS ] entity {0} does not have component {1}.", entity.id, typeid(C).name());
 					return nullptr;
 				}
 			}
 			else
 			{
-				R3D_CORE_ERROR("[ ECS ] entity {0} is not registered to any Archetype.", entity.id);
-				R3D_CORE_ASSERT(false, "");
+				R3D_CORE_ASSERT(false, "[ ECS ] entity {0} is not registered to any Archetype.", entity.id);
 				return nullptr;
 			}
 		}
@@ -81,7 +78,7 @@ namespace r3d
 			{
 				//yes
 				size_t archetypeIndex = found->second;
-				auto archetype = &m_archetypeDataVector[archetypeIndex];
+				ArchetypeData* archetype = &m_archetypeDataVector[archetypeIndex];
 				// does the archetype of entity have C?
 				if (archetype->has<C>())
 				{
@@ -93,8 +90,7 @@ namespace r3d
 			}
 			else
 			{
-				R3D_CORE_ERROR("[ ECS ] entity {0} is not registered to any Archetype.", entity.id);
-				R3D_CORE_ASSERT(false, "");
+				R3D_CORE_ASSERT(false, "[ ECS ] entity {0} is not registered to any Archetype.", entity.id);
 				return;
 			}
 		}
@@ -102,14 +98,31 @@ namespace r3d
 		void setArchetype(Entity entity, const Archetype& archetype);
 
 		template <class ...Args>
+		void addArchetype()
+		{
+			ComponentList list = std::move(ComponentList::buildList<Args...>());
+
+			size_t archId = 0;
+			if (matchExact(list, archId))
+			{
+				R3D_CORE_WARN("[ ECS ] archetype already exists.");
+				return;
+			}
+			else
+			{
+				addArchetype(Archetype(std::move(list)));
+			}
+		}
+
+		void addArchetype(const Archetype& archetype);
+
+		template <class ...Args>
 		void setArchetype(Entity entity)
 		{
 			auto found = m_entity_to_archetypeData.find(entity);
 			if (found != m_entity_to_archetypeData.end())
 			{
-				// assert
-				R3D_CORE_ERROR("[ ECS ] entity {0} already belongs to an archetype.", entity.id);
-				R3D_CORE_ASSERT(false, "");
+				R3D_CORE_ASSERT(false, "[ ECS ] entity {0} already belongs to an archetype.", entity.id);
 				return;
 			}
 			else
@@ -150,8 +163,7 @@ namespace r3d
 					else
 					{
 						// no:  create wanted archetype and add entity there
-						Archetype wantedArchetype{ wantedComponentList };
-						m_archetypeDataVector.emplace_back(wantedArchetype);
+						m_archetypeDataVector.emplace_back(wantedComponentList);
 						oldArchetype = &m_archetypeDataVector[oldArchetypeIndex];
 
 						ArchetypeData* destinationArchetypeData = &m_archetypeDataVector.back();
@@ -162,15 +174,13 @@ namespace r3d
 				}
 				else
 				{
-					R3D_CORE_ERROR("[ ECS ] entity {0} does not have component {1}.", entity.id, typeid(C).name());
-					R3D_CORE_ASSERT(false, "");
+					R3D_CORE_ASSERT(false, "[ ECS ] entity {0} does not have component {1}.", entity.id, typeid(C).name());
 					return;
 				}
 			}
 			else
 			{
-				R3D_CORE_ERROR("[ ECS ] entity {0} is not registered to any Archetype.", entity.id);
-				R3D_CORE_ASSERT(false, "");
+				R3D_CORE_ASSERT(false, "[ ECS ] entity {0} is not registered to any Archetype.", entity.id);
 				return;
 			}
 		}
@@ -189,8 +199,7 @@ namespace r3d
 				if (oldArchetype->has<C>())
 				{
 					// yes: assert. entity already has that component
-					R3D_CORE_ERROR("[ ECS ] entity {0}  already has component {1}", entity.id, typeid(C).name());
-					R3D_CORE_ASSERT(false, "");
+					R3D_CORE_ASSERT(false, "[ ECS ] entity {0}  already has component {1}", entity.id, typeid(C).name());
 					return;
 				}
 				else
@@ -215,8 +224,7 @@ namespace r3d
 					else
 					{
 						// no:  create wanted archetype and add entity there
-						Archetype wantedArchetype{ wantedComponentList };
-						m_archetypeDataVector.emplace_back(wantedArchetype);
+						m_archetypeDataVector.emplace_back(wantedComponentList);
 						oldArchetype = &m_archetypeDataVector[oldArchetypeIndex];
 
 						ArchetypeData* destinationArchetypeData = &m_archetypeDataVector.back();
@@ -243,8 +251,7 @@ namespace r3d
 				else
 				{
 					// no: create such archetype, update map
-					Archetype destinationArchetypeData{ list };
-					m_archetypeDataVector.emplace_back(destinationArchetypeData);
+					m_archetypeDataVector.emplace_back(list);
 					m_archetypeDataVector[m_archetypeDataVector.size() - 1].componentDataMap[typeid(C).hash_code()].assign<C>(entity, std::move(data));
 					m_entity_to_archetypeData[entity] = m_archetypeDataVector.size() - 1;
 				}
@@ -255,8 +262,37 @@ namespace r3d
 		void copyEntity(Entity destinationEntity, Entity sourceEntity);
 		void removeEntity(Entity entity);
 
-		std::unordered_map<Entity, size_t, EntityHasher> m_entity_to_archetypeData;
-		std::vector<ArchetypeData> m_archetypeDataVector;
+		std::vector<Entity>* getEntities(size_t archId)
+		{
+			if (archId < m_archetypeDataVector.size())
+			{
+				ArchetypeData* archetypeData = &m_archetypeDataVector[archId];
+				if (!archetypeData->componentDataMap.empty())
+				{
+					return &archetypeData->componentDataMap.begin()->second.getEntities();
+				}
+				else
+				{
+					return nullptr;
+				}
+			}
+			else
+			{
+				return nullptr;
+			}
+		}
+
+		template<class C>
+		C* getComponents(size_t archId)
+		{
+			return m_archetypeDataVector[archId].get<C>()->getComponents<C>();
+		}
+
+		template<class C>
+		size_t getNbComponents(size_t archId)
+		{
+			return m_archetypeDataVector[archId].get<C>()->size();
+		}
 
 	private:
 		bool matchExact(const ComponentList& list, size_t& indexOut) const;
@@ -265,5 +301,7 @@ namespace r3d
 		bool onEntityDestroyedEvent(EntityDestroyedEvent& e);
 		bool onManyEntitiesDestroyedEvent(ManyEntitiesDestroyedEvent& e);
 
+		std::unordered_map<Entity, size_t, EntityHasher> m_entity_to_archetypeData;
+		std::vector<ArchetypeData> m_archetypeDataVector;
 	};
 }

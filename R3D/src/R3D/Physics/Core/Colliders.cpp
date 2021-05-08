@@ -31,9 +31,9 @@ namespace r3d
 	real3x3 ColliderBox::computeInertiaTensor(const real3& halfSize, const real& mass)
 	{
 		real3x3 I{0.0};
-		I[0][0] = mass * (halfSize.y * halfSize.y + halfSize.z * halfSize.z) / 3.;
-		I[1][1] = mass * (halfSize.x * halfSize.x + halfSize.z * halfSize.z) / 3.;
-		I[2][2] = mass * (halfSize.y * halfSize.y + halfSize.x * halfSize.x) / 3.;
+		I[0][0] = mass * (halfSize.y * halfSize.y + halfSize.z * halfSize.z) / static_cast<real>(3.);
+		I[1][1] = mass * (halfSize.x * halfSize.x + halfSize.z * halfSize.z) / static_cast<real>(3.);
+		I[2][2] = mass * (halfSize.y * halfSize.y + halfSize.x * halfSize.x) / static_cast<real>(3.);
 		return I;
 	}
 

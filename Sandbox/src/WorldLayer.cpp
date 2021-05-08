@@ -3,6 +3,11 @@
 #include <R3D/Physics/Core/Colliders.h>
 #include <R3D/Physics/Core/Colliders.h>
 
+//extern "C"
+//{
+//	_declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+//}
+
 namespace r3d
 {
 	
@@ -17,13 +22,13 @@ namespace r3d
 		{
 			size_t size = getSize<SelfDestructionTimer>(am, arch);
 			auto* selfDestr = get<SelfDestructionTimer>(am, arch);
-			auto& entities = getEntities(am, arch);
+			std::vector<Entity>* entities = getEntities(am, arch);
 
 			for (size_t i = 0; i < size; ++i)
 			{
 				if (t - selfDestr[i].birth > selfDestr[i].lifespan)
 				{
-					toRemove.push_back(entities[i]);
+					toRemove.push_back((*entities)[i]);
 				}
 			}
 		}
@@ -54,7 +59,7 @@ namespace r3d
 	}
 
 	template<class Tag>
-	Entity WorldLayer::createBox(r3d::real3 position, r3d::rquat quat, r3d::real3 scale, r3d::real gravity, r3d::real invMass, r3d::real3 velocity, r3d::float4 color, float timer)
+	Entity WorldLayer::createBox(r3d::real3 position, r3d::rquat quat, r3d::real3 scale, r3d::real gravity, r3d::real invMass, r3d::real3 velocity, r3d::float4 color, float timer, const std::string& materialName)
 	{
 		using namespace r3d;
 
@@ -68,7 +73,7 @@ namespace r3d
 		real3 angVelocity = real3{ 0.0 };
 		real friction = 0.1;
 
-		am->setArchetype < Transform, RigidBody, Color, ColliderBox, BoxPrimitive, Tag >(boxEnt);
+		am->setArchetype < Transform, RigidBody, Color, ColliderBox, BoxPrimitive, Tag>(boxEnt);
 		am->set<Transform>(boxEnt, Transform{ position, quat, scale });
 		am->set<Color>(boxEnt, color);
 		am->set<RigidBody>(boxEnt, RigidBody{ invI, velocity, angVelocity, force, torque, invMass, friction });
@@ -79,19 +84,25 @@ namespace r3d
 			sdt.lifespan = timer;
 			am->add<SelfDestructionTimer>(boxEnt, std::move(sdt));
 		}
+		if (materialName != "")
+		{
+			am->add<MaterialComp>(boxEnt, MaterialComp{materialName});
+			std::string meshName = "cube";// Random::randFloat() < 0.5 ? "cube" : "skydome";
+			am->add<MeshID>(boxEnt, MeshID(meshName));
+		}
 
 		return boxEnt;
 	}
 
 	template<class Tag>
-	Entity WorldLayer::createBox(r3d::real3 position, r3d::real angle, r3d::real3 axis, r3d::real3 scale, r3d::real gravity, r3d::real invMass, r3d::real3 velocity, r3d::float4 color, float timer)
+	Entity WorldLayer::createBox(r3d::real3 position, r3d::real angle, r3d::real3 axis, r3d::real3 scale, r3d::real gravity, r3d::real invMass, r3d::real3 velocity, r3d::float4 color, float timer, const std::string& materialName)
 	{
 		real cosSquareAngle = glm::cos(glm::radians(angle / 2.0));
 		real sinSquareAngle = glm::sin(glm::radians(angle / 2.0));
 		real3 squareAngleAxis = sinSquareAngle * axis;
 		rquat squareOrientationQuat = glm::normalize(rquat{ cosSquareAngle, squareAngleAxis.x, squareAngleAxis.y, squareAngleAxis.z });
 		
-		return createBox<Tag>(position, squareOrientationQuat, scale, gravity, invMass, velocity, color, timer);
+		return createBox<Tag>(position, squareOrientationQuat, scale, gravity, invMass, velocity, color, timer, materialName);
 	}
 	
 	void WorldLayer::setUpFboBloom()
@@ -161,6 +172,48 @@ namespace r3d
 		setUpFboShadowDebug();
 	}
 
+	void WorldLayer::setShadersSettings()
+	{
+		solidShader.bind();
+		solidShader.setUniformValue("minShadowBias", minShadowBias);
+		solidShader.setUniformValue("maxShadowBias", maxShadowBias);
+		solidShader.setUniformValue("invBloomThreshold", bloomSettings.invThreshold[0], bloomSettings.invThreshold[1], bloomSettings.invThreshold[2]);
+		solidShader.setUniformValue("cameraPos", camera.getEye());
+
+		// pass lights
+		solidShader.setUniformValue("pointLight.eye", solidRenderer.getPointLight().eye);
+		solidShader.setUniformValue("pointLight.ambient", solidRenderer.getPointLight().ambient);
+		solidShader.setUniformValue("pointLight.diffuse", solidRenderer.getPointLight().diffuse);
+		solidShader.setUniformValue("pointLight.specular", solidRenderer.getPointLight().specular);
+		solidShader.setUniformValue("pointLight.attenuation.constant", solidRenderer.getPointLight().attenuation.constant);
+		solidShader.setUniformValue("pointLight.attenuation.linear", solidRenderer.getPointLight().attenuation.linear);
+		solidShader.setUniformValue("pointLight.attenuation.quadratic", solidRenderer.getPointLight().attenuation.quadratic);
+
+		solidShader.setUniformValue("spotLight.eye", solidRenderer.getSpotLight().eye);
+		solidShader.setUniformValue("spotLight.direction", solidRenderer.getSpotLight().direction);
+		solidShader.setUniformValue("spotLight.ambient", float(solidRenderer.isSpotLightOn()) * solidRenderer.getSpotLight().ambient);
+		solidShader.setUniformValue("spotLight.diffuse", float(solidRenderer.isSpotLightOn()) * solidRenderer.getSpotLight().diffuse);
+		solidShader.setUniformValue("spotLight.specular", float(solidRenderer.isSpotLightOn()) * solidRenderer.getSpotLight().specular);
+		solidShader.setUniformValue("spotLight.cutOff", solidRenderer.getSpotLight().cutOff);
+		solidShader.setUniformValue("spotLight.attenuation.constant", solidRenderer.getSpotLight().attenuation.constant);
+		solidShader.setUniformValue("spotLight.attenuation.linear", solidRenderer.getSpotLight().attenuation.linear);
+		solidShader.setUniformValue("spotLight.attenuation.quadratic", solidRenderer.getSpotLight().attenuation.quadratic);
+
+		solidShader.setUniformValue("sunLight.eye", solidRenderer.getSunLight().eye);
+		solidShader.setUniformValue("sunLight.center", solidRenderer.getSunLight().center);
+		solidShader.setUniformValue("sunLight.ambient", solidRenderer.getSunLight().ambient);
+		solidShader.setUniformValue("sunLight.diffuse", solidRenderer.getSunLight().diffuse);
+		solidShader.setUniformValue("sunLight.specular", solidRenderer.getSunLight().specular);
+
+		solidShader.unbind();
+
+
+		hdrShader.bind();
+		hdrShader.setUniformValue("exposure", hdrSettings.exposure);
+		hdrShader.setUniformValue("gamma", hdrSettings.gamma);
+		hdrShader.unbind();
+	}
+
 	WorldLayer::WorldLayer() : r3d::Layer("World layer.")
 	{
 		using namespace r3d;
@@ -178,26 +231,27 @@ namespace r3d
 		plane.normal = { 0.0, 1.0, 0.0 };
 		plane.offset = 0.0;
 		gridEnt = Application::getEntityManager()->create();
-		am->setArchetype < Transform, ColliderPlane, Color, RigidBody, PlanePrimitive, GroundTag >(gridEnt);
+		am->setArchetype < Transform, ColliderPlane, Color, RigidBody, PlanePrimitive, GroundTag, MaterialComp >(gridEnt);
 		am->set<Color>(gridEnt, Palette::getInstance().grey);
 		am->set<RigidBody>(gridEnt, RigidBody{ real3x3{0.0}, 0.0, 0.9, real3{0.0} });
 		am->set<Transform>(gridEnt, Transform{ real3{plane.offset}, rquat{1.0, plane.normal.x, plane.normal.y, plane.normal.z}, real3{80.} });
 		am->set<ColliderPlane>(gridEnt, plane);
+		am->set<MaterialComp>(gridEnt, MaterialComp{ "cube" });
 
 #ifdef STACKING
 
 		real3 scale{ 1.0, 1.0, 1.0 };
 		real3 position{ 0.0, scale.y, 0.0 };
-		int numBoxes = 8;
-		for (int i = 0; i < numBoxes; ++i)
+		size_t numBoxes = 10;
+		for (size_t i = 0; i < numBoxes; ++i)
 		{
 			int turningAngle = 0;
 			real  scaleFactor = 1.0;// (1.0 - 0.9 * i / float(numBoxes));
 			real3 scaleFactorVec = { scaleFactor, scaleFactor, scaleFactor };
-			real3 addPos = { 0.0, 2.0 * scaleFactor * scale.y + i * 0.1, 0.0 };
+			real3 addPos = { 0.0, 2.0 * scaleFactor * scale.y + static_cast<real>(i + (size_t)1) * 0.1, 0.0 };
 
 			auto ent = createBox<BrickTag>(position, turningAngle * i, real3{ 0.0, 1.0, 0.0 }, scale * scaleFactorVec, stdGravity, 1.0 / scaleFactor, { 0.0, 0.0, 0.0 },
-				Palette::getInstance().blue);
+				Palette::getInstance().blue, -1.0, "cube");
 
 			position += addPos;
 
@@ -213,14 +267,14 @@ namespace r3d
 
 		real3 wallscale = { 5.0, 3.0, 0.5 };
 		real3 wallscaleMini = { 5.0, 1.0, 0.5 };
-		createBox<WallTag>(real3{ +0.0, wallscale.y, -5.0 }, 0, real3{ 0.0, 1.0, 0.0 }, wallscale, stdGravity, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red);
-		createBox<WallTag>(real3{ -5.5, wallscale.y, 0.0 }, 90, real3{ 0.0, 1.0, 0.0 }, wallscale, stdGravity, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red);
-		createBox<WallTag>(real3{ +5.5, wallscale.y, 0.0 }, 90, real3{ 0.0, 1.0, 0.0 }, wallscale, stdGravity, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red);
-		createBox<WallTag>(real3{ +0.0, wallscaleMini.y, +5.5 }, 0, real3{ 0.0, 1.0, 0.0 }, wallscaleMini, stdGravity, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red);
+		createBox<WallTag>(real3{ +0.0, wallscale.y, -5.0 }, 0, real3{ 0.0, 1.0, 0.0 }, wallscale, stdGravity, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red, -1.0, "brickwall");
+		createBox<WallTag>(real3{ -5.5, wallscale.y, 0.0 }, 90, real3{ 0.0, 1.0, 0.0 }, wallscale, stdGravity, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red, -1.0, "brickwall");
+		createBox<WallTag>(real3{ +5.5, wallscale.y, 0.0 }, 90, real3{ 0.0, 1.0, 0.0 }, wallscale, stdGravity, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red, -1.0, "brickwall");
+		createBox<WallTag>(real3{ +0.0, wallscaleMini.y, +5.5 }, 0, real3{ 0.0, 1.0, 0.0 }, wallscaleMini, stdGravity, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red, -1.0, "brickwall");
 		
 		real3 woodscale = { 0.2, 4.0, 1.0 };
-		createBox<WoodTag>(real3{ +3.0, woodscale.y + 0.0, 0.0 }, +5.0, real3{ 0.0, 0.0, 1.0 }, woodscale, stdGravity, 1.0, { 0.0, 0.0, 0.0 }, Palette::getInstance().orange);
-		createBox<WoodTag>(real3{ -3.0, woodscale.y + 0.0, 0.0 }, -5.0, real3{ 0.0, 0.0, 1.0 }, woodscale, stdGravity, 1.0, { 0.0, 0.0, 0.0 }, Palette::getInstance().orange);
+		createBox<WoodTag>(real3{ +3.0, woodscale.y + 0.0, 0.0 }, +5.0, real3{ 0.0, 0.0, 1.0 }, woodscale, stdGravity, 1.0, { 0.0, 0.0, 0.0 }, Palette::getInstance().orange, -1.0, "brickwall");
+		createBox<WoodTag>(real3{ -3.0, woodscale.y + 0.0, 0.0 }, -5.0, real3{ 0.0, 0.0, 1.0 }, woodscale, stdGravity, 1.0, { 0.0, 0.0, 0.0 }, Palette::getInstance().orange, -1.0, "brickwall");
 
 #else
 		physicsOn = false;
@@ -232,7 +286,6 @@ namespace r3d
 		newSize = { 1.0f };
 		newColor = { 0.05f, 0.3f, 0.9f };
 		newEntity = createBox(newPosition, newAngle, newAngleAxis, newSize, -2.0, 1.0, real3{ 0.0 }, { newColor.r, newColor.g, newColor.b, 1.0f });
-
 #endif
 
 		// camera
@@ -295,6 +348,20 @@ namespace r3d
 		shadowDebugShader = Shader{ "C:/dev/R3D/R3D/res/shaders/shadow_debug.shader" };
 		skyShader         = Shader{ "C:/dev/R3D/R3D/res/shaders/sky.shader" };
 		contactsShader    = Shader{ "C:/dev/R3D/R3D/res/shaders/contacts.shader" };
+		
+		// Materials
+		// Create texture array.
+		// I load all textures and I put them into the texture array
+		// I create a map: texture_name -> index in the array
+		// I assign to objects the right index (using the map above)
+
+		solidRenderer.materialsDatabase.insert({ "brickwall", Material{ "C:/dev/R3D/Sandbox/res/textures/diffuse_brickwall.jpg",
+			"C:/dev/R3D/Sandbox/res/textures/specular_brickwall.jpg",
+			"C:/dev/R3D/Sandbox/res/textures/normal_brickwall.jpg", 128 } });
+
+		solidRenderer.materialsDatabase.insert({ "cube", Material{ "C:/dev/R3D/Sandbox/res/textures/diffuse_cube.png",
+			"C:/dev/R3D/Sandbox/res/textures/specular_cube.png",
+			"C:/dev/R3D/Sandbox/res/textures/normal_cube.png", 128 } });
 
 		wireframesRenderer.setShader(&linesShader);
 		solidRenderer.setShader(&solidShader);
@@ -304,7 +371,7 @@ namespace r3d
 		// Event listeners
 		pushBackLayerListener(MouseButtonPressedEvent::getStaticType(), this);
 
-		// physics stuff
+		// Physics stuff
 		sphereSphereContactDetector.setCollisionData(&collisionData);
 		spherePlaneContactDetector.setCollisionData(&collisionData);
 		boxPlaneContactDetector.setCollisionData(&collisionData);
@@ -319,15 +386,7 @@ namespace r3d
 		setUpFboShadow();
 
 		// shader's settings
-		solidShader.bind();
-		solidShader.setUniformValue("minShadowBias", minShadowBias);
-		solidShader.setUniformValue("maxShadowBias", maxShadowBias);
-		solidShader.unbind();
-		
-		hdrShader.bind();
-		hdrShader.setUniformValue("exposure", hdrSettings.exposure);
-		hdrShader.setUniformValue("gamma", hdrSettings.gamma);
-		hdrShader.unbind();
+		setShadersSettings();
 
 		if (false == fboDefault.isComplete() || false == fboHDR.isComplete())
 		{
@@ -436,7 +495,7 @@ namespace r3d
 			if (Input::getInstance().isMouseButtonPressed(GLFW_MOUSE_BUTTON_1, *window))
 			{
 				float current = window->getCurrentTime();
-				if (current - mouseStatus.lastPressedTime > 0.1)
+				if (current - mouseStatus.lastPressedTime > 0.1f)
 				{
 					onMouseButtonPressedEvent(MouseButtonPressedEvent(GLFW_MOUSE_BUTTON_1, 0, mousePos));
 					mouseStatus.lastPressedTime = current;
@@ -512,6 +571,8 @@ namespace r3d
 		aspect = fboSize.x / fboSize.y;
 		projectionMatrix = glm::perspective(fovy, aspect, nearPlane, farPlane);
 
+		setShadersSettings();
+
 		// pass uniforms to shaders
 		linesShader.bind();
 		linesShader.setUniformMatrix("view", camera.getViewMatrix(), false);
@@ -554,7 +615,6 @@ namespace r3d
 		{
 			solidRenderer.setShader(&shadowShader);
 			solidRenderer.update(*am, t, dt);
-			//solidRenderer.drawLights(camera.getEye());
 			solidRenderer.setShader(&solidShader);
 		}
 		glCullFace(GL_BACK);
@@ -565,9 +625,7 @@ namespace r3d
 		fboShadowDebug.bind();
 		window->clearColorBufferBit();
 		shadowDebugShader.bind();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, fboShadow.getTextureID(0));
-		shadowDebugShader.setUniformValue("screenTexture", 0);
+		shadowDebugShader.setTexture(GL_TEXTURE_2D, "screenTexture", fboShadow.getTextureID(0));
 		Vaos::getInstance().quad.bind();
 		Vaos::getInstance().quad.draw(GL_TRIANGLES);
 		Vaos::getInstance().quad.unbind();
@@ -579,9 +637,7 @@ namespace r3d
 		// pass shadows uniforms
 		solidShader.bind();
 		solidShader.setUniformMatrix("sunLightSpaceMat", lightSpaceMat, false);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, fboShadow.getTextureID(0));
-		solidShader.setUniformValue("shadowMap", 0);
+		solidShader.setTexture(GL_TEXTURE_2D, "shadowMap", fboShadow.getTextureID(0));
 
 		// render commands
 		window->setViewPort(fboSize.x, fboSize.y);
@@ -635,11 +691,11 @@ namespace r3d
 			// 2. Bloom: a) Render bright colors
 			fboBloom.bind();
 			window->clearColorBufferBit();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, fboDefault.getTextureID(0));
 			bloomBrightShader.bind();
 			bloomBrightShader.setUniformValue("screenTexture", 0);
 			bloomBrightShader.setUniformValue("invBloomThreshold", bloomSettings.invThreshold);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, fboDefault.getTextureID(0));
 			Vaos::getInstance().quad.bind();
 			Vaos::getInstance().quad.draw(GL_TRIANGLES);
 			Vaos::getInstance().quad.unbind();
@@ -738,7 +794,7 @@ namespace r3d
 			real3 bulletPos = am->get<Transform>(gun)->position;
 			real3 bulletVel = -real(30.0 + Random::randFloat() * 2.0 - 1.0) * camera.getCameraZ();
 			fquat bulletRot = glm::toQuat(real3x3{ camera.getCameraX(), camera.getCameraY(), camera.getCameraZ() });
-			createBox<BulletTag>(bulletPos, bulletRot, v, stdGravity, 10.0, bulletVel, { c.r, c.g, c.b, 1.0 }, 1.0);
+			createBox<BulletTag>(bulletPos, bulletRot, v, stdGravity, 10.0, bulletVel, { c.r, c.g, c.b, 1.0 }, 1.0, "");
 		}
 
 		return false;

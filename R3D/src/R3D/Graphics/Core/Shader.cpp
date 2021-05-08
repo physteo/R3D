@@ -198,7 +198,7 @@ namespace r3d
 			textureUnit = it - m_textureUnits.begin();
 		}
 
-		glActiveTexture(GL_TEXTURE0 + textureUnit);
+		glActiveTexture(GL_TEXTURE0 + static_cast<GLenum>(textureUnit));
 		glBindTexture(target, textureID);
 	}
 
@@ -207,7 +207,7 @@ namespace r3d
 		unsigned int s;
 		const char* src = shader.c_str();
 		s = glCreateShader(type);
-		GLint length = strlen(src);
+		GLint length = static_cast<GLint>(strlen(src));
 		glShaderSource(s, 1, &src, &length);
 		glCompileShader(s);
 

@@ -8,9 +8,9 @@ namespace r3d
 	class Camera
 	{
 	private:
-		float3 m_eye;
-		float3 m_center;
-		float3 m_up;
+		float3 m_eye{1.0f};
+		float3 m_center{0.0f};
+		float3 m_up{0.0f, 1.0f, 0.0f};
 
 	public:
 

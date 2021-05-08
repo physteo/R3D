@@ -15,7 +15,7 @@ namespace r3d
 	{
 		VertexArray  vao;
 		Buffer databuffer;
-		unsigned int numberOfIndices;
+		//size_t numInstances;
 	};
 
 	class InstancesRenderer
@@ -28,9 +28,9 @@ namespace r3d
 			{
 				auto& databuffer = shapeData.databuffer;
 				auto& vao = shapeData.vao;
-				unsigned int numIndices = shapeData.numberOfIndices;
-				size_t instancesNumber = instancesData.size();
-
+				unsigned int numIndices = shapeData.vao.numIndices();
+				GLsizei instancesNumber = static_cast<GLsizei>(instancesData.size());
+				
 				// pass data
 				databuffer.bind();
 				glBufferData(GL_ARRAY_BUFFER, instancesNumber * sizeof(InstanceData), &(instancesData[0]), GL_DYNAMIC_DRAW);

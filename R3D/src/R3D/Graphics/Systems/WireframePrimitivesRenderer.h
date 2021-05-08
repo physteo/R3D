@@ -9,10 +9,10 @@ namespace r3d
 
 	class WireframePrimitivesRenderer : public System
 	{
-		int circleResolution{ 10 };
-		int sphereResolution{ 15 };
-		int sphereMeridians{ 10 };
-		int sphereParallels{ 10 };
+		size_t circleResolution{ 10 };
+		size_t sphereResolution{ 15 };
+		size_t sphereMeridians{ 10 };
+		size_t sphereParallels{ 10 };
 
 		enum Shape
 		{
@@ -47,10 +47,10 @@ namespace r3d
 		void setSphereResolution(int sphereResolution);
 		void setSphereMeridians(int sphereMeridians);
 		void setSphereParallels(int sphereParallels);
-		inline int getCircleResolution() const { return circleResolution; }
-		inline int getSphereResolution() const { return sphereResolution; }
-		inline int getSphereMeridians() const { return sphereMeridians; }
-		inline int getSphereParallels() const { return sphereParallels; }
+		inline size_t getCircleResolution() const { return circleResolution; }
+		inline size_t getSphereResolution() const { return sphereResolution; }
+		inline size_t getSphereMeridians() const { return sphereMeridians; }
+		inline size_t getSphereParallels() const { return sphereParallels; }
 
 	private:
 		void buildCircle(std::vector<float>& positions, std::vector<unsigned int>& indices);
@@ -61,7 +61,6 @@ namespace r3d
 		void buildBox(std::vector<float>& positions, std::vector<unsigned int>& indices);
 
 		void getInstancesData(ArchetypeManager& am, const ComponentList& componentList, std::vector<InstanceData>& outInstancesData);
-		void getInstancesDataNew(ArchetypeManager& am, const ComponentList& componentList, std::vector<InstanceData>& outInstancesData);
 		void getInstancesDataPlane(ArchetypeManager& am, std::vector<InstanceData>& outInstancesData);
 
 	private:

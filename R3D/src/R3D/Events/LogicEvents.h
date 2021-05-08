@@ -12,7 +12,7 @@ namespace r3d
 		HealthDamageEvent(Entity entityIn, float damageIn) : entity(entityIn), damage(damageIn) {}
 
 		EVENT_CLASS_TYPE(EventType::Logic_HealthDamage);
-		EVENT_CLASS_CATEGORY(EventCategoryLogic);
+		EVENT_CLASS_CATEGORY(EventCategory::Logic);
 
 
 		std::string toString() const override
@@ -33,7 +33,7 @@ namespace r3d
 		ButtonPressedEvent(std::string buttonName) : m_buttonName(buttonName) {}
 
 		EVENT_CLASS_TYPE(EventType::Logic_ButtonPressed);
-		EVENT_CLASS_CATEGORY(EventCategoryLogic);
+		EVENT_CLASS_CATEGORY(EventCategory::Logic);
 
 		inline const std::string& getButtonName() { return m_buttonName; }
 		std::string toString() const override

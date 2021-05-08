@@ -22,8 +22,8 @@ namespace r3d
 		RawPackedArray(const RawPackedArray& other);
 		RawPackedArray& operator=(const RawPackedArray& other);
 
-		RawPackedArray(RawPackedArray&& other);
-		RawPackedArray& operator=(RawPackedArray&& other);
+		RawPackedArray(RawPackedArray&& other) noexcept;
+		RawPackedArray& operator=(RawPackedArray&& other) noexcept;
 
 		friend bool operator==(const RawPackedArray& lhs, const RawPackedArray& rhs);
 
@@ -74,7 +74,7 @@ namespace r3d
 		char*	 m_data;
 
 		void release();
-		void swapData(RawPackedArray& other);
+		void swapData(RawPackedArray& other) noexcept;
 
 	};
 

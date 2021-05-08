@@ -25,7 +25,6 @@ namespace r3d
 
 	VertexArray& VertexArray::operator=(VertexArray&& other)
 	{
-		// check for self-assignment.
 		if (this != &other)
 		{
 			release();
@@ -137,9 +136,9 @@ namespace r3d
 
 	static std::vector<float> planeVertices = {
 					-1, -1, 0,
-					+1, -1,	0,
-					+1, +1, 0,
 					-1, +1,	0,
+					+1, +1, 0,
+					+1, -1,	0,
 	};
 
 	static std::vector<float> planeNormals = {
@@ -170,36 +169,36 @@ namespace r3d
 
 	static std::vector<float> cubeVertices =
 	{
-		// front
-		-0.5, -0.5, +0.5,  // 0
-		+0.5, -0.5, +0.5,	// 1
-		+0.5, +0.5, +0.5,	// 2
-		-0.5, +0.5, +0.5,	// 3
-		// right
-		+0.5, -0.5, +0.5,	// 4
-		+0.5, -0.5, -0.5,	// 5
-		+0.5, +0.5, -0.5,	// 6
-		+0.5, +0.5, +0.5,  // 7
-		// back
-		-0.5, -0.5, -0.5,  // 8
-		-0.5, +0.5, -0.5,	// 9
-		+0.5, +0.5, -0.5,	// 10
-		+0.5, -0.5, -0.5,	// 11
-		// left
-		-0.5, -0.5, -0.5, // 12
-		-0.5, -0.5, +0.5, // 13
-		-0.5, +0.5, +0.5, // 14
-		-0.5, +0.5, -0.5, // 15
-		// up
-		-0.5, +0.5, +0.5, // 16
-		+0.5, +0.5, +0.5, // 17
-		+0.5, +0.5, -0.5, // 18
-		-0.5, +0.5, -0.5, // 19
-		// down
-		-0.5, -0.5, -0.5, // 20
-		+0.5, -0.5, -0.5, // 21
-		+0.5, -0.5, +0.5, // 22
-		-0.5, -0.5, +0.5  // 23
+		// front                        
+		-0.5, -0.5, +0.5,  // 0     
+		+0.5, -0.5, +0.5,	// 1	
+		+0.5, +0.5, +0.5,	// 2	
+		-0.5, +0.5, +0.5,	// 3	
+		// right					
+		+0.5, -0.5, +0.5,	// 4	
+		+0.5, -0.5, -0.5,	// 5	
+		+0.5, +0.5, -0.5,	// 6	
+		+0.5, +0.5, +0.5,  // 7		
+		// back						
+		-0.5, -0.5, -0.5,  // 8		
+		-0.5, +0.5, -0.5,	// 9	
+		+0.5, +0.5, -0.5,	// 10	
+		+0.5, -0.5, -0.5,	// 11	
+		// left						
+		-0.5, -0.5, -0.5, // 12		
+		-0.5, -0.5, +0.5, // 13		
+		-0.5, +0.5, +0.5, // 14		
+		-0.5, +0.5, -0.5, // 15		
+		// up						
+		-0.5, +0.5, +0.5, // 16		
+		+0.5, +0.5, +0.5, // 17		
+		+0.5, +0.5, -0.5, // 18		
+		-0.5, +0.5, -0.5, // 19		
+		// down						
+		-0.5, -0.5, -0.5, // 20		
+		+0.5, -0.5, -0.5, // 21		
+		+0.5, -0.5, +0.5, // 22		
+		-0.5, -0.5, +0.5  // 23		
 	};
 
 	static std::vector<float> cubeNormals =
@@ -270,6 +269,39 @@ namespace r3d
 		-1., 0., 0.
 	};
 
+	static std::vector<float> cubeUVs = 
+	{
+		0.0, 0.0,
+		1.0, 0.0,
+		1.0, 1.0,
+		0.0, 1.0,
+		// right
+		0.0, 1.0,
+		0.0, 0.0,
+		1.0, 0.0,
+		1.0, 1.0, 
+		// back
+		0.0, 0.0, 
+		0.0, 1.0,
+		1.0, 1.0,
+		1.0, 0.0,
+		// left
+		0.0, 0.0, 
+		0.0, 1.0, 
+		1.0, 1.0, 
+		1.0, 0.0, 
+		// up
+		0.0, 1.0, 
+		1.0, 1.0, 
+		1.0, 0.0, 
+		0.0, 0.0, 
+		// down
+		0.0, 0.0, 
+		1.0, 0.0, 
+		1.0, 1.0, 
+		0.0, 1.0  
+	};
+
 	static std::vector<unsigned int> cubeComponents{ 3, 3, 3 };
 
 	static VertexArray create_dome_mesh(float radius);
@@ -301,9 +333,18 @@ namespace r3d
 				cubeComponents,
 				cubeIndices
 			},
-		skyDome{create_dome_mesh(1.0f)},
-		circle{create_circle_mesh()}
+		cubeVNTU{ createCubeVNTUMesh() },
+		skyDome{ createSkyDomeMesh(1.0f) },
+		circle{ create_circle_mesh() }
 	{
+	}
+
+	VertexArray Vaos::createCubeVNTUMesh()
+	{
+		return VertexArray{
+			{ cubeVertices, cubeNormals, cubeTangents, cubeUVs },
+			{ 3, 3, 3, 2 },
+			cubeIndices };
 	}
 
 	static VertexArray create_circle_mesh()
@@ -333,7 +374,7 @@ namespace r3d
 		return VertexArray{ {positions}, {3}, indices };
 	}
 
-	static VertexArray create_dome_mesh(float radius)
+	VertexArray Vaos::createSkyDomeMesh(float radius)
 	{
 		int resolution = 32;
 		int latitude = resolution / 2;

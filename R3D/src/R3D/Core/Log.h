@@ -1,6 +1,13 @@
 #pragma once
 
 #include <R3D/Core/Core.h>
+
+#pragma warning(push)
+#pragma warning(disable: 26812)
+#pragma warning(disable: 26451)
+#pragma warning(disable: 26495)
+#pragma warning(disable: 6385)
+
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 
@@ -22,6 +29,7 @@ namespace r3d
 }
 
 // logging macros
+
 #define R3D_CORE_TRACE(...)    ::r3d::Log::getCoreLogger()->trace(__VA_ARGS__)
 #define R3D_CORE_INFO(...)     ::r3d::Log::getCoreLogger()->info(__VA_ARGS__)
 #define R3D_CORE_WARN(...)     ::r3d::Log::getCoreLogger()->warn(__VA_ARGS__)
@@ -33,3 +41,5 @@ namespace r3d
 #define R3D_WARN(...)          ::r3d::Log::getClientLogger()->warn(__VA_ARGS__)
 #define R3D_ERROR(...)         ::r3d::Log::getClientLogger()->error(__VA_ARGS__)
 #define R3D_CRITICAL(...)      ::r3d::Log::getClientLogger()->critical(__VA_ARGS__)
+
+#pragma warning(pop)

@@ -106,7 +106,7 @@ namespace r3d
 		// TODO
 	}
 
-	void Window::setViewPort(float width, float height) const
+	void Window::setViewPort(double width, double height) const
 	{
 		glViewport(0, 0, (GLsizei) width, (GLsizei) height);
 	}

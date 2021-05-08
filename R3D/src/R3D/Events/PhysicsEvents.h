@@ -12,7 +12,7 @@ struct EnterSleepEvent : public Event
 	EnterSleepEvent() = default;
 	EnterSleepEvent(Entity aIn) : a(aIn) {}
 
-	EVENT_CLASS_CATEGORY(EventCategoryPhysics | EventCategoryCollisionDetection);
+	EVENT_CLASS_CATEGORY(EventCategory::Physics | EventCategory::CollisionDetection);
 	EVENT_CLASS_TYPE(EventType::CollisionDetection_EnterSleep)
 
 		std::string toString() const override
@@ -30,7 +30,7 @@ struct AwakeEvent : public Event
 	AwakeEvent() = default;
 	AwakeEvent(Entity aIn) : a(aIn) {}
 
-	EVENT_CLASS_CATEGORY(EventCategoryPhysics | EventCategoryCollisionDetection);
+	EVENT_CLASS_CATEGORY(EventCategory::Physics | EventCategory::CollisionDetection);
 	EVENT_CLASS_TYPE(EventType::CollisionDetection_Awake)
 
 		std::string toString() const override
@@ -73,7 +73,7 @@ public:
 	CircleCircleCollisionsEvent(const std::vector<CircleCircleCollision>* collisions, size_t numberOfCollisions)
 		: m_collisions(collisions), m_numberOfCollisions(numberOfCollisions) {}
 
-	EVENT_CLASS_CATEGORY(EventCategoryPhysics | EventCategoryCollisionDetection);
+	EVENT_CLASS_CATEGORY(EventCategory::Physics | EventCategory::CollisionDetection);
 	EVENT_CLASS_TYPE(EventType::CollisionDetection_CircleCircle)
 
 		std::string toString() const override
@@ -126,7 +126,7 @@ public:
 	CircleEdgeCollisionsEvent(const std::vector<CircleEdgeCollision>* collisions, size_t numberOfCollisions)
 		: m_collisions(collisions), m_numberOfCollisions(numberOfCollisions) {}
 
-	EVENT_CLASS_CATEGORY(EventCategoryPhysics | EventCategoryCollisionDetection);
+	EVENT_CLASS_CATEGORY(EventCategory::Physics | EventCategory::CollisionDetection);
 	EVENT_CLASS_TYPE(EventType::CollisionDetection_CircleEdge)
 
 		std::string toString() const override
@@ -171,7 +171,7 @@ public:
 	CirclePlaneCollisionsEvent(const std::vector<CirclePlaneCollision>* collisions, size_t numberOfCollisions)
 		: m_collisions(collisions), m_numberOfCollisions(numberOfCollisions) {}
 
-	EVENT_CLASS_CATEGORY(EventCategoryPhysics | EventCategoryCollisionDetection);
+	EVENT_CLASS_CATEGORY(EventCategory::Physics | EventCategory::CollisionDetection);
 	EVENT_CLASS_TYPE(EventType::CollisionDetection_CirclePlane)
 
 		std::string toString() const override

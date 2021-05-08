@@ -9,7 +9,12 @@
 
 namespace r3d
 {
-
+	void Debugger::setAm(ArchetypeManager* am)
+	{
+		m_am = am;
+		am->addArchetype<SegmentPrimitive, Color, Transform, ContactEntityTag>();
+		am->addArchetype<CirclePrimitive, Color, Transform, ContactEntityTag>();
+	}
 
 	void Debugger::draw_segment(const real3& position, const float3& vec, const float3& color)
 	{
@@ -50,7 +55,7 @@ namespace r3d
 
 	void Debugger::draw_polygon(const std::vector<real3>& positions)
 	{
-		for (int i = 0; i < positions.size(); ++i)
+		for (size_t i = 0; i < positions.size(); ++i)
 		{
 			real3 a = positions[i];
 			real3 b = positions[(i + 1) % positions.size()] - positions[i];

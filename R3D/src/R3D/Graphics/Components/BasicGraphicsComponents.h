@@ -23,6 +23,11 @@ namespace r3d
 		float4 vec;
 	};
 
+	struct MaterialComp
+	{
+		std::string name; // TODO: not efficient
+	};
+
 #if 0
 	struct ShaderComponent
 	{

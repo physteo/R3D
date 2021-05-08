@@ -226,7 +226,6 @@ namespace r3d
 
 	bool is_point_below_face(const real3& point, const Transform& box, const ColliderPlane& plane, const Facet& face, real& dist, real3& intersection)
 	{
-
 		if (is_point_below_plane(point, plane, dist))
 		{
 			real3 facePoints[4];
@@ -239,7 +238,7 @@ namespace r3d
 			real3 p = point + real(2.) * dist * plane.normal;
 			real3 q = point - real(2.) * dist * plane.normal;
 
-			if (intersect_line_quad(q, p, facePoints[0], facePoints[1], facePoints[2], facePoints[3], 0.000001, intersection)) // TODO: control better tolerance 
+			if (intersect_line_quad(q, p, facePoints[0], facePoints[1], facePoints[2], facePoints[3], static_cast<real>(0.000001), intersection)) // TODO: control better tolerance 
 			{
 				if (glm::abs(dist) < R3D_EPSILON)
 				{
@@ -252,6 +251,7 @@ namespace r3d
 				return false;
 			}
 		}
+		return false;
 	}
 
 	std::vector<PointQuery> clip_face(const Facet& incidentFace, const Transform& incidentBox, 
@@ -471,7 +471,7 @@ namespace r3d
 		if (eq.separation > 0) return false;
 		
 		// pick the minimum penetration
-		const real bias = 0.0001;
+		const real bias = static_cast<real>(0.0001);
 		if (abs(eq.separation) + bias < abs(fq1.penetration) && abs(eq.separation) + bias < abs(fq2.penetration))
 		{
 			return create_edge_edge_contact(eq, box1, e1, box2, e2, manifold);

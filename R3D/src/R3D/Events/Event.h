@@ -8,20 +8,20 @@ namespace r3d
 #define EVENT_CLASS_TYPE(type)	static  EventType getStaticType() {return type;}\
 								virtual EventType getEventType() const override { return getStaticType(); }\
 								virtual const char* getName() const override { return #type; }
-#define EVENT_CLASS_CATEGORY(category) virtual int getCategoryFlags() const override {return category;}
+#define EVENT_CLASS_CATEGORY(category) virtual EventCategory getCategoryFlags() const override {return category;}
 
 	class Event
 	{
 	public:
 		virtual EventType getEventType() const = 0;
 		virtual const char* getName()    const = 0;
-		virtual int getCategoryFlags()   const = 0;
+		virtual EventCategory getCategoryFlags()   const = 0;
 
 		virtual std::string toString()   const { return getName(); }
 
-		inline bool isInCategory(EventCategory category) const
+		inline bool isInCategory(enum class EventCategory category) const
 		{
-			return getCategoryFlags() & category;
+			return static_cast<int>(getCategoryFlags()) & static_cast<int>(category);
 		}
 
 		bool handled = false;

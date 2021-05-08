@@ -2,35 +2,42 @@
 
 #include <R3D/Core/Core.h>
 #include <functional>
+#include <limits>
 
 namespace r3d
 {
 	namespace ecs
 	{
-		const unsigned ENTITY_INDEX_BITS = 24;
-		const unsigned ENTITY_INDEX_MASK = ((1 << ENTITY_INDEX_BITS) - 1);
+		using Id = unsigned;
+		using Index = unsigned;
+		using Gen = unsigned;
 
-		const unsigned ENTITY_GENERATION_BITS = 9;
-		const unsigned ENTITY_GENERATION_MASK = ((1 << ENTITY_GENERATION_BITS) - 1);
+		const Id ENTITY_INDEX_BITS = 24;
+		const Id ENTITY_INDEX_MASK = ((1 << ENTITY_INDEX_BITS) - 1);
+
+		const Id ENTITY_GENERATION_BITS = 9;
+		const Id ENTITY_GENERATION_MASK = ((1 << ENTITY_GENERATION_BITS) - 1);
+
+		const Id ENTITY_NULL = std::numeric_limits<Id>::max();
 	}
 
 	struct Entity
 	{
-		Entity() : id(29790) {}
+		Entity() : id(ecs::ENTITY_NULL) {}
 
-		Entity(unsigned index, unsigned generation)
+		Entity(ecs::Index index, ecs::Gen generation)
 		{
 			id = (generation << ecs::ENTITY_INDEX_BITS) | (index);
 		}
 
-		unsigned id;
+		ecs::Id id;
 
-		unsigned index() const
+		ecs::Index index() const
 		{
 			return (id & ecs::ENTITY_INDEX_MASK);
 		}
 
-		unsigned generation() const
+		ecs::Gen generation() const
 		{
 			return ((id >> ecs::ENTITY_INDEX_BITS) & ecs::ENTITY_GENERATION_MASK);
 		}

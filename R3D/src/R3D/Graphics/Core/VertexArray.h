@@ -28,11 +28,9 @@ namespace r3d
 
 		~VertexArray();
 
-		//Cannot use the copy constructor/assignment.
-		VertexArray(const Buffer &) = delete;
-		VertexArray& operator=(const VertexArray &) = delete;
+		VertexArray(const VertexArray& other) = delete;
+		VertexArray& operator=(const VertexArray& other) = delete;
 
-		//Can use move constructor/assignment.
 		VertexArray(VertexArray&& other);
 		VertexArray& operator=(VertexArray&& other);
 
@@ -41,6 +39,7 @@ namespace r3d
 
 		void draw(GLenum mode) const;
 
+		inline unsigned int numIndices() const { return m_numIndices; }
 	private:
 		void generate() { glGenVertexArrays(1, &m_id); }
 		void fillData(const std::vector<std::vector<float> >& attributes, const std::vector<unsigned int>& components);
@@ -55,11 +54,16 @@ namespace r3d
 
 	public:
 		static Vaos& getInstance();
-	
+		static VertexArray createCubeVNTUMesh();
+		static VertexArray createSphereMesh();
+		static VertexArray createSkyDomeMesh(float radius);
+
 		const VertexArray point;
 		const VertexArray quad;
 		const VertexArray plane;
 		const VertexArray cube;
+		const VertexArray cubeVNTU;
+		const VertexArray cubeWithUv;
 		const VertexArray skyDome;
 		const VertexArray circle;
 
