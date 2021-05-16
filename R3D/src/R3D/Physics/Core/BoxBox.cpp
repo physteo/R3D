@@ -368,13 +368,13 @@ namespace r3d
 		// debug draw
 		{
 			for (auto v : clippedPointsOfIncidentFace)
-				Application::getDebugger()->draw_circle(v.position, 0.15, { 1.0, 1.0, 0.0 });
+				Application::getDebugger()->draw_circle(v.position, (real)0.15, { 1.0, 1.0, 0.0 });
 		
 			for (auto p : penetratingPoints)
-				Application::getDebugger()->draw_circle(p.position, 0.18, { 1.0, 0.0, 1.0 });
+				Application::getDebugger()->draw_circle(p.position, (real)0.18, { 1.0, 0.0, 1.0 });
 		
 			for (auto p : penetratingPoints2)
-				Application::getDebugger()->draw_circle(p.position, 0.21, { 1.0, 0.5, 1.0 });
+				Application::getDebugger()->draw_circle(p.position, (real)0.21, { 1.0, 0.5, 1.0 });
 		
 		}
 #endif
@@ -452,7 +452,7 @@ namespace r3d
 		c->position = real(0.5) * (c1 + c2);
 
 #if defined(R3D_DEBUG)
-		Application::getDebugger()->draw_circle(c->position, 0.15, { 1.0, 0.64, 0.0 });
+		Application::getDebugger()->draw_circle(c->position, (real)0.15, { 1.0, 0.64, 0.0 });
 #endif
 		return manifold->numContacts;
 	}

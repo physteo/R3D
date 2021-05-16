@@ -4,7 +4,6 @@
 
 namespace r3d
 {
-	static SimpleRenderer s_debugRenderer{};
 	static Shader s_debugShader{ "C:/Users/matte/source/repos/OpenGL/Rendara3D/res/shaders/lines.shader" };
 
 	static void debug_draw_segment(float3 origin, float3 vector, float3 color)

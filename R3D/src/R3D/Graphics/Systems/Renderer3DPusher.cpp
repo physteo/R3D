@@ -1,12 +1,11 @@
 #include <R3Dpch.h>
 
-#include <R3D/Graphics/Core/Shader.h>
+#include "Renderer3DPusher.h"
 #include <R3D/Graphics/Components/BasicGraphicsComponents.h>
 #include <R3D/Ecs/TransformComponent.h>
 #include <R3D/Graphics/Core/VertexArray.h>
 
 #include "SolidPrimitivesRenderer.h" // TODO: temporary: for MeshID
-#include "Renderer3DPusher.h"
 
 namespace r3d
 {

@@ -7,7 +7,7 @@ namespace r3d
 	unsigned long long StringHash::computeHash(const std::string& str)
 	{
 		//return murmur::MurmurHash64A((void*)&str[0], str.size(), 0);
-		return murmur::MurmurHash64A((void*)&str[0], str.size(), 0);
+		return murmur::MurmurHash64A((void*)&str[0], (int)str.size(), 0);
 	}
 
 	namespace murmur

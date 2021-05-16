@@ -182,7 +182,7 @@ namespace r3d
 		if (it == m_textureUnits.end())
 		{
 			// new texture
-			textureUnit = m_textureUnits.size();
+			textureUnit = (int)m_textureUnits.size();
 #if defined(R3D_DEBUG) || defined(R3D_RELEASE)
 			int maxTextureUnits = 0;
 			glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
@@ -195,7 +195,7 @@ namespace r3d
 		else
 		{
 			// texture unit already exists, dont set the uniform
-			textureUnit = it - m_textureUnits.begin();
+			textureUnit = (int)(it - m_textureUnits.begin());
 		}
 
 		glActiveTexture(GL_TEXTURE0 + static_cast<GLenum>(textureUnit));

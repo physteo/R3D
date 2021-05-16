@@ -6,8 +6,6 @@
 namespace r3d
 {
 
-
-
 	class Material
 	{
 	public:

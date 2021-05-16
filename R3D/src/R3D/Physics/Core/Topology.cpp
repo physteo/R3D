@@ -58,6 +58,7 @@ namespace r3d
 			}
 		}
 		assert(false);
+		return 0;
 	}
 
 	std::vector<real3> get_positions_of_face(const Facet& facet)

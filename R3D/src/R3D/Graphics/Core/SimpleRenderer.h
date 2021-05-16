@@ -1,5 +1,6 @@
 #pragma once
 #include "VertexArray.h"
+#include "../../Core/MathUtils.h"
 
 namespace r3d
 {

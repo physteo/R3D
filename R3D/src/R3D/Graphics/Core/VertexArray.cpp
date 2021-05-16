@@ -1,4 +1,5 @@
 #include <R3Dpch.h>
+#include "../../Core/Log.h"
 #include "VertexArray.h"
 
 namespace r3d
@@ -36,8 +37,13 @@ namespace r3d
 	void VertexArray::fillData(const std::vector<std::vector<float>>& attributes, const std::vector<unsigned int>& components)
 	{
 		std::vector<float> data;
+		if (components.size() == 0 || attributes.size() == 0)
+		{
+			R3D_CORE_WARN("Data is empty. Cannot fill VertexArray.");
+			return;
+		}
 
-		unsigned int numVertices = attributes.at(0).size() / components.at(0);
+		unsigned int numVertices = (unsigned int)attributes.at(0).size() / components.at(0);
 
 		/* put data in format VNTVNTVNTVNT */
 		for (size_t i = 0; i < numVertices; i++)
@@ -71,8 +77,8 @@ namespace r3d
 				offset += components.at(j);
 			}
 
-			glEnableVertexAttribArray(i);
-			glVertexAttribPointer(i, components.at(i), GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(offset * sizeof(float)));
+			glEnableVertexAttribArray((GLuint)i);
+			glVertexAttribPointer((GLuint)i, (GLint)components.at(i), GL_FLOAT, GL_FALSE, (GLsizei)stride * sizeof(float), (void*)(offset * sizeof(float)));
 		}
 
 		m_vbo.unbind(); // TODO: necessary?
@@ -89,7 +95,7 @@ namespace r3d
 		unbind();
 		m_ibo.unbind(); // Note: need to first unbind the vao.
 		
-		m_numIndices = indices.size();
+		m_numIndices = (unsigned int)indices.size();
 	}
 
 	void VertexArray::swapData(VertexArray& other)
@@ -439,13 +445,13 @@ namespace r3d
 		{
 			for (size_t j = 0; j < latitude - 1; j++)
 			{
-				indices[index++] = (size_t)(i * latitude + j);
-				indices[index++] = (size_t)((i + 1) * latitude + j);
-				indices[index++] = (size_t)((i + 1) * latitude + j + 1);
+				indices[index++] = (unsigned int)(i * latitude + j);
+				indices[index++] = (unsigned int)((i + 1) * latitude + j);
+				indices[index++] = (unsigned int)((i + 1) * latitude + j + 1);
 
-				indices[index++] = (size_t)((i + 1) * latitude + j + 1);
-				indices[index++] = (size_t)(i * latitude + j + 1);
-				indices[index++] = (size_t)(i * latitude + j);
+				indices[index++] = (unsigned int)((i + 1) * latitude + j + 1);
+				indices[index++] = (unsigned int)(i * latitude + j + 1);
+				indices[index++] = (unsigned int)(i * latitude + j);
 			}
 		}
 

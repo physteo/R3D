@@ -14,7 +14,7 @@ namespace r3d
 	{
 		generate();
 		setData(data, size);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, binding, m_id);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, (GLuint)binding, (GLuint)m_id);
 	}
 
 	Buffer::~Buffer()

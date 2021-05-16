@@ -25,7 +25,7 @@ namespace r3d
 	{
 		for (auto arb = arbiters.begin(); arb != arbiters.end(); ++arb)
 		{
-			arb->second.preStep(am, 1.0 / dt);
+			arb->second.preStep(am, (float)1.0 / dt);
 		}
 
 	}

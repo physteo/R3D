@@ -99,7 +99,7 @@ namespace r3d
 		bind();
 		if (set)
 		{
-			glDrawBuffers(drawBuffers.size(), &drawBuffers[0]);
+			glDrawBuffers((GLsizei)drawBuffers.size(), &drawBuffers[0]);
 		}
 		else
 		{
