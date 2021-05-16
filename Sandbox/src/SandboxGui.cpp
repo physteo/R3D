@@ -38,6 +38,14 @@ namespace r3d
 
 	void create_dockspace(float fontscale);
 
+	static ImTextureID convert_to_imgui_texture_id(unsigned int textureID)
+	{
+		void* imTextureID;
+		R3D_ASSERT("Size of texture ID and imGui texture id differs.", sizeof(imTextureID) == sizeof(textureID));
+		memcpy(&imTextureID, &textureID, sizeof(textureID));
+		return imTextureID;
+	}
+
 	void WorldLayer::onImGuiUpdate(r3d::Window* window)
 	{
 #if 1
@@ -502,11 +510,11 @@ namespace r3d
 		// View
 		{
 			ImGui::Begin("View", window->getFontscale());
-
+			
 			ImVec2 pos = ImGui::GetCursorScreenPos();
 			ImVec2 windowSize = ImGui::GetWindowSize();
 			ImGui::GetWindowDrawList()->AddImage(
-				(void*)fboHDR.getTextureID(0),
+				convert_to_imgui_texture_id(fboHDR.getTextureID(0)),
 				pos, ImVec2(pos.x + windowSize.x, pos.y + windowSize.y), 
 				ImVec2(0, 1), 
 				ImVec2(1, 0)
@@ -515,12 +523,12 @@ namespace r3d
 			fboSize = { windowSize.x, windowSize.y };
 			viewWindowCenter = { pos.x + windowSize.x / 2.0 , pos.y + windowSize.y / 2.0 };
 			
-			float currentTime = window->getCurrentTime();
+			double currentTime = window->getCurrentTime();
 			if (fboSize != fboSizePrev && currentTime - lastFboResize > 0.5)
 			{
 				onEvent(ViewWindowResizeEvent{ fboSize });
 				fboSizePrev = fboSize;
-				lastFboResize = currentTime;
+				lastFboResize = (float)currentTime;
 			}
 
 			ImGui::End();
@@ -532,7 +540,7 @@ namespace r3d
 			ImVec2 pos = ImGui::GetCursorScreenPos();
 			ImVec2 windowSize = ImGui::GetWindowSize();
 			ImGui::GetWindowDrawList()->AddImage(
-				(void*)fboShadowDebug.getTextureID(0),
+				convert_to_imgui_texture_id(fboShadowDebug.getTextureID(0)),
 				pos, ImVec2(pos.x + border[0] * windowSize.x, pos.y + border[1] * windowSize.y),
 				ImVec2(0, 1),
 				ImVec2(1, 0)
@@ -648,7 +656,7 @@ namespace r3d
 			ImVec2 pos = ImGui::GetCursorScreenPos();
 			ImVec2 windowSize = ImGui::GetWindowSize();
 			ImGui::SetNextWindowPos(pos);
-			ImGui::SetNextWindowSize(ImVec2(windowSize.x / 1.6, windowSize.y / 6.5));
+			ImGui::SetNextWindowSize(ImVec2(windowSize.x / 1.6f, windowSize.y / 6.5f));
 			if (ImGui::BeginPopupModal("New"))
 			{
 				editor.filename = "C:/dev/R3D/R3D/res/shaders/new.shader";
@@ -674,7 +682,7 @@ namespace r3d
 				ImGui::OpenPopup("Save Shader As..");
 			}
 			ImGui::SetNextWindowPos(pos);
-			ImGui::SetNextWindowSize(ImVec2(windowSize.x / 1.6, windowSize.y / 6.5));
+			ImGui::SetNextWindowSize(ImVec2(windowSize.x / 1.6f, windowSize.y / 6.5f));
 			if (ImGui::BeginPopupModal("Save Shader As.."))
 			{
 				ImGui::InputText("", &editor.filename);

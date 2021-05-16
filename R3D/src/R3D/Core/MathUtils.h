@@ -24,6 +24,7 @@ namespace r3d
 	typedef glm::tmat4x4<real, glm::precision::highp> real4x4;
 	typedef glm::tquat<real, glm::precision::highp> rquat;
 
+	typedef glm::vec<2, glm::int32> int2;
 	typedef glm::vec2 float2;
 	typedef glm::vec3 float3;
 	typedef glm::vec4 float4;

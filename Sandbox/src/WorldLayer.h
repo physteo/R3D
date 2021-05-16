@@ -82,7 +82,7 @@ namespace r3d
 		virtual void update(ArchetypeManager& am, double t, double dt) override;
 	};
 
-	class ShaderEditor;
+	struct ShaderEditor;
 
 	class WorldLayer : public Layer
 	{
@@ -163,10 +163,10 @@ namespace r3d
 		FrameBuffer fboHDR;
 		FrameBuffer fboShadow;
 		FrameBuffer fboShadowDebug;
-		float2 fboSize;
-		float2 fboSizePrev;
+		int2 fboSize;
+		int2 fboSizePrev;
 		float lastFboResize{ 0.0f };
-		float2 fboShadowSize{ 1024, 1024 };
+		int2 fboShadowSize{ 1024, 1024 };
 
 		// shadow settings
 		float lighNearPlane{ 2.0f };
@@ -182,7 +182,7 @@ namespace r3d
 		BloomSettings bloomSettings;
 		HDRSettings hdrSettings;
 		float2 viewWindowCenter{ 0.0f, 0.0f };
-		float lastSpotSwitchedOn{ 0.0f };
+		double lastSpotSwitchedOn{ 0.0 };
 
 
 	public:

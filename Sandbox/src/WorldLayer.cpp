@@ -44,8 +44,8 @@ namespace r3d
 
 		r3d::fquat quat;
 		axis = glm::dot(axis, axis) < R3D_EPSILON ? float3{ 0.0 } : glm::normalize(axis);
-		float cos = glm::cos(glm::radians(angleDeg / 2.0));
-		float sin = glm::sin(glm::radians(angleDeg / 2.0));
+		float cos = glm::cos(glm::radians(angleDeg / 2.0f));
+		float sin = glm::sin(glm::radians(angleDeg / 2.0f));
 		quat.w = cos; quat.x = sin * axis.x; quat.y = sin * axis.y; quat.z = sin * axis.z;
 
 		ArchetypeManager* am = getArchetypeManager();
@@ -67,11 +67,11 @@ namespace r3d
 
 		ArchetypeManager* am = getArchetypeManager();
 
-		real3x3 invI = (invMass < R3D_EPSILON) ? real3x3{ 0.0f } : glm::inverse(r3d::ColliderBox::computeInertiaTensor(scale, 1.0 / invMass)); // TODO: put back the inverse
+		real3x3 invI = (invMass < R3D_EPSILON) ? real3x3{ 0.0f } : glm::inverse(r3d::ColliderBox::computeInertiaTensor(scale, (real)1.0 / invMass)); // TODO: put back the inverse
 		real3 force = real3{ 0.0, (invMass < R3D_EPSILON) ? 0.0 : gravity / invMass,0.0 };
 		real3 torque = real3{ 0.0 };
 		real3 angVelocity = real3{ 0.0 };
-		real friction = 0.1;
+		real friction = (real)0.1;
 
 		am->setArchetype < Transform, RigidBody, Color, ColliderBox, BoxPrimitive, Tag>(boxEnt);
 		am->set<Transform>(boxEnt, Transform{ position, quat, scale });
@@ -80,7 +80,7 @@ namespace r3d
 		if (timer > 0)
 		{
 			SelfDestructionTimer sdt;
-			sdt.birth = Application::getWindow()->getCurrentTime();
+			sdt.birth = (float)Application::getWindow()->getCurrentTime();
 			sdt.lifespan = timer;
 			am->add<SelfDestructionTimer>(boxEnt, std::move(sdt));
 		}
@@ -97,8 +97,8 @@ namespace r3d
 	template<class Tag>
 	Entity WorldLayer::createBox(r3d::real3 position, r3d::real angle, r3d::real3 axis, r3d::real3 scale, r3d::real gravity, r3d::real invMass, r3d::real3 velocity, r3d::float4 color, float timer, const std::string& materialName)
 	{
-		real cosSquareAngle = glm::cos(glm::radians(angle / 2.0));
-		real sinSquareAngle = glm::sin(glm::radians(angle / 2.0));
+		real cosSquareAngle = glm::cos(glm::radians(angle / 2.0f));
+		real sinSquareAngle = glm::sin(glm::radians(angle / 2.0f));
 		real3 squareAngleAxis = sinSquareAngle * axis;
 		rquat squareOrientationQuat = glm::normalize(rquat{ cosSquareAngle, squareAngleAxis.x, squareAngleAxis.y, squareAngleAxis.z });
 		
@@ -233,7 +233,7 @@ namespace r3d
 		gridEnt = Application::getEntityManager()->create();
 		am->setArchetype < Transform, ColliderPlane, Color, RigidBody, PlanePrimitive, GroundTag, MaterialComp >(gridEnt);
 		am->set<Color>(gridEnt, Palette::getInstance().grey);
-		am->set<RigidBody>(gridEnt, RigidBody{ real3x3{0.0}, 0.0, 0.9, real3{0.0} });
+		am->set<RigidBody>(gridEnt, RigidBody{ real3x3{0.0}, (real)0.0, (real)0.9, real3{0.0} });
 		am->set<Transform>(gridEnt, Transform{ real3{plane.offset}, rquat{1.0, plane.normal.x, plane.normal.y, plane.normal.z}, real3{80.} });
 		am->set<ColliderPlane>(gridEnt, plane);
 		am->set<MaterialComp>(gridEnt, MaterialComp{ "cube" });
@@ -250,7 +250,7 @@ namespace r3d
 			real3 scaleFactorVec = { scaleFactor, scaleFactor, scaleFactor };
 			real3 addPos = { 0.0, 2.0 * scaleFactor * scale.y + static_cast<real>(i + (size_t)1) * 0.1, 0.0 };
 
-			auto ent = createBox<BrickTag>(position, turningAngle * i, real3{ 0.0, 1.0, 0.0 }, scale * scaleFactorVec, stdGravity, 1.0 / scaleFactor, { 0.0, 0.0, 0.0 },
+			auto ent = createBox<BrickTag>(position, (real)turningAngle * i, real3{ 0.0, 1.0, 0.0 }, scale * scaleFactorVec, stdGravity, (real)1.0 / scaleFactor, { 0.0, 0.0, 0.0 },
 				Palette::getInstance().blue, -1.0, "cube");
 
 			position += addPos;
@@ -267,14 +267,14 @@ namespace r3d
 
 		real3 wallscale = { 5.0, 3.0, 0.5 };
 		real3 wallscaleMini = { 5.0, 1.0, 0.5 };
-		createBox<WallTag>(real3{ +0.0, wallscale.y, -5.0 }, 0, real3{ 0.0, 1.0, 0.0 }, wallscale, stdGravity, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red, -1.0, "brickwall");
-		createBox<WallTag>(real3{ -5.5, wallscale.y, 0.0 }, 90, real3{ 0.0, 1.0, 0.0 }, wallscale, stdGravity, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red, -1.0, "brickwall");
-		createBox<WallTag>(real3{ +5.5, wallscale.y, 0.0 }, 90, real3{ 0.0, 1.0, 0.0 }, wallscale, stdGravity, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red, -1.0, "brickwall");
-		createBox<WallTag>(real3{ +0.0, wallscaleMini.y, +5.5 }, 0, real3{ 0.0, 1.0, 0.0 }, wallscaleMini, stdGravity, 0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red, -1.0, "brickwall");
+		createBox<WallTag>(real3{ +0.0, wallscale.y, -5.0 }, 0, real3{ 0.0, 1.0, 0.0 }, wallscale, stdGravity, (real)0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red, -1.0, "brickwall");
+		createBox<WallTag>(real3{ -5.5, wallscale.y, 0.0 }, 90, real3{ 0.0, 1.0, 0.0 }, wallscale, stdGravity, (real)0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red, -1.0, "brickwall");
+		createBox<WallTag>(real3{ +5.5, wallscale.y, 0.0 }, 90, real3{ 0.0, 1.0, 0.0 }, wallscale, stdGravity, (real)0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red, -1.0, "brickwall");
+		createBox<WallTag>(real3{ +0.0, wallscaleMini.y, +5.5 }, 0, real3{ 0.0, 1.0, 0.0 }, wallscaleMini, stdGravity, (real)0.005, { 0.0, 0.0, 0.0 }, Palette::getInstance().red, -1.0, "brickwall");
 		
 		real3 woodscale = { 0.2, 4.0, 1.0 };
-		createBox<WoodTag>(real3{ +3.0, woodscale.y + 0.0, 0.0 }, +5.0, real3{ 0.0, 0.0, 1.0 }, woodscale, stdGravity, 1.0, { 0.0, 0.0, 0.0 }, Palette::getInstance().orange, -1.0, "brickwall");
-		createBox<WoodTag>(real3{ -3.0, woodscale.y + 0.0, 0.0 }, -5.0, real3{ 0.0, 0.0, 1.0 }, woodscale, stdGravity, 1.0, { 0.0, 0.0, 0.0 }, Palette::getInstance().orange, -1.0, "brickwall");
+		createBox<WoodTag>(real3{ +3.0, woodscale.y + 0.0, 0.0 }, +5.0, real3{ 0.0, 0.0, 1.0 }, woodscale, stdGravity, (real)1.0, { 0.0, 0.0, 0.0 }, Palette::getInstance().orange, -1.0, "brickwall");
+		createBox<WoodTag>(real3{ -3.0, woodscale.y + 0.0, 0.0 }, -5.0, real3{ 0.0, 0.0, 1.0 }, woodscale, stdGravity, (real)1.0, { 0.0, 0.0, 0.0 }, Palette::getInstance().orange, -1.0, "brickwall");
 
 #else
 		physicsOn = false;
@@ -421,7 +421,7 @@ namespace r3d
 
 			// solve contacts
 			collisionData.clearArbiters(em);
-			collisionData.preStep(am, dt);
+			collisionData.preStep(am, (real)dt);
 			static const int iterations = 10;
 			collisionData.applyImpulses(am, iterations);
 
@@ -479,11 +479,11 @@ namespace r3d
 		{
 			window->setCursorDisabled();
 			std::pair<float, float> mousePos = Input::getInstance().getMousePosition(*window);
-			float dx = mousePos.first - window->getWidth() / 2.0;
-			float dy = mousePos.second - window->getHeight() / 2.0;
+			float dx = mousePos.first - (float)window->getWidth() / 2.0f;
+			float dy = mousePos.second - (float)window->getHeight() / 2.0f;
 			float3 cameraDir = camera.getCenter() - camera.getEye();
-			float theta = -mouseStatus.sensibility * dt * dy;
-			float phi = -mouseStatus.sensibility * dt * dx;
+			float theta = -mouseStatus.sensibility * (float)dt * dy;
+			float phi = -mouseStatus.sensibility * (float)dt * dx;
 			float3 axist = sin(theta) * camera.getCameraX();
 			float3 axisp = sin(phi) * camera.getCameraY();
 			fquat qt = fquat{cos(theta), axist.x, axist.y, axist.z };
@@ -494,7 +494,7 @@ namespace r3d
 			// mouse pressed
 			if (Input::getInstance().isMouseButtonPressed(GLFW_MOUSE_BUTTON_1, *window))
 			{
-				float current = window->getCurrentTime();
+				float current = (float)window->getCurrentTime();
 				if (current - mouseStatus.lastPressedTime > 0.1f)
 				{
 					onMouseButtonPressedEvent(MouseButtonPressedEvent(GLFW_MOUSE_BUTTON_1, 0, mousePos));
@@ -502,7 +502,8 @@ namespace r3d
 				}
 			}
 
-			window->setCursorPosition({ window->getWidth() / 2.0, window->getHeight() / 2.0 });
+			std::pair<float, float> cursorPosition = { (float)window->getWidth() / 2.0f, (float)window->getHeight() / 2.0f };
+			window->setCursorPosition(cursorPosition);
 
 			float wasdSpeed = 0.5f;
 			float3 delta{0.0f};
@@ -524,7 +525,7 @@ namespace r3d
 			}
 			if (Input::getInstance().isKeyPressed(GLFW_KEY_F, *window))
 			{
-				if (t - lastSpotSwitchedOn > 0.5f)
+				if (t - lastSpotSwitchedOn > 0.5)
 				{
 					solidRenderer.switchSpotLight();
 					lastSpotSwitchedOn = t;
@@ -537,7 +538,7 @@ namespace r3d
 
 		if (Input::getInstance().isKeyPressed(GLFW_KEY_TAB, *window))
 		{
-			float current = window->getCurrentTime();
+			float current = (float)window->getCurrentTime();
 			if (current - cameraMode.lastSwitchedTime > 0.5f) 
 			{
 				if (cameraMode.fps)
@@ -548,7 +549,7 @@ namespace r3d
 				else
 				{
 					window->setCursorDisabled();
-					window->setCursorPosition({ window->getWidth() / 2.0, window->getHeight() / 2.0 });
+					window->setCursorPosition({ (float)window->getWidth() / 2.0f, (float)window->getHeight() / 2.0f });
 					am->add<BoxPrimitive>(gun, BoxPrimitive{});
 				}
 				cameraMode.lastSwitchedTime = current;
@@ -568,7 +569,7 @@ namespace r3d
 		double dt = window->getLastFrameTime();
 		r3d::ArchetypeManager* am = getArchetypeManager();
 
-		aspect = fboSize.x / fboSize.y;
+		aspect = (float)fboSize.x / fboSize.y;
 		projectionMatrix = glm::perspective(fovy, aspect, nearPlane, farPlane);
 
 		setShadersSettings();
@@ -708,7 +709,6 @@ namespace r3d
 
 			int axis = 0;
 			bool firstIteration = true;
-			int amount;
 			for (int i = 0; i < bloomSettings.blurPasses; ++i)
 			{
 				fboBlur[axis].bind();

@@ -35,7 +35,7 @@ namespace r3d
 			for (size_t i = 0; i < arbiter.second.manifold.numContacts; ++i)
 			{
 				const Contact& contact = arbiter.second.manifold.contacts[i];
-				createContactEntity(am, arbiter.second.manifold, i);
+				createContactEntity(am, arbiter.second.manifold, (int)i);
 			}
 		}
 		m_contactShader->unbind();
@@ -66,7 +66,7 @@ namespace r3d
 			q = glm::normalize(q);
 		}
 
-		float segLength = 0.333;
+		float segLength = 0.333f;
 		float3 displacement{ 1.0, 0.0, 0.0 };
 		float3 rotated_displacement = q * displacement;
 		rotated_displacement = segLength * rotated_displacement / glm::length(rotated_displacement);
